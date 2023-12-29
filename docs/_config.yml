@@ -1,0 +1,16 @@
+title: PPS Project @ Unibo
+description: Documentation for the PPS project
+baseurL: "/PPS-22-direct-style-experiments"
+
+# Rendering
+markdown: kramdown
+kramdown:
+  input: GFM                  # uses GH Flavored Markdown
+  hard_wrap: false            # do not enter <br> automatically
+  syntax_highlighter: rouge   # Uses Rouge for syntax highlighting
+
+# Theme and plugins
+remote_theme: pages-themes/primer@v0.6.0
+plugins:
+  - jekyll-remote-theme
+  - jemoji
