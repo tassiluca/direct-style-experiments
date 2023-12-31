@@ -1,6 +1,10 @@
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     scala
-    kotlin("jvm") version "1.9.22"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.kotlin.qa)
+    application
 }
 
 repositories {
@@ -8,6 +12,18 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
-    implementation(libs.scala.lang)
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.scala.stdlib)
+    testImplementation(libs.bundles.kotlin.testing)
+}
+
+kotlin {
+    target {
+        compilations.all {
+            kotlinOptions {
+                allWarningsAsErrors = true
+                freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
+            }
+        }
+    }
 }
