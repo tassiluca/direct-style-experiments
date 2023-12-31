@@ -1,6 +1,7 @@
 title: PPS-22-direct-style
 description: Documentation for the PPS project
-baseurl: "/PPS-22-direct-style-experiments/content"
+baseurl: "/PPS-22-direct-style-experiments"
+source: ./content
 
 # Rendering
 markdown: kramdown
