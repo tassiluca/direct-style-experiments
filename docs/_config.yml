@@ -1,6 +1,6 @@
-title: PPS Project @ Unibo
+title: PPS-22-direct-style
 description: Documentation for the PPS project
-baseurL: "/PPS-22-direct-style-experiments"
+baseurl: "/PPS-22-direct-style-experiments/content"
 
 # Rendering
 markdown: kramdown
