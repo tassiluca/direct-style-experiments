@@ -1,0 +1,35 @@
+name: Build, Test, and Check codebase
+
+on:
+  push:
+    branches-ignore:
+      - 'dependabot/**'
+    paths-ignore:
+      - '.gitignore'
+      - 'CHANGELOG.md'
+      - 'LICENSE'
+      - 'README.md'
+      - 'renovate.json'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu, macos, windows]
+        jvm_version: [11, 17, 21]
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Setup JDK ${{ matrix.jvm_version }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: ${{ matrix.jvm_version }}
+      - name: Build
+        run: ./gradlew classes testClasses
+      - name: Test
+        run: ./gradlew test
