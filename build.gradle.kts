@@ -1,6 +1,7 @@
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     scala
+    alias(libs.plugins.scalatest)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.dokka)
     alias(libs.plugins.kotlin.qa)
@@ -14,6 +15,8 @@ repositories {
 dependencies {
     implementation(libs.kotlin.stdlib)
     implementation(libs.scala.stdlib)
+    testRuntimeOnly(libs.flexmark) // needed to make it works scalatest
+    testImplementation(libs.scalatest)
     testImplementation(libs.bundles.kotlin.testing)
 }
 

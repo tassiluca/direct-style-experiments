@@ -6,6 +6,8 @@ mockito = "5.8.0"
 
 [libraries]
 scala-stdlib = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
+scalatest = "org.scalatest:scalatest_3:3.2.17"
+flexmark = "com.vladsch.flexmark:flexmark-all:0.64.8"
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotest-assertions-core-jvm = { module = "io.kotest:kotest-assertions-core-jvm", version.ref = "kotest" }
 kotlinx-coroutines-core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"
@@ -16,6 +18,7 @@ mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 kotlin-testing = [ "kotest-junit5-jvm", "kotest-assertions-core-jvm", "mockito-core" ]
 
 [plugins]
+scalatest = "com.github.maiflai.scalatest:0.32"
 dokka = "org.jetbrains.dokka:1.9.10"
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-qa = "org.danilopianini.gradle-kotlin-qa:0.57.1"

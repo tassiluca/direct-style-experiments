@@ -18,6 +18,7 @@ object optional:
 
 @main def useBOptional(): Unit =
   import optional.*
+
   def firstColumn[T](xss: List[List[T]]): Option[List[T]] =
     optional:
       xss.map(_.headOption.?)
