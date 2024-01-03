@@ -1,6 +1,6 @@
 package io.github.tassiLuca.boundaries.examples
 
-import io.github.tassiLuca.boundaries.examples.BoundaryExamples.{firstColumn, firstIndex}
+import io.github.tassiLuca.boundaries.examples.BoundaryExamples.{firstColumn, firstColumn2, firstIndex}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
 
@@ -13,4 +13,9 @@ class BoundaryExamplesTest extends AnyFlatSpec:
   "BoundaryExamples.firstColumn" should "return a List with the first element of each List given in input" in {
     firstColumn(List(List(1, 2, 3), List(3))) shouldBe Some(List(1, 3))
     firstColumn(List(List(), List(1))) shouldBe None
+  }
+
+  "BoundaryExamples.firstColumn2" should "return a List with the first element of each List given in input" in {
+    firstColumn2(List(List(1, 2, 3), List(3))) shouldBe Some(List(1, 3))
+    firstColumn2(List(List(), List(1))) shouldBe None
   }

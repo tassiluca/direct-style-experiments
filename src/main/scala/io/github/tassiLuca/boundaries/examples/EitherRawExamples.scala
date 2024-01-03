@@ -3,7 +3,7 @@ package io.github.tassiLuca.boundaries.examples
 import scala.util.boundary
 import scala.util.boundary.{Label, break}
 
-trait EitherExamples:
+trait EitherRawExamples:
 
   type User
   type UserId

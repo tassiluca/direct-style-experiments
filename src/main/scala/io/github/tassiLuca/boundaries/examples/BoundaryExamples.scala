@@ -16,3 +16,7 @@ object BoundaryExamples extends App:
   def firstColumn[T](xss: List[List[T]]): Option[List[T]] =
     optional:
       xss.map(_.headOption.?)
+
+  def firstColumn2[T](xss: List[List[T]]): Option[List[T]] =
+    val firstElements = xss.map(_.headOption)
+    if firstElements.forall(_.isDefined) then Some(firstElements.flatten) else None
