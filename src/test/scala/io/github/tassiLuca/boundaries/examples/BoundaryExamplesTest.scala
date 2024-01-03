@@ -1,6 +1,6 @@
-package io.github.tassiLuca.boundaries
+package io.github.tassiLuca.boundaries.examples
 
-import io.github.tassiLuca.boundaries.BoundaryExamples.{firstColumn, firstIndex}
+import io.github.tassiLuca.boundaries.examples.BoundaryExamples.{firstColumn, firstIndex}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
 

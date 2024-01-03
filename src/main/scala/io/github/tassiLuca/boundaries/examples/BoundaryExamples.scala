@@ -1,8 +1,10 @@
-package io.github.tassiLuca.boundaries
+package io.github.tassiLuca.boundaries.examples
+
+import io.github.tassiLuca.boundaries.optional
+import io.github.tassiLuca.boundaries.optional.?
 
 import scala.util.boundary
 import scala.util.boundary.break
-import optional.*
 
 object BoundaryExamples extends App:
 
