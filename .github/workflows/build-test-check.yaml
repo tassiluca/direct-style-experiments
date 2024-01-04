@@ -19,17 +19,35 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu, macos, windows]
-        jvm_version: [11, 17, 21]
+        jvm_version: [21]
     runs-on: ${{ matrix.os }}-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
       - name: Setup JDK ${{ matrix.jvm_version }}
         uses: actions/setup-java@v4
         with:
           distribution: 'adopt'
           java-version: ${{ matrix.jvm_version }}
+      - name: Setup dependencies of gears submodule
+        run: |
+          cd lib/gears
+          pushd dependencies
+            ./publish-deps.sh
+          popd
+          sbt publishM2
       - name: Build
         run: ./gradlew classes testClasses
       - name: Test
         run: ./gradlew test
+      - name: Check
+        run: ./gradlew check
+
+  success:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉 Build, Test and Check steps succeeded!"
