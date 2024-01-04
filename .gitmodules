@@ -1,0 +1,3 @@
+[submodule "lib/gears"]
+	path = lib/gears
+	url = https://github.com/lampepfl/gears.git

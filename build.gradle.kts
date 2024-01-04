@@ -9,12 +9,14 @@ plugins {
 }
 
 repositories {
+    mavenLocal() // used for gears dependency
     mavenCentral()
 }
 
 dependencies {
     implementation(libs.kotlin.stdlib)
     implementation(libs.scala.stdlib)
+    implementation(libs.gears) // from maven local repository
     testRuntimeOnly(libs.flexmark) // needed to make it works scalatest
     testImplementation(libs.scalatest)
     testImplementation(libs.bundles.kotlin.testing)
