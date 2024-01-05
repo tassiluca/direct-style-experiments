@@ -3,6 +3,9 @@ plugins {
 }
 
 gitHooks {
+    preCommit {
+        tasks("check")
+    }
     commitMsg {
         conventionalCommits()
     }
