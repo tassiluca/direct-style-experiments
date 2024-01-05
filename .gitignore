@@ -208,3 +208,7 @@ gradle-app.setting
 ### OS ###
 # MacOS
 .DS_Store
+
+### Project specific stuff ###
+# Gears jar in libs folder
+!libs/gears*.jar
