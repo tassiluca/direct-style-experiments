@@ -32,13 +32,6 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: ${{ matrix.jvm_version }}
-      - name: Setup dependencies of gears submodule
-        run: |
-          cd lib/gears
-          pushd dependencies
-            ./publish-deps.sh
-          popd
-          sbt publishM2
       - name: Build
         run: ./gradlew classes testClasses
       - name: Test
