@@ -1,3 +1,5 @@
+import kotlin.io.path.Path
+
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     scala
@@ -9,14 +11,24 @@ plugins {
 }
 
 repositories {
-    mavenLocal() // used for gears dependency
     mavenCentral()
 }
 
 dependencies {
+    val localLibraries = Path("libs")
     implementation(libs.kotlin.stdlib)
     implementation(libs.scala.stdlib)
-    implementation(libs.gears) // from maven local repository
+    // Gears is a wip strawman library for async programming not already available on Maven Central...
+    val gears = "gears_3-0.1.0-SNAPSHOT"
+    implementation(
+        files(
+            listOf(
+                "$gears.jar",
+                "$gears-javadoc.jar",
+                "$gears-sources.jar"
+            ).map { localLibraries.resolve(it) }
+        )
+    )
     testRuntimeOnly(libs.flexmark) // needed to make it works scalatest
     testImplementation(libs.scalatest)
     testImplementation(libs.bundles.kotlin.testing)
