@@ -33,6 +33,12 @@ dependencies {
     testImplementation(libs.bundles.kotlin.testing)
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
 kotlin {
     target {
         compilations.all {
