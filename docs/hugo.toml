@@ -1,0 +1,18 @@
+baseURL = 'https://tassiluca.github.io/PPS-22-direct-style-experiments/'
+languageCode = 'en-us'
+title = 'PPS-22-direct-style-experiments'
+
+enableGitInfo = true # to enable 'Last Modified by' date and git author information on 'doc' type pages.
+
+[markup]
+  [markup.highlight]
+    style = 'catppuccin-latte'
+
+[module]
+    [[module.imports]]
+        path = 'github.com/alex-shpak/hugo-book'
+
+[params]
+    BookTheme = 'auto'
+    BookRepo = 'https://github.com/tassiLuca/PPS-22-direct-style-experiments' # used for 'Last Modified' and 'Edit this page' links
+    BookCommitPath = 'commit'

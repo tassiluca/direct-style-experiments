@@ -6,6 +6,7 @@
   - `boundary:` is short for `boundary.apply:` with the indented code below it passed as the body
     - `block` is a context function that is called within boundary.apply to return the block of code shown in the example
     - Users don’t define `Label` instances themselves. Instead, this is done inside the implementation of `boundary.apply` to provide the capability of doing a non-local return.
+
       ```scala
       /** Run `body` with freshly generated label as implicit argument. Catch any
        *  breaks associated with that label and return their results instead of
@@ -18,6 +19,7 @@
           if ex.label eq local then ex.value
           else throw ex
       ```
+      
       - we don’t want users to call break without an enclosing boundary. That’s why break requires an in-scope given instance of Label, which the implementation of boundary.apply creates before it calls the code block you provide. If your code block calls break, a given Label will be in-scope.
   - non-localbreaks are logically implemented as non-fatal exceptions and the implementation is optimized to suppress unnecessary stack trace generation. Stack traces are unnecessary because we are handling these exceptions, not barfing them on the user!
   - optimizations: Better performance is provided when a break occurs to the enclosing scope inside the same method (i.e., the same stack frame), where it can be rewritten to a jump call.
