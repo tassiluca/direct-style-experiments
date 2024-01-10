@@ -27,7 +27,7 @@ trait PostsRepositoryComponent:
         require(posts.count(_.title == post.title) == 0, "A post with same title has already been saved")
         println(s"[PostsRepository - ${Thread.currentThread()}] Saving post $post...")
         sleep(3_000)
-        posts = posts + post
+        synchronized { posts = posts + post }
         true
 
       override def load(postTitle: Title)(using Async): Option[Post] =
