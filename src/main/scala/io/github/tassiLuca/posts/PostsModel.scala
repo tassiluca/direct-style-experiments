@@ -1,4 +1,4 @@
-package io.github.tassiLuca.gears.posts
+package io.github.tassiLuca.posts
 
 import java.util.Date
 
