@@ -1,12 +1,14 @@
 package io.github.tassiLuca.posts.direct
 
+import gears.async.AsyncOperations.sleep
 import gears.async.default.given
 import gears.async.{Async, Future, Task}
 import io.github.tassiLuca.boundaries.either
-import io.github.tassiLuca.boundaries.either.?
-import io.github.tassiLuca.posts.{PostsModel, simulates}
+import io.github.tassiLuca.boundaries.either.{?, ThrowableConverter}
+import io.github.tassiLuca.posts.{PostsModel, simulates, both}
 
 import java.util.Date
+import scala.util.{Failure, Success, Try}
 
 /** The component blog posts service. */
 trait PostsServiceComponent:
@@ -33,29 +35,29 @@ trait PostsServiceComponent:
 
     private class PostsServiceImpl extends PostsService:
 
+      given ThrowableConverter[String] = (t: Throwable) => t.getMessage
+
       override def create(authorId: AuthorId, title: Title, body: Body): Either[String, Post] =
-        either:
-          Async.blocking:
-            val post: Future[Post] = Future:
-              val p = Post(authorId, title, body, Date())
-              val f1 = p.verifyAuthor.run
-              val f2 = p.verifyContent.run
-              f1.await.?
-              f2.await.?
-            context.repository.save(post.await)
-            post.await
+        Async.blocking:
+          val post = Post(authorId, title, body, Date())
+          if post.verifyAuthor.run.zip(post.verifyContent.run).await.both(r => r.isSuccess && r.get) then
+            either { context.repository.save(post).? }
+          else Left("Error")
 
       extension (p: Post)
-        private def verifyAuthor(using Async): Task[Either[String, Post]] = Task:
-          "PostsService" simulates s"verifying author ${p.author}"
-          if Math.random() > 0.3 then Right(p) else Left(s"${p.author} is not authorized to post content!")
+        private def verifyAuthor(using Async): Task[Try[Boolean]] = Task:
+          Try:
+            sleep(10_000)
+            "PostsService" simulates s"verifying author '${p.author}'"
+            true
 
-        private def verifyContent(using Async): Task[Either[String, Post]] = Task:
-          "PostsService" simulates s"verifying author ${p.author}"
-          if Math.random() > 0.3 then Right(p) else Left("The post contains non-appropriate sections.")
+        private def verifyContent(using Async): Task[Try[Boolean]] = Task:
+          Try:
+            "PostsService" simulates s"verifying post '${p.title}' content"
+            false
 
-      override def get(title: Title): Either[String, Post] = Async.blocking:
-        context.repository.load(title).toEither.left.map(_.getMessage)
+      override def get(title: Title): Either[String, Post] = either:
+        Async.blocking { context.repository.load(title).? }
 
-      override def all(): Either[String, LazyList[Post]] = Async.blocking:
-        context.repository.loadAll().toEither.left.map(_.getMessage)
+      override def all(): Either[String, LazyList[Post]] = either:
+        Async.blocking(context.repository.loadAll().?)

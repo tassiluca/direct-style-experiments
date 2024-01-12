@@ -22,4 +22,5 @@ object BlogPostsApp$ extends PostsServiceComponent with PostsModel with PostsRep
       p <- app.service.get("A hello world post")
     yield p
   Await.ready(post, Duration.Inf)
-  println(post)
+  println(post.value)
+  

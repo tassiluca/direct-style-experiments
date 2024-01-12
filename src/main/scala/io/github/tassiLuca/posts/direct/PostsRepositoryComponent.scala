@@ -15,7 +15,7 @@ trait PostsRepositoryComponent:
   /** The repository in charge of storing and retrieving blog posts. */
   trait PostsRepository:
     /** Save the given [[post]]. */
-    def save(post: Post)(using Async): Try[Unit]
+    def save(post: Post)(using Async): Try[Post]
 
     /** Load the post with the given [[postTitle]]. */
     def load(postTitle: Title)(using Async): Try[Post]
@@ -30,10 +30,11 @@ trait PostsRepositoryComponent:
     private class PostsLocalRepository extends PostsRepository:
       private var posts: Set[Post] = Set()
 
-      override def save(post: Post)(using Async): Try[Unit] = Try:
+      override def save(post: Post)(using Async): Try[Post] = Try:
         require(posts.count(_.title == post.title) == 0, "A post with same title has already been saved")
         "PostsRepository" simulates s"saving post ${post.title}"
         synchronized { posts = posts + post }
+        post
 
       override def load(postTitle: Title)(using Async): Try[Post] = Try:
         "PostsRepository" simulates s"loading post $postTitle"

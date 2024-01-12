@@ -46,11 +46,11 @@ trait PostsServiceComponent:
 
       extension (p: Post)
         private def verifyAuthor: Boolean =
-          "PostsService" simulatesBlocking s"verifying author ${p.author}"
+          "PostsService" simulatesBlocking s"verifying author '${p.author}''"
           if Math.random() > 0.3 then true else false
 
         private def verifyContent: Boolean =
-          "PostsService" simulatesBlocking s"verifying author ${p.author}"
+          "PostsService" simulatesBlocking s"verifying post '${p.title}' content"
           if Math.random() > 0.3 then true else false
 
       override def get(title: Title): Future[Post] = context.repository.load(title)
