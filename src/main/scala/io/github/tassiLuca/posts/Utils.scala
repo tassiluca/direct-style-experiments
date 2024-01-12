@@ -16,11 +16,3 @@ extension (component: String)
     println(s"[$component - ${Thread.currentThread()}] $action")
     Thread.sleep(Random.nextInt(10_000))
     println(s"[$component - ${Thread.currentThread()}] ended $action")
-
-extension [T](p: (T, T))
-  def both(f: T => Boolean): Boolean = f(p._1) && f(p._2)
-
-@main def testBoth(): Unit =
-  println(
-    (Success(true), Failure(IllegalStateException())).both(r => r.isSuccess && r.get)
-  )

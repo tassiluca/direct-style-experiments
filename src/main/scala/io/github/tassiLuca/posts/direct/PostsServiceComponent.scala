@@ -1,11 +1,10 @@
 package io.github.tassiLuca.posts.direct
 
-import gears.async.AsyncOperations.sleep
 import gears.async.default.given
-import gears.async.{Async, Future, Task}
+import gears.async.{Async, Task}
 import io.github.tassiLuca.boundaries.either
 import io.github.tassiLuca.boundaries.either.{?, ThrowableConverter}
-import io.github.tassiLuca.posts.{PostsModel, simulates, both}
+import io.github.tassiLuca.posts.{PostsModel, simulates}
 
 import java.util.Date
 import scala.util.{Failure, Success, Try}
@@ -34,30 +33,31 @@ trait PostsServiceComponent:
     def apply(): PostsService = PostsServiceImpl()
 
     private class PostsServiceImpl extends PostsService:
+      
+      opaque type PostContent = (Title, Body)
 
       given ThrowableConverter[String] = (t: Throwable) => t.getMessage
 
-      override def create(authorId: AuthorId, title: Title, body: Body): Either[String, Post] =
+      override def create(authorId: AuthorId, title: Title, body: Body): Either[String, Post] = either:
         Async.blocking:
-          val post = Post(authorId, title, body, Date())
-          if post.verifyAuthor.run.zip(post.verifyContent.run).await.both(r => r.isSuccess && r.get) then
-            either { context.repository.save(post).? }
-          else Left("Error")
+          val author = authorBy(authorId).run
+          val content = verifyContent(title, body).run
+          val post = Post(author.await.?, content.await.?._1, content.await.?._2, Date())
+          context.repository.save(post).?
+          post
 
-      extension (p: Post)
-        private def verifyAuthor(using Async): Task[Try[Boolean]] = Task:
-          Try:
-            sleep(10_000)
-            "PostsService" simulates s"verifying author '${p.author}'"
-            true
+      private def authorBy(id: AuthorId)(using Async): Task[Either[String, Author]] = Task:
+        either:
+          "PostsService" simulates s"getting author $id info..."
+          Author(id, "Luca", "Tassinari")
 
-        private def verifyContent(using Async): Task[Try[Boolean]] = Task:
-          Try:
-            "PostsService" simulates s"verifying post '${p.title}' content"
-            false
+      private def verifyContent(title: Title, body: Body)(using Async): Task[Either[String, PostContent]] = Task:
+        either:
+          "PostsService" simulates s"verifying content of the post '$title'"
+          (title, body)
 
       override def get(title: Title): Either[String, Post] = either:
         Async.blocking { context.repository.load(title).? }
 
       override def all(): Either[String, LazyList[Post]] = either:
-        Async.blocking(context.repository.loadAll().?)
+        Async.blocking { context.repository.loadAll().? }

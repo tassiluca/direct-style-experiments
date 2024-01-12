@@ -15,43 +15,40 @@ trait PostsServiceComponent:
 
   /** The service exposing a set of functionalities to interact with blog posts. */
   trait PostsService:
-    /** Creates a new blog post with the given [[title]] and [[body]], authored by [[authorId]], or a string explaining
-      * the reason of the failure.
-      */
-    def create(authorId: AuthorId, title: Title, body: Body): Future[Unit]
+    /** Creates a new blog post with the given [[title]] and [[body]], authored by [[authorId]]. */
+    def create(authorId: AuthorId, title: Title, body: Body): Future[Post]
 
-    /** Get a post from its [[title]] or a string explaining the reason of the failure. */
+    /** Get a post from its [[title]]. */
     def get(title: Title): Future[Post]
 
-    /** Gets all the stored blog posts in a lazy manner or a string explaining the reason of the failure. */
+    /** Gets all the stored blog posts in a lazy manner. */
     def all(): Future[LazyList[Post]]
 
   object PostsService:
     def apply(): PostsService = PostsServiceImpl()
 
     private class PostsServiceImpl extends PostsService:
+
+      opaque type PostContent = (Title, Body)
       given ExecutionContext = ExecutionContext.global
 
-      override def create(authorId: AuthorId, title: Title, body: Body): Future[Unit] =
-        val post = Post(authorId, title, body, Date())
-        val authorVerification = Future { post.verifyAuthor }
-        val contentVerification = Future { post.verifyContent }
+      override def create(authorId: AuthorId, title: Title, body: Body): Future[Post] =
+        val author = authorBy(authorId)
+        val content = verifyContent(title, body)
         for
-          resultAuthor <- authorVerification
-          if resultAuthor
-          resultVerification <- contentVerification
-          if resultVerification
+          a <- author
+          c <- content
+          post = Post(a, c._1, c._2, Date())
           _ <- context.repository.save(post)
-        yield ()
+        yield post
 
-      extension (p: Post)
-        private def verifyAuthor: Boolean =
-          "PostsService" simulatesBlocking s"verifying author '${p.author}''"
-          if Math.random() > 0.3 then true else false
+      private def authorBy(id: AuthorId)(using ExecutionContext): Future[Author] = Future:
+        "PostsService" simulatesBlocking s"getting author $id info..."
+        Author(id, "Luca", "Tassinari")
 
-        private def verifyContent: Boolean =
-          "PostsService" simulatesBlocking s"verifying post '${p.title}' content"
-          if Math.random() > 0.3 then true else false
+      private def verifyContent(title: Title, body: Body)(using ExecutionContext): Future[PostContent] = Future:
+        "PostsService" simulatesBlocking s"verifying content of the post '$title'"
+        (title, body)
 
       override def get(title: Title): Future[Post] = context.repository.load(title)
 
