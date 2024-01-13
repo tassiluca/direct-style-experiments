@@ -33,28 +33,25 @@ trait PostsServiceComponent:
     def apply(): PostsService = PostsServiceImpl()
 
     private class PostsServiceImpl extends PostsService:
-      
+
       opaque type PostContent = (Title, Body)
 
       given ThrowableConverter[String] = (t: Throwable) => t.getMessage
 
-      override def create(authorId: AuthorId, title: Title, body: Body): Either[String, Post] = either:
-        Async.blocking:
-          val author = authorBy(authorId).run
-          val content = verifyContent(title, body).run
-          val post = Post(author.await.?, content.await.?._1, content.await.?._2, Date())
+      override def create(authorId: AuthorId, title: Title, body: Body): Either[String, Post] = Async.blocking:
+        either:
+          val (author, content) = authorBy(authorId).run.zip(verifyContent(title, body).run).awaitResult.?
+          val post = Post(author, content._1, content._2, Date())
           context.repository.save(post).?
           post
 
-      private def authorBy(id: AuthorId)(using Async): Task[Either[String, Author]] = Task:
-        either:
-          "PostsService" simulates s"getting author $id info..."
-          Author(id, "Luca", "Tassinari")
+      private def authorBy(id: AuthorId): Task[Author] = Task:
+        "PostsService" simulates s"getting author $id info..."
+        Author(id, "Luca", "Tassinari")
 
-      private def verifyContent(title: Title, body: Body)(using Async): Task[Either[String, PostContent]] = Task:
-        either:
-          "PostsService" simulates s"verifying content of the post '$title'"
-          (title, body)
+      private def verifyContent(title: Title, body: Body): Task[PostContent] = Task:
+        "PostsService" simulates s"verifying content of the post '$title'"
+        (title, body)
 
       override def get(title: Title): Either[String, Post] = either:
         Async.blocking { context.repository.load(title).? }
