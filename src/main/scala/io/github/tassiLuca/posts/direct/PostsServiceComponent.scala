@@ -9,7 +9,7 @@ import io.github.tassiLuca.posts.{PostsModel, simulates}
 import java.util.Date
 import scala.util.{Failure, Success, Try}
 
-/** The component blog posts service. */
+/** The blog posts service component. */
 trait PostsServiceComponent:
   context: PostsRepositoryComponent with PostsModel =>
 
@@ -21,40 +21,39 @@ trait PostsServiceComponent:
     /** Creates a new blog post with the given [[title]] and [[body]], authored by [[authorId]], or a string explaining
       * the reason of the failure.
       */
-    def create(authorId: AuthorId, title: Title, body: Body): Either[String, Post]
+    def create(authorId: AuthorId, title: Title, body: Body)(using Async): Either[String, Post]
 
     /** Get a post from its [[title]] or a string explaining the reason of the failure. */
-    def get(title: Title): Either[String, Post]
+    def get(title: Title)(using Async): Either[String, Post]
 
     /** Gets all the stored blog posts in a lazy manner or a string explaining the reason of the failure. */
-    def all(): Either[String, LazyList[Post]]
+    def all()(using Async): Either[String, LazyList[Post]]
 
   object PostsService:
-    def apply(): PostsService = PostsServiceImpl()
+    def apply(contentVerifier: ContentVerifier, authorsService: AuthorsService): PostsService =
+      PostsServiceImpl(contentVerifier, authorsService)
 
-    private class PostsServiceImpl extends PostsService:
+    private class PostsServiceImpl(
+        contentVerifier: ContentVerifier,
+        authorsService: AuthorsService,
+    ) extends PostsService:
 
-      opaque type PostContent = (Title, Body)
+      given ThrowableConverter[String] = (t: Throwable) => t.getMessage // TODO put in an object of given instances
 
-      given ThrowableConverter[String] = (t: Throwable) => t.getMessage
-
-      override def create(authorId: AuthorId, title: Title, body: Body): Either[String, Post] = Async.blocking:
-        either:
-          val (author, content) = authorBy(authorId).run.zip(verifyContent(title, body).run).awaitResult.?
-          val post = Post(author, content._1, content._2, Date())
-          context.repository.save(post).?
-          post
+      override def create(authorId: AuthorId, title: Title, body: Body)(using Async): Either[String, Post] = either:
+        val (author, content) = authorBy(authorId).run.zip(verifyContent(title, body).run).awaitResult.?
+        val post = Post(author, content.?._1, content.?._2, Date())
+        context.repository.save(post).?
+        post
 
       private def authorBy(id: AuthorId): Task[Author] = Task:
-        "PostsService" simulates s"getting author $id info..."
-        Author(id, "Luca", "Tassinari")
+        authorsService.by(id).get
 
-      private def verifyContent(title: Title, body: Body): Task[PostContent] = Task:
-        "PostsService" simulates s"verifying content of the post '$title'"
-        (title, body)
+      private def verifyContent(title: Title, body: Body): Task[Either[String, PostContent]] = Task:
+        contentVerifier(title, body)
 
-      override def get(title: Title): Either[String, Post] = either:
-        Async.blocking { context.repository.load(title).? }
+      override def get(title: Title)(using Async): Either[String, Post] = either:
+        context.repository.load(title).?
 
-      override def all(): Either[String, LazyList[Post]] = either:
-        Async.blocking { context.repository.loadAll().? }
+      override def all()(using Async): Either[String, LazyList[Post]] = either:
+        context.repository.loadAll().?
