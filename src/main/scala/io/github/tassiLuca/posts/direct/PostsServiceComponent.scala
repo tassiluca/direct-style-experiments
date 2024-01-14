@@ -3,11 +3,11 @@ package io.github.tassiLuca.posts.direct
 import gears.async.default.given
 import gears.async.{Async, Task}
 import io.github.tassiLuca.boundaries.either
-import io.github.tassiLuca.boundaries.either.{?, ThrowableConverter}
+import io.github.tassiLuca.boundaries.either.?
+import io.github.tassiLuca.boundaries.EitherConversions.given
 import io.github.tassiLuca.posts.{PostsModel, simulates}
 
 import java.util.Date
-import scala.util.{Failure, Success, Try}
 
 /** The blog posts service component. */
 trait PostsServiceComponent:
@@ -30,30 +30,36 @@ trait PostsServiceComponent:
     def all()(using Async): Either[String, LazyList[Post]]
 
   object PostsService:
-    def apply(contentVerifier: ContentVerifier, authorsService: AuthorsService): PostsService =
+    def apply(contentVerifier: ContentVerifier, authorsService: AuthorsVerifier): PostsService =
       PostsServiceImpl(contentVerifier, authorsService)
 
     private class PostsServiceImpl(
         contentVerifier: ContentVerifier,
-        authorsService: AuthorsService,
+        authorsVerifier: AuthorsVerifier,
     ) extends PostsService:
 
-      given ThrowableConverter[String] = (t: Throwable) => t.getMessage // TODO put in an object of given instances
+      override def create(authorId: AuthorId, title: Title, body: Body)(using Async): Either[String, Post] =
+        if context.repository.exists(title)
+        then Left(s"A post entitled $title already exists")
+        else
+          either:
+            val content = verifyContent(title, body).run
+            val author = authorBy(authorId).run
+            val post = Post(author.awaitResult.?, content.await.?._1, content.await.?._2, Date())
+            context.repository.save(post)
 
-      override def create(authorId: AuthorId, title: Title, body: Body)(using Async): Either[String, Post] = either:
-        val (author, content) = authorBy(authorId).run.zip(verifyContent(title, body).run).awaitResult.?
-        val post = Post(author, content.?._1, content.?._2, Date())
-        context.repository.save(post).?
-        post
-
+      /* Pretending to make a call to the Authorship Service that keeps track of authorized authors. */
       private def authorBy(id: AuthorId): Task[Author] = Task:
-        authorsService.by(id).get
+        "PostsService".simulates(s"getting author $id info...", maxDuration = 1_000)
+        authorsVerifier(id)
 
+      /* Some local computation that verifies the content of the post is appropriate (e.g. not offensive, ...). */
       private def verifyContent(title: Title, body: Body): Task[Either[String, PostContent]] = Task:
+        "PostsService".simulates(s"verifying content of post '$title'", minDuration = 1_000)
         contentVerifier(title, body)
 
-      override def get(title: Title)(using Async): Either[String, Post] = either:
-        context.repository.load(title).?
+      override def get(title: Title)(using Async): Either[String, Post] =
+        context.repository.load(title).toRight(s"Post $title not found")
 
       override def all()(using Async): Either[String, LazyList[Post]] = either:
-        context.repository.loadAll().?
+        context.repository.loadAll()

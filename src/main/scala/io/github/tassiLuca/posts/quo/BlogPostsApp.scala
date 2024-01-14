@@ -5,17 +5,24 @@ import io.github.tassiLuca.posts.PostsModel
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext}
 
-object BlogPostsApp$ extends PostsServiceComponent with PostsModel with PostsRepositoryComponent:
+trait BlogPostsApp extends PostsServiceComponent with PostsModel with PostsRepositoryComponent:
   override type AuthorId = String
   override type Body = String
   override type Title = String
 
+  val contentVerifier: ContentVerifier
+  val authorsVerifier: AuthorsVerifier
+
   override val repository: PostsRepository = PostsRepository()
-  override val service: PostsService = PostsService()
 
 @main def usePostsApp(): Unit =
   given ExecutionContext = ExecutionContext.global
-  val app = BlogPostsApp$
+  val app = new BlogPostsApp:
+    override val contentVerifier: ContentVerifier = (t, b) => Right((t, b))
+    override val authorsVerifier: AuthorsVerifier = a =>
+      require(a == "ltassi@gmail.com", "No author with the given id matches")
+      Author(a, "Luca", "Tassinari")
+    override val service: PostsService = PostsService(contentVerifier, authorsVerifier)
   val post =
     for
       _ <- app.service.create("ltassi@gmail.com", "A hello world post", "Hello World!")
@@ -23,4 +30,3 @@ object BlogPostsApp$ extends PostsServiceComponent with PostsModel with PostsRep
     yield p
   Await.ready(post, Duration.Inf)
   println(post.value)
-  

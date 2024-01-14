@@ -8,6 +8,6 @@ trait BlogPostsApp extends PostsServiceComponent with PostsModel with PostsRepos
   override type Title = String
 
   val contentVerifier: ContentVerifier
-  val authorsService: AuthorsService
+  val authorsVerifier: AuthorsVerifier
 
   override val repository: PostsRepository = PostsRepository()

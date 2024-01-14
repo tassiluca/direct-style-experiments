@@ -25,31 +25,37 @@ trait PostsServiceComponent:
     def all(): Future[LazyList[Post]]
 
   object PostsService:
-    def apply(): PostsService = PostsServiceImpl()
+    def apply(contentVerifier: ContentVerifier, authorsVerifier: AuthorsVerifier): PostsService =
+      PostsServiceImpl(contentVerifier, authorsVerifier)
 
-    private class PostsServiceImpl extends PostsService:
+    private class PostsServiceImpl(
+        contentVerifier: ContentVerifier,
+        authorsVerifier: AuthorsVerifier,
+    ) extends PostsService:
 
-      opaque type PostContent = (Title, Body)
       given ExecutionContext = ExecutionContext.global
 
       override def create(authorId: AuthorId, title: Title, body: Body): Future[Post] =
-        val author = authorBy(authorId)
-        val content = verifyContent(title, body)
+        val authorAsync = authorBy(authorId)
+        val contentAsync = verifyContent(title, body)
         for
-          a <- author
-          c <- content
-          post = Post(a, c._1, c._2, Date())
+          content <- contentAsync
+          author <- authorAsync
+          post = Post(author, content._1, content._2, Date())
           _ <- context.repository.save(post)
         yield post
 
+      /* Pretending to make a call to the Authorship Service that keeps track of authorized authors. */
       private def authorBy(id: AuthorId)(using ExecutionContext): Future[Author] = Future:
-        "PostsService" simulatesBlocking s"getting author $id info..."
-        Author(id, "Luca", "Tassinari")
+        "PostsService".simulatesBlocking(s"getting author $id info...", maxDuration = 1_000)
+        authorsVerifier(id)
 
-      private def verifyContent(title: Title, body: Body)(using ExecutionContext): Future[PostContent] = Future:
-        "PostsService" simulatesBlocking s"verifying content of the post '$title'"
-        (title, body)
+      /* Some local computation that verifies the content of the post is appropriate (e.g. not offensive, ...). */
+      private def verifyContent(title: Title, body: Body)(using ExecutionContext): Future[PostContent] =
+        Future:
+          "PostsService".simulatesBlocking(s"verifying content of the post '$title'", minDuration = 1_000)
+          contentVerifier(title, body) match { case Left(e) => throw RuntimeException(e); case Right(v) => v }
 
-      override def get(title: Title): Future[Post] = context.repository.load(title)
+      override def get(title: Title): Future[Post] = context.repository.load(title).map(_.get)
 
       override def all(): Future[LazyList[Post]] = context.repository.loadAll()

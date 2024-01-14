@@ -3,7 +3,6 @@ package io.github.tassiLuca.posts
 import gears.async.Async
 
 import java.util.Date
-import scala.util.Try
 
 /** The model of a simple blog posts service. */
 trait PostsModel:
@@ -29,7 +28,6 @@ trait PostsModel:
   /** A function that verifies the content of the post, returning [[Right]] with the content of the post if the
     * verification passes or [[Left]] with the reason why failed.
     */
-  type ContentVerifier = Async ?=> (Title, Body) => Either[String, PostContent]
+  type ContentVerifier = (Title, Body) => Either[String, PostContent]
 
-  trait AuthorsService:
-    def by(id: AuthorId)(using Async): Try[Author]
+  type AuthorsVerifier = (AuthorId) => Author

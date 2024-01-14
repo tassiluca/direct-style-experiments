@@ -13,9 +13,10 @@ object either:
       case Right(value) => value
       case Left(value) => break(Left(value))
 
-  type ThrowableConverter[L] = Throwable => L
-
   extension [R](t: Try[R])
-    inline def ?[L](using Label[Left[L, Nothing]])(using converter: ThrowableConverter[L]): R = t match
+    inline def ?[L](using Label[Left[L, Nothing]])(using converter: Conversion[Throwable, L]): R = t match
       case Success(value) => value
       case Failure(exception) => break(Left(converter(exception)))
+
+object EitherConversions:
+  given Conversion[Throwable, String] = _.getMessage

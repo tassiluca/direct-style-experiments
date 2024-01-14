@@ -2,12 +2,9 @@ package io.github.tassiLuca.posts.direct
 
 import gears.async.default.given
 import gears.async.{Async, Future}
-import io.github.tassiLuca.posts.simulates
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
-
-import scala.util.Try
 
 class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
 
@@ -18,25 +15,18 @@ class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
 
   override def beforeEach(): Unit =
     blogPostsApp = new BlogPostsApp:
-      override val contentVerifier: ContentVerifier = (t, b) =>
-        "PostsService" simulates s"verifying content of post '$t'"
-        Right((t, b))
-      override val authorsService: AuthorsService = new AuthorsService:
-        private val authors = Set(
-          Author("ltassi", "Luca", "Tassinari"),
-          Author("mrossi", "Mario", "Rossi"),
-        )
-        override def by(id: AuthorId)(using Async): Try[Author] =
-          "PostsService" simulates s"getting author $id info..."
-          Try(authors.find(_.authorId == id).get)
-      override val service: PostsService = PostsService(contentVerifier, authorsService)
+      override val contentVerifier: ContentVerifier = (t, b) => Right((t, b))
+      override val authorsVerifier: AuthorsVerifier = a =>
+        require(a == authorId, "No author with the given id matches")
+        Author(a, "Luca", "Tassinari")
+      override val service: PostsService = PostsService(contentVerifier, authorsVerifier)
 
   "BlogPostsService" should "create posts correctly if author and content is legit" in {
     Async.blocking:
       blogPostsApp.service.create(authorId, postTitle, postBody).isRight shouldBe true
       val post = blogPostsApp.service.get(postTitle)
       post.isRight shouldBe true
-      post.toOption.get.author shouldBe blogPostsApp.authorsService.by(authorId).get
+      post.toOption.get.author shouldBe blogPostsApp.authorsVerifier(authorId)
       post.toOption.get.body shouldBe postBody
   }
 
@@ -58,6 +48,7 @@ class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
 
   "BlogPostsService" should "fail on unauthorized author and cancel the content verification check" in {
     Async.blocking:
-      blogPostsApp.service.create("unauthorized", postTitle, postBody).isLeft shouldBe true
-      // TODO: check println?
+      val result = blogPostsApp.service.create("unauthorized", postTitle, postBody)
+      result.isLeft shouldBe true
+      // the cancelling can be observed looking at the logs :(
   }
