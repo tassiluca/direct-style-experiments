@@ -10,10 +10,8 @@ import java.time.LocalTime
 /** A usage examples of channels. Remarks:
   *   - consumers are competing with each other for sent values
   *   - each value sent to the channel gets delivered to **exactly** 1 consumer
-  *   - consumers after consumes 1 items only, i.e. it's not like a subscribe in reactive programming! To emulates
-  *     reativeness we could schedule the consumers to run after a period of time < than the period of the producer.
-  *     However it works only if the producer publishes at fixed rate. To program reactive-like behaviours see
-  *     [[gears.async.ChannelMultiplexer]]s examples.
+  *   - consumers after consumes 1 items only, i.e. it's not like a subscribe in reactive programming!
+  *     - Variant: perform a loop inside the consumer
   */
 object UseSimpleChannels extends App:
 
@@ -23,7 +21,7 @@ object UseSimpleChannels extends App:
   val producerPeriod = 4_000
 
   /** The number of consumers. */
-  val consumers = 1
+  val consumers = 2
 
   /** The size of the bounded channel. */
   val bufferSize = 10
@@ -42,14 +40,14 @@ object UseSimpleChannels extends App:
 
   /** A generic consumer of items. */
   def consumer(c: ReadableChannel[Int]): Task[Unit] = Task:
-    println(s"[CONSUMER - ${Thread.currentThread()} @ ${LocalTime.now()}] Waiting for a new item...")
-    val item = c.read() // blocking operation
-    println(s"[CONSUMER - ${Thread.currentThread()} @ ${LocalTime.now()}] received $item")
+    while (true) {
+      println(s"[CONSUMER - ${Thread.currentThread()} @ ${LocalTime.now()}] Waiting for a new item...")
+      val item = c.read() // blocking operation
+      println(s"[CONSUMER - ${Thread.currentThread()} @ ${LocalTime.now()}] received $item")
+    }
 
   Async.blocking:
-    for _ <- 0 until consumers do
-      consumer(channel.asReadable).run
-        // consumer(channel.asReadable).schedule(Every(1_000)).run
+    for _ <- 0 until consumers do consumer(channel.asReadable).run
     sleep(10_000)
     scheduledProducer(channel.asSendable).run
     sleep(30_000)
