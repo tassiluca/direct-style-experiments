@@ -51,4 +51,5 @@ class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
       val result = blogPostsApp.service.create("unauthorized", postTitle, postBody)
       result.isLeft shouldBe true
       // the cancelling can be observed looking at the logs :(
+      Thread.sleep(15_000)
   }
