@@ -2,7 +2,7 @@
 kotlin = "1.9.22"
 scala = "3.3.1"
 kotest = "5.8.0"
-mockito = "5.8.0"
+mockito = "5.10.0"
 
 [libraries]
 scala-stdlib = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
