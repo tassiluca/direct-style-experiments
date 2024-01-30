@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ScalaCompilerConfiguration">
     <option name="incrementalityType" value="IDEA" />
-    <profile name="Gradle 1" modules="PPS-22-direct-style-experiments.back-and-forth.main,PPS-22-direct-style-experiments.back-and-forth.test,PPS-22-direct-style-experiments.bbubbles-core.main,PPS-22-direct-style-experiments.bbubbles-core.test,PPS-22-direct-style-experiments.main,PPS-22-direct-style-experiments.popping-bubbles-core.main,PPS-22-direct-style-experiments.popping-bubbles-core.test,PPS-22-direct-style-experiments.popping-bubbles-swing.main,PPS-22-direct-style-experiments.popping-bubbles-swing.test,PPS-22-direct-style-experiments.test">
+    <profile name="Gradle 1" modules="PPS-22-direct-style-experiments.back-and-forth.main,PPS-22-direct-style-experiments.back-and-forth.test,PPS-22-direct-style-experiments.bbubbles-core.main,PPS-22-direct-style-experiments.bbubbles-core.test,PPS-22-direct-style-experiments.main,PPS-22-direct-style-experiments.popping-bubbles-core.main,PPS-22-direct-style-experiments.popping-bubbles-core.test,PPS-22-direct-style-experiments.popping-bubbles-swing.main,PPS-22-direct-style-experiments.popping-bubbles-swing.test,PPS-22-direct-style-experiments.rears-core.main,PPS-22-direct-style-experiments.rears-core.test,PPS-22-direct-style-experiments.test">
       <option name="deprecationWarnings" value="true" />
       <option name="uncheckedWarnings" value="true" />
     </profile>
