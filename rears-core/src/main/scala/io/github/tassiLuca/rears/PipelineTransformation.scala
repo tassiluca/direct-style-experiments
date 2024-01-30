@@ -1,14 +1,29 @@
 package io.github.tassiLuca.rears
 
-import concurrent.duration.DurationInt
+import concurrent.duration.{Duration, DurationInt}
 import gears.async.Channel.{Closed, Res}
 import gears.async.default.given
 import gears.async.TaskSchedule.RepeatUntilFailure
 import gears.async.{Async, Future, ReadableChannel, Task, Timer, UnboundedChannel}
 
+import scala.language.postfixOps
+
 type PipelineTransformation[Item] = ReadableChannel[Item] => ReadableChannel[Item]
 
 extension [T](r: ReadableChannel[T])(using Async)
+
+  def debounce(timespan: Duration): ReadableChannel[T] =
+    val channel = UnboundedChannel[T]()
+    var lastEmission: Option[Long] = None
+    Task {
+      val value = r.read().toOption.get
+      val now = System.currentTimeMillis()
+      if lastEmission.isEmpty || now - lastEmission.get >= timespan.toMillis then
+        channel.send(value)
+        lastEmission = Some(now)
+    }.schedule(RepeatUntilFailure()).run
+    channel
+
   def filter(p: T => Boolean): ReadableChannel[T] =
     val channel = UnboundedChannel[T]()
     Task {
@@ -17,13 +32,14 @@ extension [T](r: ReadableChannel[T])(using Async)
     }.schedule(RepeatUntilFailure()).run
     channel.asReadable
 
-  def buffer(n: Int): ReadableChannel[List[T]] =
+  def buffer(n: Int, timespan: Duration = 5 seconds): ReadableChannel[List[T]] =
     val channel: UnboundedChannel[List[T]] = UnboundedChannel()
     var buffer = List[T]()
     Task {
-      val timer = Timer(5.seconds)
+      val timer = Timer(timespan)
       Future { timer.run() }
       val value = Async.raceWithOrigin(r.readSource, timer.src).awaitResult
+      timer.cancel()
       if value._2 == timer.src then
         channel.send(buffer)
         buffer = List.empty
