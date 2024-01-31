@@ -4,7 +4,7 @@ import concurrent.duration.{Duration, DurationInt}
 import gears.async.Channel.{Closed, Res}
 import gears.async.default.given
 import gears.async.TaskSchedule.RepeatUntilFailure
-import gears.async.{Async, Future, ReadableChannel, Task, Timer, UnboundedChannel}
+import gears.async.{Async, Channel, Future, ReadableChannel, SendableChannel, Task, Timer, UnboundedChannel}
 
 import scala.language.postfixOps
 
@@ -32,6 +32,13 @@ extension [T](r: ReadableChannel[T])(using Async)
     }.schedule(RepeatUntilFailure()).run
     channel.asReadable
 
+  // Strange behavior, apparently the same code but it blocks... see the tests
+  def filter2(p: T => Boolean): ReadableChannel[T] =
+    as[T] { c =>
+      val value = r.read().toOption.get
+      if p(value) then c.send(value)
+    }
+
   def buffer(n: Int, timespan: Duration = 5 seconds): ReadableChannel[List[T]] =
     val channel: UnboundedChannel[List[T]] = UnboundedChannel()
     var buffer = List[T]()
@@ -50,3 +57,10 @@ extension [T](r: ReadableChannel[T])(using Async)
           buffer = List.empty
     }.schedule(RepeatUntilFailure()).run
     channel.asReadable
+
+private def as[T](transformation: SendableChannel[T] => Unit)(using Async): ReadableChannel[T] =
+  val channel = UnboundedChannel[T]()
+  Task {
+    transformation(channel.asSendable)
+  }.schedule(RepeatUntilFailure()).run
+  channel.asReadable

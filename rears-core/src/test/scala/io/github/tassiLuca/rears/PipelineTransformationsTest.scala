@@ -3,6 +3,7 @@ package io.github.tassiLuca.rears
 import gears.async.TaskSchedule.Every
 import gears.async.default.given
 import gears.async.{Async, Future, ReadableChannel, Task, TaskSchedule, UnboundedChannel}
+import org.scalatest.Ignore
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -38,6 +39,12 @@ class PipelineTransformationsTest extends AnyFlatSpec with Matchers {
   "Filtering a channel" should "return a new channel with only the elements passing the predicate" in {
     Async.blocking:
       val filtered = producer.filter(_ % 2 == 0)
+      for i <- 2 to 10 by 2 do filtered.read() shouldBe Right(i)
+  }
+
+  ignore /* "filter2" */ should "behave exactly like filter" in {
+    Async.blocking:
+      val filtered = producer.filter2(_ % 2 == 0)
       for i <- 2 to 10 by 2 do filtered.read() shouldBe Right(i)
   }
 
