@@ -39,8 +39,21 @@ extension [T](r: ReadableChannel[T])(using Async)
     }.schedule(RepeatUntilFailure()).run
     channel
 
+  def groupBy[K](keySelector: T => K): ReadableChannel[(K, ReadableChannel[T])] =
+    var channels = Map[K, UnboundedChannel[T]]()
+    val channel = UnboundedChannel[(K, UnboundedChannel[T])]()
+    Task {
+      val value = r.read().toOption.get
+      val key = keySelector(value)
+      if !channels.contains(key) then
+        channels = channels + ((key, UnboundedChannel[T]()))
+        channel.send(key -> channels(key))
+      channels(key).send(value)
+    }.schedule(RepeatUntilFailure()).run
+    channel.asReadable
+
   def buffer(n: Int, timespan: Duration = 5 seconds): ReadableChannel[List[T]] =
-    val channel: UnboundedChannel[List[T]] = UnboundedChannel()
+    val channel = UnboundedChannel[List[T]]()
     var buffer = List[T]()
     Task {
       val timer = Timer(timespan)

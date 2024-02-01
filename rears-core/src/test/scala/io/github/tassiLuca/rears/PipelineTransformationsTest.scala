@@ -2,8 +2,7 @@ package io.github.tassiLuca.rears
 
 import gears.async.TaskSchedule.Every
 import gears.async.default.given
-import gears.async.{Async, Future, ReadableChannel, Task, TaskSchedule, UnboundedChannel}
-import org.scalatest.Ignore
+import gears.async.{Async, Future, Listener, ReadableChannel, Task, TaskSchedule, UnboundedChannel}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -61,6 +60,17 @@ class PipelineTransformationsTest extends AnyFlatSpec with Matchers {
       val buffered = producer.buffer(step)
       for i <- 1 to 9 by step do buffered.read() shouldBe Right(List.range(i, i + step))
       buffered.read() shouldBe Right(List(10))
+  }
+
+  "Grouping channel elements on a element selector" should "return a Map with the correct group of channel" in {
+    Async.blocking:
+      val grouped = producer.groupBy(_ % 2 == 0)
+      for _ <- 0 until 2 do
+        val group = grouped.read()
+        group.isRight shouldBe true
+        group.toOption.get match
+          case (false, c) => for i <- 1 to 10 by 2 do c.read() shouldBe Right(i)
+          case (true, c) => for i <- 2 to 10 by 2 do c.read() shouldBe Right(i)
   }
 
   def producer(using Async): ReadableChannel[Int] =
