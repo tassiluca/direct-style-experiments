@@ -14,6 +14,8 @@ gitHooks {
 
 rootProject.name = "PPS-22-direct-style-experiments"
 include(
-    ":back-and-forth",
+    ":commons",
     ":rears-core",
+    ":smart-home",
+    ":back-and-forth",
 )
