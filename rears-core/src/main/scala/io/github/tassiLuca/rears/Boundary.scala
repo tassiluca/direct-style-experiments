@@ -1,6 +1,8 @@
 package io.github.tassiLuca.rears
 
-import gears.async.{Async, Listener, Task}
+import gears.async.{Async, Listener, SendableChannel, Task}
+
+import scala.util.Try
 
 trait Observable[E]:
   def asRunnable: Task[Unit]
@@ -19,6 +21,7 @@ trait Observable[E]:
 
     def notifyListeners(e: E): Unit = synchronized:
       listeners.foreach(_.completeNow(e, this))
-      
+
 trait Consumer[E]:
-  def update(e: E): Task[Unit]
+
+  def listeningChannel: SendableChannel[Try[E]]

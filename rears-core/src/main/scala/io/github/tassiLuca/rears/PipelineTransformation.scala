@@ -8,7 +8,7 @@ import gears.async.{Async, Channel, Future, ReadableChannel, SendableChannel, Ta
 
 import scala.language.postfixOps
 
-type PipelineTransformation[Item] = ReadableChannel[Item] => ReadableChannel[Item]
+type PipelineTransformation[T, R] = ReadableChannel[T] => ReadableChannel[R]
 
 extension [T](r: ReadableChannel[T])(using Async)
 
