@@ -8,6 +8,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/popping-bubbles-swing/PPS-22-direct-style-experiments.popping-bubbles-swing.test.iml" filepath="$PROJECT_DIR$/.idea/modules/popping-bubbles-swing/PPS-22-direct-style-experiments.popping-bubbles-swing.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/rears-core/PPS-22-direct-style-experiments.rears-core.main.iml" filepath="$PROJECT_DIR$/.idea/modules/rears-core/PPS-22-direct-style-experiments.rears-core.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/rears-core/PPS-22-direct-style-experiments.rears-core.test.iml" filepath="$PROJECT_DIR$/.idea/modules/rears-core/PPS-22-direct-style-experiments.rears-core.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/smart-home/PPS-22-direct-style-experiments.smart-home.main.iml" filepath="$PROJECT_DIR$/.idea/modules/smart-home/PPS-22-direct-style-experiments.smart-home.main.iml" />
     </modules>
   </component>
 </project>

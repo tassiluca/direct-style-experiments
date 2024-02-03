@@ -1,27 +1,18 @@
 package io.github.tassiLuca.rears
 
-import gears.async.{Async, Listener, SendableChannel, Task}
-
-import scala.util.Try
+import gears.async.TaskSchedule.RepeatUntilFailure
+import gears.async.*
 
 trait Observable[E]:
+  def src: Async.Source[E]
+
   def asRunnable: Task[Unit]
-  def src: Async.Source[E] = BoundarySource
-
-  private object BoundarySource extends Async.OriginalSource[E]:
-    private var listeners = Set[Listener[E]]()
-
-    override def poll(k: Listener[E]): Boolean = false
-
-    override def dropListener(k: Listener[E]): Unit = synchronized:
-      listeners = listeners - k
-
-    override protected def addListener(k: Listener[E]): Unit = synchronized:
-      listeners = listeners + k
-
-    def notifyListeners(e: E): Unit = synchronized:
-      listeners.foreach(_.completeNow(e, this))
 
 trait Consumer[E]:
+  def listeningChannel: SendableChannel[E]
 
-  def listeningChannel: SendableChannel[Try[E]]
+  def asRunnable: Task[Unit] = Task {
+    listeningChannel.asInstanceOf[Channel[E]].read().foreach(react)
+  }.schedule(RepeatUntilFailure())
+
+  def react(e: E): Unit
