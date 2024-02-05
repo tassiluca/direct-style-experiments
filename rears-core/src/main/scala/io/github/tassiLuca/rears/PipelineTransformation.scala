@@ -12,66 +12,55 @@ type PipelineTransformation[T, R] = ReadableChannel[T] => ReadableChannel[R]
 
 extension [T](r: ReadableChannel[T])(using Async)
 
-  def filter(p: T => Boolean): ReadableChannel[T] =
-    val channel = UnboundedChannel[T]()
-    Task {
-      val value = r.read().toOption.get
-      if p(value) then channel.send(value)
-    }.schedule(RepeatUntilFailure()).run
-    channel.asReadable
-
-  // Strange behavior, apparently the same code but it blocks... see the tests
-  def filter2(p: T => Boolean): ReadableChannel[T] =
-    as[T] { c =>
-      val value = r.read().toOption.get
-      if p(value) then c.send(value)
-    }
+  def filter(p: T => Boolean): ReadableChannel[T] = fromNew[T] { c =>
+    val value = r.read().toOption.get
+    if p(value) then c.send(value)
+  }
 
   def debounce(timespan: Duration): ReadableChannel[T] =
-    val channel = UnboundedChannel[T]()
     var lastEmission: Option[Long] = None
-    Task {
+    fromNew[T] { emitter =>
       val value = r.read().toOption.get
       val now = System.currentTimeMillis()
       if lastEmission.isEmpty || now - lastEmission.get >= timespan.toMillis then
-        channel.send(value)
+        emitter.send(value)
         lastEmission = Some(now)
-    }.schedule(RepeatUntilFailure()).run
-    channel
+    }
 
   def groupBy[K](keySelector: T => K): ReadableChannel[(K, ReadableChannel[T])] =
     var channels = Map[K, UnboundedChannel[T]]()
-    val channel = UnboundedChannel[(K, UnboundedChannel[T])]()
-    Task {
+    fromNew[(K, UnboundedChannel[T])] { emitter =>
       val value = r.read().toOption.get
       val key = keySelector(value)
       if !channels.contains(key) then
         channels = channels + ((key, UnboundedChannel[T]()))
-        channel.send(key -> channels(key))
+        emitter.send(key -> channels(key))
       channels(key).send(value)
-    }.schedule(RepeatUntilFailure()).run
-    channel.asReadable
+    }
 
   def buffer(n: Int, timespan: Duration = 5 seconds): ReadableChannel[List[T]] =
-    val channel = UnboundedChannel[List[T]]()
     var buffer = List[T]()
-    Task {
+    fromNew[List[T]] { emitter =>
       val timer = Timer(timespan)
       Future { timer.run() }
       val value = Async.raceWithOrigin(r.readSource, timer.src).awaitResult
       timer.cancel()
       if value._2 == timer.src then
-        channel.send(buffer)
+        emitter.send(buffer)
         buffer = List.empty
       else
         buffer = buffer :+ value._1.asInstanceOf[Either[Closed, T]].toOption.get
         if buffer.size == n then
-          channel.send(buffer)
+          emitter.send(buffer)
           buffer = List.empty
-    }.schedule(RepeatUntilFailure()).run
-    channel.asReadable
+    }
 
-private def as[T](transformation: SendableChannel[T] => Unit)(using Async): ReadableChannel[T] =
+// IMPORTANT REMARK: if Async ?=> is omitted the body of the task is intended to be **not**
+// suspendable, leading to the block of the context until the task has failed!
+// See `TasksTest` in root project for more about the task scheduling behavior.
+private def fromNew[T](
+    transformation: Async ?=> SendableChannel[T] => Unit,
+)(using Async): ReadableChannel[T] =
   val channel = UnboundedChannel[T]()
   Task {
     transformation(channel.asSendable)

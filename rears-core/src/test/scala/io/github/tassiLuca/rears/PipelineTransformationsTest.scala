@@ -13,6 +13,12 @@ import scala.util.Random
 
 class PipelineTransformationsTest extends AnyFlatSpec with Matchers {
 
+  "Filtering a channel" should "return a new channel with only the elements passing the predicate" in {
+    Async.blocking:
+      val filtered = producer.filter(_ % 2 == 0)
+      for i <- 2 to 10 by 2 do filtered.read() shouldBe Right(i)
+  }
+
   "Debouncing a channel" should "emit the first item immediately" in {
     val span = 1.seconds
     Async.blocking:
@@ -33,18 +39,6 @@ class PipelineTransformationsTest extends AnyFlatSpec with Matchers {
         debounced.read()
         val now = System.currentTimeMillis()
         now - before should be > span.toMillis
-  }
-
-  "Filtering a channel" should "return a new channel with only the elements passing the predicate" in {
-    Async.blocking:
-      val filtered = producer.filter(_ % 2 == 0)
-      for i <- 2 to 10 by 2 do filtered.read() shouldBe Right(i)
-  }
-
-  ignore /* "filter2" */ should "behave exactly like filter" in {
-    Async.blocking:
-      val filtered = producer.filter2(_ % 2 == 0)
-      for i <- 2 to 10 by 2 do filtered.read() shouldBe Right(i)
   }
 
   "Buffering a channel" should "periodically gather items emitted by the channel into bundles and emit them" in {
