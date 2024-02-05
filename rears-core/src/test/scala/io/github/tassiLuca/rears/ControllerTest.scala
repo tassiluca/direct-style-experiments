@@ -1,36 +1,41 @@
 package io.github.tassiLuca.rears
 
-import gears.async.TaskSchedule.{Every, RepeatUntilFailure}
+import gears.async.TaskSchedule.Every
 import gears.async.default.given
-import gears.async.{Async, AsyncOperations, Channel, Future, ReadableChannel, SendableChannel, Task, TaskSchedule, UnboundedChannel}
+import gears.async.{Async, AsyncOperations, Channel, Task, TaskSchedule, UnboundedChannel}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import scala.util.{Random, Success, Try}
+import scala.util.{Random, Try}
 
 class ControllerTest extends AnyFlatSpec with Matchers:
 
-  "1 to many controller with no transformation" should "broadcast the information to all consumers" in {
+  type Item = Int
+  val items = 10
+
+  "1 to many controller" should "broadcast the information to all consumers" in {
+    var consumerAValues = Seq[Try[Int]]()
+    var consumerBValues = Seq[Try[Int]]()
     val producer = observable
     val consumers = Set(
-      consumer(e => println(s"Consumer A -- $e")),
-      consumer(e => println(s"Consumer B -- $e")),
+      consumer(e => consumerAValues = consumerAValues :+ e),
+      consumer(e => consumerBValues = consumerBValues :+ e),
     )
     Async.blocking:
-      val p = producer.asRunnable.run
       Controller.oneToMany(producer, consumers, identity).run
       consumers.map(_.asRunnable.run)
-      p.await
+      producer.asRunnable.run.await // TODO: need to await the consumers!
+    consumerAValues.size shouldBe items
+    consumerBValues.size shouldBe items
   }
 
-  def observable: Observable[Int] = new Observable[Int]:
+  def observable: Observable[Item] = new Observable[Int]:
     private val boundarySource = BoundarySource[Int]()
-    override def src: Async.Source[Int] = boundarySource
+    override def src: Async.Source[Item] = boundarySource
     override def asRunnable: Task[Unit] = Task {
-      boundarySource.notifyListeners(Random.nextInt())
-    }.schedule(Every(1_000, maxRepetitions = 10))
+      boundarySource.notifyListeners(Random.nextInt(10))
+    }.schedule(Every(1_000, maxRepetitions = items + 1))
 
-  def consumer(action: Try[Int] => Unit): Consumer[Try[Int]] = new Consumer[Try[Int]]:
-    private val channel = UnboundedChannel[Try[Int]]()
-    override def listeningChannel: Channel[Try[Int]] = channel
-    override def react(e: Try[Int]): Unit = action(e)
+  def consumer(action: Try[Item] => Unit): Consumer[Try[Int]] = new Consumer[Try[Int]]:
+    override val listeningChannel: Channel[Try[Int]] = UnboundedChannel[Try[Int]]()
+    override def react(e: Try[Item]): Unit = action(e)

@@ -14,5 +14,4 @@ class BoundarySource[E] extends Async.OriginalSource[E]:
     listeners = listeners + k
 
   def notifyListeners(e: E): Unit = synchronized:
-    // println(listeners)
     listeners.foreach(_.completeNow(e, this))

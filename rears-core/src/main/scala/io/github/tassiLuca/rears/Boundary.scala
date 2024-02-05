@@ -9,7 +9,7 @@ trait Observable[E]:
   def asRunnable: Task[Unit]
 
 trait Consumer[E]:
-  def listeningChannel: SendableChannel[E]
+  val listeningChannel: SendableChannel[E] = UnboundedChannel[E]()
 
   def asRunnable: Task[Unit] = Task {
     listeningChannel.asInstanceOf[Channel[E]].read().foreach(react)
