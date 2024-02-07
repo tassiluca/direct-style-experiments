@@ -9,6 +9,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/rears-core/PPS-22-direct-style-experiments.rears-core.main.iml" filepath="$PROJECT_DIR$/.idea/modules/rears-core/PPS-22-direct-style-experiments.rears-core.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/rears-core/PPS-22-direct-style-experiments.rears-core.test.iml" filepath="$PROJECT_DIR$/.idea/modules/rears-core/PPS-22-direct-style-experiments.rears-core.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/smart-home/PPS-22-direct-style-experiments.smart-home.main.iml" filepath="$PROJECT_DIR$/.idea/modules/smart-home/PPS-22-direct-style-experiments.smart-home.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/smart-home/PPS-22-direct-style-experiments.smart-home.test.iml" filepath="$PROJECT_DIR$/.idea/modules/smart-home/PPS-22-direct-style-experiments.smart-home.test.iml" />
     </modules>
   </component>
 </project>
