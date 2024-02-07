@@ -1,7 +1,7 @@
 package io.github.tassiLuca.smarthome.application
 
-import gears.async.{Async, AsyncOperations, ReadableChannel, Task}
-import io.github.tassiLuca.rears.{Controller, Observable}
+import gears.async.{Async, AsyncOperations, ReadableChannel}
+import io.github.tassiLuca.rears.Controller
 import io.github.tassiLuca.smarthome.core.{
   HACControllerComponent,
   TemperatureEntry,
@@ -16,8 +16,8 @@ trait ThermostatHubManager extends ThermostatComponent with ThermostatSchedulerC
   def run(source: ReadableChannel[TemperatureEntry])(using Async, AsyncOperations): Unit =
     thermostat.asRunnable.run
     Controller
-      .oneToManyR(
-        source = source,
+      .oneToMany(
+        source,
         consumers = Set(thermostat),
         transformation = identity,
       )

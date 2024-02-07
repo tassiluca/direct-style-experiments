@@ -1,12 +1,11 @@
 package io.github.tassiLuca.rears
 
+import gears.async.{Async, Channel, ReadableChannel, SendableChannel, Task, UnboundedChannel}
 import gears.async.TaskSchedule.RepeatUntilFailure
-import gears.async.*
 
 import scala.util.Try
 
-// TODO: maybe rename into `Publisher`.
-trait Observable[E]:
+trait Publisher[E]:
   def source: Async.Source[E]
   def asRunnable: Task[Unit]
   def publishingChannel(using Async): ReadableChannel[E] = source.toChannel
