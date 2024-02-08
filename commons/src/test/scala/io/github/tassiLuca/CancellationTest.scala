@@ -59,6 +59,7 @@ class CancellationTest extends AnyFunSpec with Matchers {
             val f1 = Future { throw Error(); "gears!" }
             val f2 = Future { sleep(2_000); stillAlive = true; "hello" }
             f2.zip(f1).await
+          f.awaitResult
           f.awaitResult.isFailure shouldBe true
           val now = System.currentTimeMillis()
           now - before should be < 2_000L

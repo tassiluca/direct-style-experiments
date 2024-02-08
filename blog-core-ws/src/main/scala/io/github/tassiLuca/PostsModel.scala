@@ -28,4 +28,4 @@ trait PostsModel:
     */
   type ContentVerifier = (Title, Body) => Either[String, PostContent]
 
-  type AuthorsVerifier = (AuthorId) => Author
+  type AuthorsVerifier = AuthorId => Author

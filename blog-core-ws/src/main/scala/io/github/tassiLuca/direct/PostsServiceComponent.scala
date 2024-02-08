@@ -1,13 +1,14 @@
 package io.github.tassiLuca.direct
 
 import gears.async.default.given
-import gears.async.{Async, Task}
+import gears.async.{Async, Future, Task}
 import io.github.tassiLuca.boundaries.either.?
 import io.github.tassiLuca.boundaries.EitherConversions.given
 import io.github.tassiLuca.PostsModel
 import io.github.tassiLuca.boundaries.either
 import io.github.tassiLuca.posts.simulates
 
+import java.time.LocalDate
 import java.util.Date
 
 /** The blog posts service component. */
@@ -44,10 +45,12 @@ trait PostsServiceComponent:
         then Left(s"A post entitled $title already exists")
         else
           either:
-            val content = verifyContent(title, body).run
-            val author = authorBy(authorId).run
-            val post = Post(author.awaitResult.?, content.await.?._1, content.await.?._2, Date())
-            context.repository.save(post)
+            val f = Future:
+              val content = verifyContent(title, body).run
+              val author = authorBy(authorId).run
+              content.zip(author).await
+            val (post, author): (Either[String, PostContent], Author) = f.awaitResult.?
+            context.repository.save(Post(author, post.?._1, post.?._2, Date()))
 
       /* Pretending to make a call to the Authorship Service that keeps track of authorized authors. */
       private def authorBy(id: AuthorId): Task[Author] = Task:

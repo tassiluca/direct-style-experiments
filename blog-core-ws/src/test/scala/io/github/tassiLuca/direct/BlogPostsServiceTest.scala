@@ -15,9 +15,12 @@ class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
 
   override def beforeEach(): Unit =
     blogPostsApp = new BlogPostsApp:
-      override val contentVerifier: ContentVerifier = (t, b) => Right((t, b))
+      override val contentVerifier: ContentVerifier = (t, b) =>
+        println("Verifying content")
+        Right((t, b))
       override val authorsVerifier: AuthorsVerifier = a =>
         require(a == authorId, "No author with the given id matches")
+        println("Verifying author")
         Author(a, "Luca", "Tassinari")
       override val service: PostsService = PostsService(contentVerifier, authorsVerifier)
 
@@ -46,7 +49,7 @@ class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
       f2.await.isRight shouldBe true
   }
 
-  "BlogPostsService" should "fail on unauthorized author and cancel the content verification check" in {
+  "BlogPostsService" should "fail on unauthorized author cancelling content verification check" in {
     Async.blocking:
       val result = blogPostsApp.service.create("unauthorized", postTitle, postBody)
       result.isLeft shouldBe true
