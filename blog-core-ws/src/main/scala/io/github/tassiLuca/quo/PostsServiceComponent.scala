@@ -5,7 +5,7 @@ import io.github.tassiLuca.posts.simulatesBlocking
 
 import java.util.Date
 import scala.concurrent
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 /** The component blog posts service. */
 trait PostsServiceComponent:
@@ -37,6 +37,13 @@ trait PostsServiceComponent:
       given ExecutionContext = ExecutionContext.global
 
       override def create(authorId: AuthorId, title: Title, body: Body): Future[Post] =
+        for
+          exists <- context.repository.exists(title)
+          if !exists
+          post <- save(authorId, title, body)
+        yield post
+
+      private def save(authorId: AuthorId, title: Title, body: Body): Future[Post] =
         val authorAsync = authorBy(authorId)
         val contentAsync = verifyContent(title, body)
         for
