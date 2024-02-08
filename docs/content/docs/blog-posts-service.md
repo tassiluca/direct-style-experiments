@@ -35,3 +35,16 @@ Both the components must be designed in an async way.
 
 ### 2nd version: direct-style
 
+- description of APIs
+- serial by default
+  - inspiring principle (taken by Kotlin Coroutines): "Concurrency is hard! Concurrency has to be explicit!"
+- opt-in concurrency, using `Future`s
+- referencial transparency using `Task`s
+- structured + cancellation mechanisms
+
+| **Combinator**  | **Goal**                                     |
+|-----------------|----------------------------------------------|
+| `zip`           | Parallel composition of two futures. If both futures succeed, succeed with their values in a pair. Otherwise, fail with the failure that was returned first |
+| `alt`           | Alternative parallel composition of this task with other task. If either task succeeds, succeed with the success that was returned first. Otherwise, fail with the failure that was returned last. |
+| `altWithCancel` | Like `alt` but the slower future is cancelled. |
+| ...
