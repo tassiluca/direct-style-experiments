@@ -12,9 +12,10 @@ gitHooks {
     createHooks()
 }
 
-rootProject.name = "PPS-22-direct-style-experiments"
+rootProject.name = "direct-style-experiments"
 include(
     ":commons",
+    ":blog-core-ws",
     ":rears-core",
     ":smart-home",
     ":back-and-forth",
