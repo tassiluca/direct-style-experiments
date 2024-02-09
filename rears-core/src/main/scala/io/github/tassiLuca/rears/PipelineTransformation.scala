@@ -34,7 +34,7 @@ extension [T](r: ReadableChannel[T])(using Async)
       val value = r.read().toOption.get
       val key = keySelector(value)
       if !channels.contains(key) then
-        channels = channels + ((key, UnboundedChannel[T]()))
+        channels = channels + (key -> UnboundedChannel[T]())
         emitter.send(key -> channels(key))
       channels(key).send(value)
     }
