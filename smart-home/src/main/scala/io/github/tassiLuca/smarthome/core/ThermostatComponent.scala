@@ -18,4 +18,3 @@ trait ThermostatComponent:
     private class ThermostatImpl extends Thermostat:
       override protected def react(e: Try[TemperatureEntry]): Unit =
         println(s"[THERMOSTAT] Received $e")
-        println(s"[THERMOSTAT] Current state $state")
