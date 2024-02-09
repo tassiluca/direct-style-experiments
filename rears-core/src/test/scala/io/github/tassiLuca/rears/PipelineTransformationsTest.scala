@@ -2,15 +2,13 @@ package io.github.tassiLuca.rears
 
 import gears.async.TaskSchedule.Every
 import gears.async.default.given
-import gears.async.{Async, Future, Listener, ReadableChannel, Task, TaskSchedule, UnboundedChannel}
-import org.scalatest.flatspec.AnyFlatSpec
+import gears.async.{Async, Channel, Future, ReadableChannel, Task, TaskSchedule, UnboundedChannel}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.duration.Duration
 import concurrent.duration.DurationInt
 import scala.language.postfixOps
-import scala.util.Random
 
 class PipelineTransformationsTest extends AnyFunSpec with Matchers {
 
@@ -63,6 +61,19 @@ class PipelineTransformationsTest extends AnyFunSpec with Matchers {
     }
   }
 
+  describe("Buffering items of a channel within a duration") {
+    it("return a new channel emitting items at their first and group next ones emitted until it") {
+      Async.blocking:
+        val c = UnboundedChannel[Int]()
+        infiniteProducer(every = 3000 milliseconds, channel = c)
+        infiniteProducer(every = 3500 milliseconds, channel = c)
+        val buffered = c bufferWithin (2 seconds)
+        for i <- 0 to 3 do buffered.read() shouldBe Right(List(i, i))
+        buffered.read() should (equal(Right(List(4, 4))) or equal(Right(List(4)))) // border line
+        buffered.read() shouldBe Right(List(5))
+    }
+  }
+
   describe("Grouping a channel on an element selector") {
     it("return a Map with the correct group of channel") {
       Async.blocking:
@@ -81,8 +92,14 @@ class PipelineTransformationsTest extends AnyFunSpec with Matchers {
     Future { for i <- 1 to 10 do channel.send(i) }
     channel.asReadable
 
-  def infiniteProducer(every: Duration = 500 milliseconds)(using Async): ReadableChannel[Int] =
-    val channel = UnboundedChannel[Int]()
-    Task(channel.send(Random.nextInt())).schedule(TaskSchedule.Every(every.toMillis)).run
+  def infiniteProducer(
+      every: Duration = 500 milliseconds,
+      channel: Channel[Int] = UnboundedChannel[Int](),
+  )(using Async): ReadableChannel[Int] =
+    var i = 0
+    Task {
+      channel.send(i)
+      i = i + 1
+    }.schedule(TaskSchedule.Every(every.toMillis)).run
     channel.asReadable
 }

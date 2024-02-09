@@ -20,8 +20,11 @@ trait Consumer[E]:
 trait State[E]:
   consumer: Consumer[E] =>
 
-  private[State] var _state: Option[E] = None
+  private var _state: Option[E] = None
   def state: Option[E] = _state
-  override protected def react(e: Try[E]): Unit =
-    _state = e.toOption
-    consumer.react(e)
+  override def asRunnable: Task[Unit] = Task {
+    listeningChannel.asInstanceOf[Channel[Try[E]]].read().foreach { e =>
+      _state = e.toOption
+      react(e)
+    }
+  }.schedule(RepeatUntilFailure())

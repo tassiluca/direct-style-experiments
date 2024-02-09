@@ -10,6 +10,7 @@ import scala.language.postfixOps
 
 type PipelineTransformation[T, R] = ReadableChannel[T] => ReadableChannel[R]
 
+// TODO: IMPROVE WITH SRC AND ? IN PLACE OF .toOption?
 extension [T](r: ReadableChannel[T])(using Async)
 
   def filter(p: T => Boolean): ReadableChannel[T] = fromNew[T] { c =>
@@ -53,6 +54,24 @@ extension [T](r: ReadableChannel[T])(using Async)
         if buffer.size == n then
           emitter.send(buffer)
           buffer = List.empty
+    }
+
+  def bufferWithin(timespan: Duration = 5 seconds): ReadableChannel[List[T]] =
+    var buffer = List[T]()
+    fromNew[List[T]] { emitter =>
+      val timer = Timer(timespan)
+      buffer = buffer :+ r.read().toOption.get
+      Future { timer.run() }
+      val f = Future:
+        val tf = Future { timer.src.awaitResult }
+        val tr = Task {
+          buffer = buffer :+ r.read().toOption.get
+        }.schedule(RepeatUntilFailure()).run
+        tr.altWithCancel(tf).awaitResult
+      f.awaitResult
+      emitter.send(buffer)
+      buffer = List.empty
+      timer.cancel()
     }
 
 // IMPORTANT REMARK: if Async ?=> is omitted the body of the task is intended to be **not**
