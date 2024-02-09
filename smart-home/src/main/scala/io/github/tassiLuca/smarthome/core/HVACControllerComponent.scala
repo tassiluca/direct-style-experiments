@@ -1,10 +1,10 @@
 package io.github.tassiLuca.smarthome.core
 
-trait HACControllerComponent:
+trait HVACControllerComponent:
 
-  val haccController: HACController
+  val hvacController: HVACController
 
-  trait HACController:
+  trait HVACController:
     def onHeater(): Unit
     def offHeather(): Unit
     def onAirConditioner(): Unit

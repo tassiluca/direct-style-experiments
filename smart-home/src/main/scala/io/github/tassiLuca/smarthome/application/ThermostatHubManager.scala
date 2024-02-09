@@ -3,13 +3,13 @@ package io.github.tassiLuca.smarthome.application
 import gears.async.{Async, AsyncOperations, ReadableChannel}
 import io.github.tassiLuca.rears.Controller
 import io.github.tassiLuca.smarthome.core.{
-  HACControllerComponent,
+  HVACControllerComponent,
   TemperatureEntry,
   ThermostatComponent,
   ThermostatSchedulerComponent,
 }
 
-trait ThermostatHubManager extends ThermostatComponent with ThermostatSchedulerComponent with HACControllerComponent:
+trait ThermostatHubManager extends ThermostatComponent with ThermostatSchedulerComponent with HVACControllerComponent:
   override val scheduler: ThermostatScheduler = ThermostatScheduler(19.0)
   override val thermostat: Thermostat = Thermostat()
 

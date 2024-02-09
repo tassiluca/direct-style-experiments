@@ -1,6 +1,6 @@
 package io.github.tassiLuca.smarthome.application
 
-import gears.async.TaskSchedule.Every
+import gears.async.TaskSchedule.{Every, RepeatUntilFailure}
 import gears.async.default.given
 import gears.async.{Async, Future, ReadableChannel, Task}
 import io.github.tassiLuca.rears.{BoundarySource, groupBy}
@@ -13,7 +13,7 @@ import scala.util.Random
 class ThermostatHubManagerTest extends AnyFlatSpec with Matchers {
 
   val thermostatHubManager: ThermostatHubManager = new ThermostatHubManager:
-    override val haccController: HACController = new HACController:
+    override val hvacController: HVACController = new HVACController:
       override def onHeater(): Unit = ???
       override def offHeather(): Unit = ???
       override def onAirConditioner(): Unit = ???
@@ -28,10 +28,11 @@ class ThermostatHubManagerTest extends AnyFlatSpec with Matchers {
 
   "The thermostat hub manager" should "receive event from the source" in {
     Async.blocking:
-      Future:
+      Task {
         sensorSource.publishingChannel.groupBy(_.name).read() match
           case Right(("temperature", c)) => thermostatHubManager.run(c.asInstanceOf[ReadableChannel[TemperatureEntry]])
           case _ => println("Boh")
-      sensorSource.asRunnable.run
+      }.schedule(RepeatUntilFailure()).run
+      // sensorSource.asRunnable.run.await
   }
 }
