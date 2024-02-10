@@ -21,5 +21,5 @@ kotlin-testing = [ "kotest-junit5-jvm", "kotest-assertions-core-jvm", "mockito-c
 scalatest = "com.github.maiflai.scalatest:0.32"
 dokka = "org.jetbrains.dokka:1.9.10"
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlin-qa = "org.danilopianini.gradle-kotlin-qa:0.59.1"
+kotlin-qa = "org.danilopianini.gradle-kotlin-qa:0.60.1"
 shadowJar = "com.github.johnrengelman.shadow:8.1.1"
