@@ -6,16 +6,16 @@ import gears.async.TaskSchedule.RepeatUntilFailure
 import scala.util.Try
 
 trait Publisher[E]:
-  def source: Async.Source[E]
+  protected val channel: Channel[E] = UnboundedChannel[E]()
   def asRunnable: Task[Unit]
-  def publishingChannel(using Async): ReadableChannel[E] = source.toChannel
+  def publishingChannel: ReadableChannel[E] = channel.asReadable
 
 trait Consumer[E]:
   val listeningChannel: SendableChannel[Try[E]] = UnboundedChannel()
   def asRunnable: Task[Unit] = Task {
     listeningChannel.asInstanceOf[Channel[Try[E]]].read().foreach(react)
   }.schedule(RepeatUntilFailure())
-  protected def react(e: Try[E]): Unit
+  protected def react(e: Try[E])(using Async): Unit
 
 trait State[E]:
   consumer: Consumer[E] =>
@@ -24,7 +24,7 @@ trait State[E]:
   def state: Option[E] = _state
   override def asRunnable: Task[Unit] = Task {
     listeningChannel.asInstanceOf[Channel[Try[E]]].read().foreach { e =>
-      _state = e.toOption
       react(e)
+      _state = e.toOption
     }
   }.schedule(RepeatUntilFailure())

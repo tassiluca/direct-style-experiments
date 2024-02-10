@@ -23,7 +23,7 @@ class ControllerTest extends AnyFlatSpec with Matchers:
       consumer(e => consumerBValues = consumerBValues :+ e),
     )
     Async.blocking:
-      Controller.oneToMany(producer.source.toChannel, consumers, identity).run
+      Controller.oneToMany(producer.publishingChannel, consumers, identity).run
       consumers.foreach(_.asRunnable.run)
       producer.asRunnable.run.await
       // TODO: improve with an extension method that wait for a certain amount of time,
@@ -39,13 +39,11 @@ class ControllerTest extends AnyFlatSpec with Matchers:
 
   def publisher: Publisher[Item] = new Publisher[Int]:
     private var i = 0
-    private val boundarySource = BoundarySource[Int]()
-    override def source: Async.Source[Item] = boundarySource
     override def asRunnable: Task[Unit] = Task {
-      boundarySource.notifyListeners(i)
+      channel.send(i)
       i = i + 1
     }.schedule(Every(1_000, maxRepetitions = items))
 
   def consumer(action: Try[Item] => Unit): Consumer[Int] = new Consumer[Int]:
     override val listeningChannel: SendableChannel[Try[Item]] = UnboundedChannel[Try[Int]]()
-    override def react(e: Try[Item]): Unit = action(e)
+    override def react(e: Try[Item])(using Async): Unit = action(e)
