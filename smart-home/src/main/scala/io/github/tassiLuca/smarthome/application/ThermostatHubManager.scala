@@ -1,8 +1,18 @@
 package io.github.tassiLuca.smarthome.application
 
-import gears.async.{Async, AsyncOperations, ReadableChannel}
-import io.github.tassiLuca.rears.Controller
-import io.github.tassiLuca.smarthome.core.{AlertSystemComponent, HVACControllerComponent, SensorHealthCheckerComponent, TemperatureEntry, ThermostatComponent, ThermostatSchedulerComponent}
+import gears.async.{Async, AsyncOperations, ReadableChannel, Task}
+import io.github.tassiLuca.rears.{Controller, bufferWithin}
+import io.github.tassiLuca.smarthome.core.{
+  AlertSystemComponent,
+  HVACControllerComponent,
+  SensorHealthCheckerComponent,
+  TemperatureEntry,
+  ThermostatComponent,
+  ThermostatSchedulerComponent,
+}
+
+import concurrent.duration.DurationInt
+import scala.language.postfixOps
 
 trait ThermostatHubManager
     extends ThermostatComponent
@@ -21,6 +31,6 @@ trait ThermostatHubManager
       .oneToMany(
         source,
         consumers = Set(thermostat, sensorHealthChecker),
-        transformation = identity,
+        transformation = r => r.bufferWithin(10.seconds),
       )
       .run

@@ -7,5 +7,5 @@ trait SensorSource extends Publisher[SensorEvent]
 
 /** A detection performed by a sensing unit. */
 sealed trait SensorEvent(val name: String)
-case class TemperatureEntry(temperature: Double) extends SensorEvent("temperature")
-case class LuminosityEntry(luminosity: Double) extends SensorEvent("luminosity")
+case class TemperatureEntry(sensorName: String, temperature: Double) extends SensorEvent(sensorName)
+case class LuminosityEntry(sensorName: String, luminosity: Double) extends SensorEvent(sensorName)
