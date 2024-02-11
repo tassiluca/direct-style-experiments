@@ -27,7 +27,8 @@ allprojects {
         with(rootProject.libs) {
             implementation(kotlin.stdlib)
             implementation(scala.stdlib)
-            // Gears is a wip strawman library for async programming not already available on Maven Central...
+            // Gears is a wip strawman library for async programming not available on Maven Central: it is
+            // included as git submodule in this project and added to dependencies with jars.
             val gears = "gears_3-0.1.0-SNAPSHOT"
             implementation(
                 files(
