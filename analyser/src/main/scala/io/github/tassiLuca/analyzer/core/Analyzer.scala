@@ -19,5 +19,5 @@ object Analyzer:
   extension (repository: Repository)
     private def performAnalysis(organizationName: String): Task[RepositoryReport] = Task:
       val contributions = Future { gitHubService.contributorsOf(organizationName, repository.name) }
-      val release = Future { gitHubService.lastReleaseOf(organizationName, repository.name) }
-      RepositoryReport(repository.name, repository.issues, repository.stars, contributions.await, release.await)
+      // val release = Future { gitHubService.lastReleaseOf(organizationName, repository.name) }
+      RepositoryReport(repository.name, repository.issues, repository.stars, contributions.await, None)

@@ -8,7 +8,9 @@ import javax.swing.SwingUtilities
 class AnalyzerGUI(controller: AppController) extends AnalyzerView:
   val gui = MainFrame(controller)
 
-  override def run(): Unit = gui.setVisible(true)
+  override def run(): Unit =
+    gui.pack()
+    gui.setVisible(true)
 
   override def update(result: OrganizationReport): Unit =
     println(result)

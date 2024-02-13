@@ -39,18 +39,16 @@ class MainFrame(controller: AppController) extends JFrame:
   mainPanel.add(topPanel, BorderLayout.NORTH)
   mainPanel.add(middlePanel, BorderLayout.CENTER)
   mainPanel.add(bottomPanel, BorderLayout.SOUTH)
-
   // Define behavior for buttons
   runButton.addActionListener((e: ActionEvent) =>
-    stateText.setText("Computation running..."),
+    controller.runSession(inputField.getText)
+    stateText.setText(s"Computation running ${inputField.getText}"),
   )
   cancelButton.addActionListener((e: ActionEvent) =>
-    // Code to cancel computation
+    controller.stopSession()
     stateText.setText("Computation canceled."),
   )
-  // Set up the main frame
   getContentPane.add(mainPanel)
-  pack()
 
   def updateResults(report: OrganizationReport): Unit =
     contributionsModel.setDataVector(
