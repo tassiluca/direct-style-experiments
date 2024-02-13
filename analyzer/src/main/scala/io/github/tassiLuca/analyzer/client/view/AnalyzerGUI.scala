@@ -6,13 +6,15 @@ import io.github.tassiLuca.analyzer.client.{AnalyzerView, AppController, Organiz
 import javax.swing.SwingUtilities
 
 class AnalyzerGUI(controller: AppController) extends AnalyzerView:
-  val gui = MainFrame(controller)
+  private val gui: MainFrame = MainFrame(controller)
 
   override def run(): Unit =
     gui.pack()
     gui.setVisible(true)
 
   override def update(result: OrganizationReport): Unit =
-    println(result)
     SwingUtilities.invokeLater(() => gui.updateResults(result))
-    println("-".repeat(100))
+
+  override def error(errorMessage: String): Unit = gui.showError(errorMessage)
+
+  override def endComputation(): Unit = gui.endSession()

@@ -23,28 +23,28 @@ class MainFrame(controller: AppController) extends JFrame:
   val contributionsCols = Array[AnyRef]("Login", "Contributions")
   val contributionsModel = DefaultTableModel(contributionsCols, 0)
   val contributionsTable = new JTable(contributionsModel)
-  val repoDetailsModel = DefaultTableModel(Array[AnyRef]("Name", "Issues", "Stars", "Last release"), 0)
+  val repoDetailsCols = Array[AnyRef]("Name", "Issues", "Stars", "Last release")
+  val repoDetailsModel = DefaultTableModel(repoDetailsCols, 0)
   val repoDetailsTable = new JTable(repoDetailsModel)
   val scrollPane1 = new JScrollPane(contributionsTable)
   val scrollPane2 = new JScrollPane(repoDetailsTable)
   val middlePanel = new JPanel(new GridLayout(2, 1))
   middlePanel.add(scrollPane1)
   middlePanel.add(scrollPane2)
-  // Bottom Panel
   val stateText = new JLabel()
   val bottomPanel = new JPanel(new FlowLayout())
   bottomPanel.add(stateText)
-  // Main Panel
   val mainPanel = new JPanel(new BorderLayout())
   mainPanel.add(topPanel, BorderLayout.NORTH)
   mainPanel.add(middlePanel, BorderLayout.CENTER)
   mainPanel.add(bottomPanel, BorderLayout.SOUTH)
-  // Define behavior for buttons
-  runButton.addActionListener((e: ActionEvent) =>
+  runButton.addActionListener(_ =>
+    contributionsModel.setDataVector(Array(Array[Any]()), contributionsCols)
+    repoDetailsModel.setDataVector(Array(Array[Any]()), contributionsCols)
     controller.runSession(inputField.getText)
-    stateText.setText(s"Computation running ${inputField.getText}"),
+    stateText.setText(s"Analysis of ${inputField.getText} organization ongoing..."),
   )
-  cancelButton.addActionListener((e: ActionEvent) =>
+  cancelButton.addActionListener(_ =>
     controller.stopSession()
     stateText.setText("Computation canceled."),
   )
@@ -52,6 +52,15 @@ class MainFrame(controller: AppController) extends JFrame:
 
   def updateResults(report: OrganizationReport): Unit =
     contributionsModel.setDataVector(
-      report._1.map(e => Array[Any](e._1, e._2)).toArray,
+      report._1.toSeq.sortBy(_._2)(using Ordering.Long.reverse).map(e => Array[Any](e._1, e._2)).toArray,
       contributionsCols,
     )
+    repoDetailsModel.setDataVector(
+      report._2.map(e => Array[Any](e.name, e.issues, e.stars, e.lastRelease)).toArray,
+      repoDetailsCols,
+    )
+
+  def endSession(): Unit = stateText.setText("Computation ended.")
+
+  def showError(errorMsg: String): Unit =
+    JOptionPane.showMessageDialog(this, errorMsg, "Error!", JOptionPane.ERROR_MESSAGE)

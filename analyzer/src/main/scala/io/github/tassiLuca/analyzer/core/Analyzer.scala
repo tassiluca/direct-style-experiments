@@ -1,23 +1,25 @@
 package io.github.tassiLuca.analyzer.core
 
-import gears.async.{Async, AsyncOperations, Future, ReadableChannel, Task}
+import gears.async.{Async, Future, ReadableChannel}
 import gears.async.Future.Collector
+import io.github.tassiLuca.boundaries.either
+import io.github.tassiLuca.boundaries.either.?
+
+type ReportChannel = (ReadableChannel[Future[RepositoryReport]], Int)
 
 object Analyzer:
 
   private val gitHubService = GitHubService()
 
-  def analyze(
-      organizationName: String,
-  )(using Async, AsyncOperations): (Int, ReadableChannel[Future[RepositoryReport]]) =
+  def analyze(organizationName: String)(using Async): Either[String, ReportChannel] = either:
     val reposInfo = gitHubService
-      .organizationsRepositories(organizationName)
-      .map(_.performAnalysis(organizationName).run)
+      .organizationsRepositories(organizationName).?
+      .map(_.performAnalysis)
       .toList
-    (reposInfo.size, Collector[RepositoryReport](reposInfo: _*).results)
+    (Collector[RepositoryReport](reposInfo: _*).results, reposInfo.size)
 
-  extension (repository: Repository)
-    private def performAnalysis(organizationName: String): Task[RepositoryReport] = Task:
-      val contributions = Future { gitHubService.contributorsOf(organizationName, repository.name) }
-      // val release = Future { gitHubService.lastReleaseOf(organizationName, repository.name) }
-      RepositoryReport(repository.name, repository.issues, repository.stars, contributions.await, None)
+  extension (r: Repository)
+    private def performAnalysis(using Async): Future[RepositoryReport] = Future:
+      val contributions = Future { gitHubService.contributorsOf(r.organization, r.name) }
+      val release = Future { gitHubService.lastReleaseOf(r.organization, r.name) }
+      RepositoryReport(r.name, r.issues, r.stars, contributions.await.getOrElse(Set()), release.await.toOption)

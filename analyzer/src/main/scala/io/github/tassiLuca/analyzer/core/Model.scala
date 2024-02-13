@@ -9,10 +9,12 @@ case class Contribution(
 
 case class Repository(
     id: Long,
-    name: String,
+    @upickle.implicits.key("full_name") fullName: String,
     @upickle.implicits.key("stargazers_count") stars: Int,
     @upickle.implicits.key("open_issues_count") issues: Int,
-) derives ReadWriter
+) derives ReadWriter:
+  def organization: String = fullName.split("/")(0)
+  def name: String = fullName.split("/")(1)
 
 case class Release(
     @upickle.implicits.key("tag_name") tag: String,

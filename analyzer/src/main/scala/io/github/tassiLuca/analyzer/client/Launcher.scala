@@ -1,10 +1,7 @@
 package io.github.tassiLuca.analyzer.client
 
-import gears.async.TaskSchedule.Every
 import gears.async.default.given
-import gears.async.*
-
-import scala.util.Random
+import gears.async.Async
 
 @main def directAnalyzerLauncher(): Unit =
   Async.blocking:

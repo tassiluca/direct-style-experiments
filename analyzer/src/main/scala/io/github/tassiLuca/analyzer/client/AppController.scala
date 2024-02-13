@@ -1,8 +1,7 @@
 package io.github.tassiLuca.analyzer.client
 
-import gears.async.default.given
-import gears.async.{Async, AsyncOperations, Future, Task}
-import io.github.tassiLuca.analyzer.core.{Analyzer, RepositoryReport}
+import gears.async.{Async, Future, ReadableChannel}
+import io.github.tassiLuca.analyzer.core.{Analyzer, ReportChannel, RepositoryReport}
 
 type OrganizationReport = (Map[String, Long], Set[RepositoryReport])
 
@@ -23,14 +22,19 @@ object AppController:
     override def stopSession(): Unit = currentComputation.foreach(_.cancel())
 
     override def runSession(organizationName: String): Unit =
-      currentComputation = Some:
-        Future:
-          var organizationReport: OrganizationReport = (Map(), Set())
-          val (expectedResults, resultChannel) = analyzer.analyze(organizationName)
-          for _ <- 0 until expectedResults do
-            val report = resultChannel.read().toOption.get.await
-            organizationReport = (organizationReport._1.aggregatedTo(report), organizationReport._2 + report)
-            view.update(organizationReport)
+      val f = Future:
+        analyzer.analyze(organizationName) match
+          case Right(value) => readReports(value._1, value._2)
+          case Left(errorMessage) => view.error(errorMessage)
+      currentComputation = Some(f)
+
+    private def readReports(reportsChannel: ReadableChannel[Future[RepositoryReport]], expectedReports: Int): Unit =
+      var organizationReport: OrganizationReport = (Map(), Set())
+      for _ <- 0 until expectedReports do
+        val report = reportsChannel.read().toOption.get.await
+        organizationReport = (organizationReport._1.aggregatedTo(report), organizationReport._2 + report)
+        view.update(organizationReport)
+      view.endComputation()
 
     extension (m: Map[String, Long])
       private def aggregatedTo(report: RepositoryReport): Map[String, Long] =

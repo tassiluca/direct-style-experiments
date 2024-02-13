@@ -2,12 +2,10 @@ package io.github.tassiLuca.analyzer.core
 
 import gears.async.Async
 
-import scala.util.Properties
-
 trait GitHubService:
-  def organizationsRepositories(organizationName: String)(using Async): Set[Repository]
-  def contributorsOf(organizationName: String, repositoryName: String)(using Async): Set[Contribution]
-  def lastReleaseOf(organizationName: String, repositoryName: String)(using Async): Option[Release]
+  def organizationsRepositories(organizationName: String)(using Async): Either[String, Set[Repository]]
+  def contributorsOf(organizationName: String, repositoryName: String)(using Async): Either[String, Set[Contribution]]
+  def lastReleaseOf(organizationName: String, repositoryName: String)(using Async): Either[String, Release]
 
 object GitHubService:
   def apply(): GitHubService = GitHubServiceImpl()
@@ -17,22 +15,22 @@ object GitHubService:
     import upickle.default.read
 
     private val client = SimpleHttpClient()
-    private val bearer = Properties.envOrNone("GH_TOKEN").get
+    private val request = basicRequest.auth.bearer(System.getenv("GH_TOKEN"))
 
-    override def organizationsRepositories(organizationName: String)(using Async): Set[Repository] =
+    override def organizationsRepositories(organizationName: String)(using Async): Either[String, Set[Repository]] =
       val endpoint = uri"https://api.github.com/orgs/$organizationName/repos"
-      client.send(basicRequest.auth.bearer(bearer).get(endpoint)).body match
-        case Left(e) => println(e); Set()
-        case Right(response) => read[Seq[Repository]](response).toSet
+      client.send(request.get(endpoint)).body.map(r => read[Seq[Repository]](r).toSet)
 
-    override def contributorsOf(organizationName: String, repositoryName: String)(using Async): Set[Contribution] =
+    override def contributorsOf(
+        organizationName: String,
+        repositoryName: String,
+    )(using Async): Either[String, Set[Contribution]] =
       val endpoint = uri"https://api.github.com/repos/$organizationName/$repositoryName/contributors"
-      client.send(basicRequest.auth.bearer(bearer).get(endpoint)).body match
-        case Left(e) => println(e); Set()
-        case Right(response) => read[Seq[Contribution]](response).toSet
+      client.send(request.get(endpoint)).body.map(r => read[Seq[Contribution]](r).toSet)
 
-    override def lastReleaseOf(organizationName: String, repositoryName: String)(using Async): Option[Release] =
+    override def lastReleaseOf(
+        organizationName: String,
+        repositoryName: String,
+    )(using Async): Either[String, Release] =
       val endpoint = uri"https://api.github.com/repos/$organizationName/$repositoryName/releases/latest"
-      client.send(basicRequest.auth.bearer(bearer).get(endpoint)).body match
-        case Left(e) => println(e); None
-        case Right(response) => Some(read[Release](response))
+      client.send(request.get(endpoint)).body.map(r => read[Release](r))
