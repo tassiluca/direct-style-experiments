@@ -36,11 +36,15 @@ Both the components must be designed in an async way.
 ### 2nd version: direct-style
 
 - description of APIs
+  - Async `Source` and `Listeners`
+    - combinators (`race` and `either`)
+  - Futures, Promise
 - serial by default
   - inspiring principle (taken by Kotlin Coroutines): "Concurrency is hard! Concurrency has to be explicit!"
 - opt-in concurrency, using `Future`s
 - referencial transparency using `Task`s
 - structured + cancellation mechanisms
+- use of boundaries: `?`
 
 | **Combinator**  | **Goal**                                     |
 |-----------------|----------------------------------------------|
