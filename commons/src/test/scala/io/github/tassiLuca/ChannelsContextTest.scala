@@ -43,6 +43,19 @@ class ChannelsContextTest extends AnyFunSpec with Matchers {
     }
   }
 
+  /*
+    "max repetition on task" should "work" in {
+    Async.blocking:
+      val channel = UnboundedChannel[Int]()
+      Task {
+        channel.send(Random.nextInt())
+      }.schedule(Every(1000)).run
+      Task {
+        println(channel.read())
+      }.schedule(RepeatUntilFailure(maxRepetitions = 2)).run.await
+  }
+   */
+
   def produceOn(channel: SendableChannel[Item]): Task[Unit] = Task {
     channel.send(Random.nextInt())
   }.schedule(Every(500, maxRepetitions = itemsProduced))

@@ -3,6 +3,7 @@ kotlin = "1.9.22"
 scala = "3.3.1"
 kotest = "5.8.0"
 mockito = "5.10.0"
+sttp = "3.9.3"
 
 [libraries]
 scala-stdlib = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
@@ -13,7 +14,8 @@ kotest-assertions-core-jvm = { module = "io.kotest:kotest-assertions-core-jvm", 
 kotlinx-coroutines-core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"
 kotest-junit5-jvm = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
-sttp = "com.softwaremill.sttp.client3:core_3:3.9.3"
+sttp = { module = "com.softwaremill.sttp.client3:core_3", version.ref = "sttp" }
+sttp-upickle = { module = "com.softwaremill.sttp.client3:upickle_3", version.ref = "sttp" }
 
 [bundles]
 kotlin-testing = [ "kotest-junit5-jvm", "kotest-assertions-core-jvm", "mockito-core" ]

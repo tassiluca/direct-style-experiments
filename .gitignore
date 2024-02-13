@@ -212,3 +212,5 @@ gradle-app.setting
 ### Project specific stuff ###
 # Gears jar in libs folder
 !libs/gears*.jar
+# Environment specific files
+.env
