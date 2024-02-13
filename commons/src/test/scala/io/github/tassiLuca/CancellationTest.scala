@@ -124,4 +124,26 @@ class CancellationTest extends AnyFunSpec with Matchers {
 //        tr.cancel()
 //      println(f.awaitResult)
 //  }
+
+//  object TestCancellation3:
+//
+//    class Producer3(using Async):
+//      val channel = UnboundedChannel[Int]()
+//
+//      def run(): Future[Unit] = Task {
+//        channel.send(Random.nextInt())
+//      }.schedule(Every(1_000)).run
+//
+//      def cancel(): Unit = Async.current.group.cancel()
+//
+//    @main def testCancellation(): Unit =
+//      Async.blocking:
+//        val p = Producer3()
+//        val f1 = p.run()
+//        val f2 = Task {
+//          println(s"${p.channel.read()}!")
+//        }.schedule(Every(1_000)).run
+//        Thread.sleep(10_000)
+//        p.cancel()
+//        p.run().awaitResult
 }
