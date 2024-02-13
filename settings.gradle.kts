@@ -19,5 +19,5 @@ include(
     ":rears-core",
     ":smart-home",
     ":back-and-forth",
-    ":analyser",
+    ":analyzer",
 )
