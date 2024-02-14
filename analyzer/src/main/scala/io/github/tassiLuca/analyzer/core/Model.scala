@@ -2,10 +2,6 @@ package io.github.tassiLuca.analyzer.core
 
 import upickle.default.ReadWriter
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Date
-
 case class Contribution(
     @upickle.implicits.key("login") user: String,
     contributions: Long,

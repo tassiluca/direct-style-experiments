@@ -43,14 +43,13 @@ trait PostsServiceComponent:
       override def create(authorId: AuthorId, title: Title, body: Body)(using Async): Either[String, Post] =
         if context.repository.exists(title)
         then Left(s"A post entitled $title already exists")
-        else
-          either:
-            val f = Future:
-              val content = verifyContent(title, body).run
-              val author = authorBy(authorId).run
-              content.zip(author).await
-            val (post, author): (Either[String, PostContent], Author) = f.awaitResult.?
-            context.repository.save(Post(author, post.?._1, post.?._2, Date()))
+        else either:
+          val f = Future:
+            val content = verifyContent(title, body).run
+            val author = authorBy(authorId).run
+            content.zip(author).await
+          val (post, author) = f.awaitResult.?
+          context.repository.save(Post(author, post.?._1, post.?._2, Date()))
 
       /* Pretending to make a call to the Authorship Service that keeps track of authorized authors. */
       private def authorBy(id: AuthorId): Task[Author] = Task:
