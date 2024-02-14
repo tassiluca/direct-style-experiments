@@ -27,10 +27,8 @@ trait ThermostatHubManager
   def run(source: ReadableChannel[TemperatureEntry])(using Async, AsyncOperations): Unit =
     thermostat.asRunnable.run
     sensorHealthChecker.asRunnable.run
-    Controller
-      .oneToMany(
-        source,
-        consumers = Set(thermostat, sensorHealthChecker),
-        transformation = r => r.bufferWithin(10.seconds),
-      )
-      .run
+    Controller.oneToMany(
+      source,
+      consumers = Set(thermostat, sensorHealthChecker),
+      transformation = r => r.bufferWithin(10.seconds),
+    ).run

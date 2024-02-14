@@ -8,8 +8,10 @@ import scala.util.{Failure, Success, Try}
 trait SensorHealthCheckerComponent[E <: SensorEvent]:
   context: AlertSystemComponent =>
 
+  /** The [[SensorHealthChecker]] instance. */
   val sensorHealthChecker: SensorHealthChecker
 
+  /** A generic consumer of [[SensorEvent]] that detects */
   trait SensorHealthChecker extends Consumer[Seq[E]] with State[Seq[E]]
 
   object SensorHealthChecker:
