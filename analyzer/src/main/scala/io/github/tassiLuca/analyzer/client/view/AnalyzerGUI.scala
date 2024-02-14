@@ -23,9 +23,8 @@ class AnalyzerGUI(controller: AppController) extends AnalyzerView:
     SwingUtilities.invokeLater(() => gui.endSession())
 
   private class MainFrame(controller: AppController) extends JFrame:
-
-    import ScalaSwingFacade.{*, given}
-
+    import io.github.tassiLuca.utils.ScalaSwingFacade.{given, *}
+    
     setTitle("GitHub Organization Analyzer")
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
     val inputField = JTextField(20)

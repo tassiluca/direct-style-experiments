@@ -1,6 +1,6 @@
 package io.github.tassiLuca.smarthome.application
 
-import gears.async.{Async, AsyncOperations, ReadableChannel, Task}
+import gears.async.{Async, AsyncOperations, ReadableChannel}
 import io.github.tassiLuca.rears.{Controller, bufferWithin}
 import io.github.tassiLuca.smarthome.core.{
   AlertSystemComponent,
