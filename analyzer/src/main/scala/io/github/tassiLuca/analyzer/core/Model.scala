@@ -2,6 +2,10 @@ package io.github.tassiLuca.analyzer.core
 
 import upickle.default.ReadWriter
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Date
+
 case class Contribution(
     @upickle.implicits.key("login") user: String,
     contributions: Long,
@@ -19,7 +23,8 @@ case class Repository(
 case class Release(
     @upickle.implicits.key("tag_name") tag: String,
     @upickle.implicits.key("published_at") date: String,
-) derives ReadWriter
+) derives ReadWriter:
+  override def toString: String = s"$tag @ $date"
 
 case class RepositoryReport(
     name: String,
