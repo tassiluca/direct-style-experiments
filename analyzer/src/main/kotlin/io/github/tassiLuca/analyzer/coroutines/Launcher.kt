@@ -1,6 +1,6 @@
-package io.github.tassiLuca.analyzer
+package io.github.tassiLuca.analyzer.coroutines
 
-import io.github.tassiLuca.analyzer.core.Analyzer
+import io.github.tassiLuca.analyzer.coroutines.core.Analyzer
 import kotlinx.coroutines.runBlocking
 
 /** The main entry point of the application. */

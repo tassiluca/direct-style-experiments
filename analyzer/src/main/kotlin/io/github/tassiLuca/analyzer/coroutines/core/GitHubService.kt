@@ -1,4 +1,4 @@
-package io.github.tassiLuca.analyzer.core
+package io.github.tassiLuca.analyzer.coroutines.core
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json

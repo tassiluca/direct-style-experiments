@@ -1,4 +1,4 @@
-package io.github.tassiLuca.analyzer.core
+package io.github.tassiLuca.analyzer.coroutines.core
 
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
