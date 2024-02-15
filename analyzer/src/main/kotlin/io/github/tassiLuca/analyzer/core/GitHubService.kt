@@ -15,7 +15,7 @@ interface GitHubService {
 
     /** @return the repositories of the organization with the given name. */
     @GET("orgs/{organizationName}/repos?per_page=100")
-    fun organizationRepositories(@Path("organizationName") organizationName: String): Call<Set<Repository>>
+    fun organizationRepositories(@Path("organizationName") organizationName: String): Call<List<Repository>>
 
     /** @return the contributors of the repository with given organization and name. */
     @GET("repos/{organizationName}/{repositoryName}/contributors?per_page=100")
@@ -35,6 +35,7 @@ interface GitHubService {
         /** Creates a new [GitHubService] instance. */
         fun create(): GitHubService {
             val authToken = System.getenv("GH_TOKEN")
+            require(authToken.isNotBlank())
             val httpClient = OkHttpClient.Builder()
                 .addInterceptor { chain ->
                     val request = chain.request().newBuilder()

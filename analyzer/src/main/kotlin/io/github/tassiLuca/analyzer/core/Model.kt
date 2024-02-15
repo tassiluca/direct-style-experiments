@@ -39,3 +39,17 @@ data class Release(
     /** The published date of the release. */
     @SerialName("published_at") val date: String,
 )
+
+/** A report for a GitHub repository. */
+data class RepositoryReport(
+    /** The name of the repository. */
+    val name: String,
+    /** The number of open issues. */
+    val issues: Int,
+    /** The number of stars. */
+    val stars: Int,
+    /** The number of contributions. */
+    val contributions: Set<Contribution>,
+    /** The last release. */
+    val lastRelease: Release?,
+)
