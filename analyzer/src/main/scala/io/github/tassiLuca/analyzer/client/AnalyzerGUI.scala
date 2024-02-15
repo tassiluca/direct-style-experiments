@@ -1,4 +1,4 @@
-package io.github.tassiLuca.analyzer.client.view
+package io.github.tassiLuca.analyzer.client
 
 import io.github.tassiLuca.analyzer.client.{AnalyzerView, AppController, OrganizationReport}
 
@@ -23,7 +23,7 @@ class AnalyzerGUI(controller: AppController) extends AnalyzerView:
     SwingUtilities.invokeLater(() => gui.endSession())
 
   private class MainFrame(controller: AppController) extends JFrame:
-    import io.github.tassiLuca.utils.ScalaSwingFacade.{given, *}
+    import io.github.tassiLuca.utils.ScalaSwingFacade.{*, given}
     
     setTitle("GitHub Organization Analyzer")
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
