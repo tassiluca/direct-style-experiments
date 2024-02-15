@@ -3,7 +3,7 @@ package io.github.tassiLuca.analyzer.core
 import gears.async.Async
 
 trait GitHubService:
-  def organizationsRepositories(organizationName: String)(using Async): Either[String, Set[Repository]]
+  def repositoriesOf(organizationName: String)(using Async): Either[String, Set[Repository]]
   def contributorsOf(organizationName: String, repositoryName: String)(using Async): Either[String, Set[Contribution]]
   def lastReleaseOf(organizationName: String, repositoryName: String)(using Async): Either[String, Release]
 
@@ -17,20 +17,22 @@ object GitHubService:
     private val client = SimpleHttpClient()
     private val request = basicRequest.auth.bearer(System.getenv("GH_TOKEN"))
 
-    override def organizationsRepositories(organizationName: String)(using Async): Either[String, Set[Repository]] =
-      val endpoint = uri"https://api.github.com/orgs/$organizationName/repos"
+    override def repositoriesOf(
+        organizationName: String,
+    )(using Async): Either[String, Set[Repository]] =
+      val endpoint = uri"https://api.github.com/orgs/$organizationName/repos?per_page=100"
       client.send(request.get(endpoint)).body.map(r => read[Seq[Repository]](r).toSet)
 
     override def contributorsOf(
         organizationName: String,
         repositoryName: String,
     )(using Async): Either[String, Set[Contribution]] =
-      val endpoint = uri"https://api.github.com/repos/$organizationName/$repositoryName/contributors"
+      val endpoint = uri"https://api.github.com/repos/$organizationName/$repositoryName/contributors?per_page=100"
       client.send(request.get(endpoint)).body.map(r => read[Seq[Contribution]](r).toSet)
 
     override def lastReleaseOf(
         organizationName: String,
         repositoryName: String,
     )(using Async): Either[String, Release] =
-      val endpoint = uri"https://api.github.com/repos/$organizationName/$repositoryName/releases/latest"
+      val endpoint = uri"https://api.github.com/repos/$organizationName/$repositoryName/releases/latest?per_page=100"
       client.send(request.get(endpoint)).body.map(r => read[Release](r))

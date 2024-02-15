@@ -1,5 +1,7 @@
 package io.github.tassiLuca.boundaries
 
+import gears.async.Channel
+
 import scala.util.{Failure, Success, Try, boundary}
 import scala.util.boundary.{Label, break}
 

@@ -1,30 +1,61 @@
-/*package io.github.tassiLuca.analyzer.core
+package io.github.tassiLuca.analyzer.core
 
 import gears.async.Async
 import gears.async.default.given
-import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class GitHubServiceTest extends AnyFlatSpec with Matchers {
+class GitHubServiceTest extends AnyFunSpec with Matchers {
 
   val gitHubService: GitHubService = GitHubService()
+  val organization = "lampepfl"
+  val repository = "gears"
+  val odersky = "odersky"
 
-  "organizationsRepositories" should "return all the repositories of a given organization" in {
-    Async.blocking:
-      val result = gitHubService.organizationsRepositories("unibo-disi-cesena")
-      println(result)
-  }
+  describe("GitHubService") {
+    describe("repositoriesOf") {
+      it("should return all the repositories of a given organization") {
+        Async.blocking:
+          val result = gitHubService.repositoriesOf(organization)
+          result.isRight shouldBe true
+          result.foreach { repos =>
+            repos.size should be > 0
+            repos.foreach(_.organization shouldBe organization)
+            repos.count(_.name == repository) shouldBe 1
+          }
+      }
 
-  "contributorsOf" should "return all the contributors of a given repository" in {
-    Async.blocking:
-      val result = gitHubService.contributorsOf("unibo-disi-cesena", "thesis-template")
-      println(result)
-  }
+      it("should return an error message if the organization does not exist") {
+        Async.blocking:
+          val result = gitHubService.repositoriesOf("non-existent-organization")
+          result.isLeft shouldBe true
+      }
+    }
 
-  "languagesOf" should "return all languages used in a given repository" in {
-    Async.blocking:
-      val result = gitHubService.languagesOf("unibo-disi-cesena", "thesis-template")
-      println(result)
+    describe("contributorsOf") {
+      it("should return all the contributors of a given repository") {
+        Async.blocking:
+          val result = gitHubService.contributorsOf(organization, repository)
+          result.isRight shouldBe true
+          result.foreach { contributors =>
+            contributors.size should (be > 0)
+            contributors.exists(_.user == odersky) shouldBe true
+          }
+      }
+    }
+
+    describe("lastReleaseOf") {
+      it("should return the last release of a repository if it exists") {
+        Async.blocking:
+          val result = gitHubService.lastReleaseOf(organization, repository)
+          result.isRight shouldBe true
+      }
+
+      it("should return a error message if it does not exist") {
+        Async.blocking:
+          val result = gitHubService.lastReleaseOf(organization, "dotty-website")
+          result.isLeft shouldBe true
+      }
+    }
   }
 }
- */
