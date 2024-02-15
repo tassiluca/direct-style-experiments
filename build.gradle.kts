@@ -28,7 +28,7 @@ allprojects {
             implementation(kotlin.stdlib)
             implementation(scala.stdlib)
             // Gears is a wip strawman library for async programming not available on Maven Central: it is
-            // included as git submodule in this project and added to dependencies with jars.
+            // included as git submodule in this project and added as dependency via jars.
             val gears = "gears_3-0.1.0-SNAPSHOT"
             implementation(
                 files(
@@ -39,6 +39,7 @@ allprojects {
                     ).map { projectRepository.resolve(it) },
                 ),
             )
+            implementation(kotlinx.coroutines.core)
             testRuntimeOnly(flexmark) // needed to make it works scalatest
             testImplementation(scalatest)
             testImplementation(bundles.kotlin.testing)

@@ -4,6 +4,8 @@ scala = "3.3.1"
 kotest = "5.8.0"
 mockito = "5.10.0"
 sttp = "3.9.3"
+retrofit = "2.9.0"
+coroutines = "1.7.3"
 
 [libraries]
 scala-stdlib = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
@@ -11,7 +13,13 @@ scalatest = "org.scalatest:scalatest_3:3.2.17"
 flexmark = "com.vladsch.flexmark:flexmark-all:0.64.8"
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotest-assertions-core-jvm = { module = "io.kotest:kotest-assertions-core-jvm", version.ref = "kotest" }
-kotlinx-coroutines-core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref="coroutines" }
+okttp = "com.squareup.okhttp3:okhttp:4.12.0"
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+retrofit-mock = { module = "com.squareup.retrofit2:retrofit-mock", version.ref = "retrofit" }
+retrofit-adapter-rxjava = { module = "com.squareup.retrofit2:adapter-rxjava", version.ref = "retrofit" }
+retrofit-serialization-converter = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0"
+kotlinx-serialization-json = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2"
 kotest-junit5-jvm = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 sttp = { module = "com.softwaremill.sttp.client3:core_3", version.ref = "sttp" }
