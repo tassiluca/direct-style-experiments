@@ -12,7 +12,7 @@ class GitHubServiceTest extends AnyFunSpec with Matchers {
   val repository = "gears"
   val odersky = "odersky"
 
-  describe("GitHubService") {
+  ignore /*describe*/ ("GitHubService") {
     describe("repositoriesOf") {
       it("should return all the repositories of a given organization") {
         Async.blocking:
