@@ -1,6 +1,8 @@
-package io.github.tassiLuca.analyzer.core
+package io.github.tassiLuca.analyzer.lib
 
 import cats.data.EitherT
+import io.github.tassiLuca.analyzer.commons.lib
+import io.github.tassiLuca.analyzer.commons.lib.{Repository, RepositoryReport}
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 
@@ -46,13 +48,13 @@ object Analyzer:
         for
           contributions <- contributionsTask
           lastRelease <- releaseTask
-        yield RepositoryReport(r.name, r.issues, r.stars, contributions.getOrElse(Seq.empty), lastRelease.toOption)
+        yield lib.RepositoryReport(r.name, r.issues, r.stars, contributions.getOrElse(Seq.empty), lastRelease.toOption)
 
       private def idiomaticAnalysis(using ExecutionContext): Future[RepositoryReport] =
         import cats.implicits.catsSyntaxTuple2Semigroupal
         (gitHubService.contributorsOf(r.organization, r.name), gitHubService.lastReleaseOf(r.organization, r.name))
           .mapN { case (contributions, lastRelease) =>
-            RepositoryReport(r.name, r.issues, r.stars, contributions.getOrElse(Seq.empty), lastRelease.toOption)
+            lib.RepositoryReport(r.name, r.issues, r.stars, contributions.getOrElse(Seq.empty), lastRelease.toOption)
           }
 
 @main def testAnalyzer(): Unit =

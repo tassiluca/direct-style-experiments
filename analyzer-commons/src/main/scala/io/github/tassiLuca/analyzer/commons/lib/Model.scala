@@ -1,4 +1,4 @@
-package io.github.tassiLuca.analyzer.core
+package io.github.tassiLuca.analyzer.commons.lib
 
 import upickle.default.ReadWriter
 
@@ -26,6 +26,6 @@ case class RepositoryReport(
     name: String,
     issues: Int,
     stars: Int,
-    contributions: Set[Contribution],
+    contributions: Seq[Contribution],
     lastRelease: Option[Release],
 )

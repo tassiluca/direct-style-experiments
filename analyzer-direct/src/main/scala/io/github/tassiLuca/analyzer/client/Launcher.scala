@@ -5,5 +5,5 @@ import gears.async.Async
 
 @main def directAnalyzerLauncher(): Unit =
   Async.blocking:
-    AppController()
+    AppController.direct
     Thread.sleep(Long.MaxValue)

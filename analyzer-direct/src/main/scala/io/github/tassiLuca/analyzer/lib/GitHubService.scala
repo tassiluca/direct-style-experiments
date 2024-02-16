@@ -1,11 +1,11 @@
-package io.github.tassiLuca.analyzer.core.direct
+package io.github.tassiLuca.analyzer.lib
 
 import gears.async.Async
-import io.github.tassiLuca.analyzer.core.{Contribution, Release, Repository}
+import io.github.tassiLuca.analyzer.commons.lib.{Contribution, Release, Repository}
 
 trait GitHubService:
-  def repositoriesOf(organizationName: String)(using Async): Either[String, Set[Repository]]
-  def contributorsOf(organizationName: String, repositoryName: String)(using Async): Either[String, Set[Contribution]]
+  def repositoriesOf(organizationName: String)(using Async): Either[String, Seq[Repository]]
+  def contributorsOf(organizationName: String, repositoryName: String)(using Async): Either[String, Seq[Contribution]]
   def lastReleaseOf(organizationName: String, repositoryName: String)(using Async): Either[String, Release]
 
 object GitHubService:
@@ -19,16 +19,16 @@ object GitHubService:
 
     override def repositoriesOf(
         organizationName: String,
-    )(using Async): Either[String, Set[Repository]] =
+    )(using Async): Either[String, Seq[Repository]] =
       val endpoint = uri"https://api.github.com/orgs/$organizationName/repos?per_page=100"
-      SimpleHttpClient().send(request.get(endpoint)).body.map(r => read[Seq[Repository]](r).toSet)
+      SimpleHttpClient().send(request.get(endpoint)).body.map(r => read[Seq[Repository]](r))
 
     override def contributorsOf(
         organizationName: String,
         repositoryName: String,
-    )(using Async): Either[String, Set[Contribution]] =
+    )(using Async): Either[String, Seq[Contribution]] =
       val endpoint = uri"https://api.github.com/repos/$organizationName/$repositoryName/contributors?per_page=100"
-      SimpleHttpClient().send(request.get(endpoint)).body.map(r => read[Seq[Contribution]](r).toSet)
+      SimpleHttpClient().send(request.get(endpoint)).body.map(r => read[Seq[Contribution]](r))
 
     override def lastReleaseOf(
         organizationName: String,

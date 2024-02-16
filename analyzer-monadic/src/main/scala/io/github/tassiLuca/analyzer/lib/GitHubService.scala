@@ -1,5 +1,6 @@
-package io.github.tassiLuca.analyzer.core
+package io.github.tassiLuca.analyzer.lib
 
+import io.github.tassiLuca.analyzer.commons.lib.{Contribution, Release, Repository}
 import sttp.client3.HttpClientFutureBackend
 import sttp.model.Uri
 

@@ -2,7 +2,7 @@ package io.github.tassiLuca.analyzer.core
 
 import gears.async.Async
 import gears.async.default.given
-import io.github.tassiLuca.analyzer.core.direct.GitHubService
+import io.github.tassiLuca.analyzer.lib.GitHubService
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 

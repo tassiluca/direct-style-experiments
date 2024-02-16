@@ -1,6 +1,6 @@
 package io.github.tassiLuca.analyzer.core
 
-import io.github.tassiLuca.analyzer.core.direct.Analyzer
+import io.github.tassiLuca.analyzer.lib.Analyzer
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

@@ -15,3 +15,7 @@ dependencies {
     testImplementation(libs.retrofit.mock)
     api(project(":analyzer-commons"))
 }
+
+tasks.jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

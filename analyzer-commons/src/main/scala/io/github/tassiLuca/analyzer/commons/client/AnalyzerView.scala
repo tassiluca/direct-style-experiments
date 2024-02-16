@@ -1,4 +1,4 @@
-package io.github.tassiLuca.analyzer.client
+package io.github.tassiLuca.analyzer.commons.client
 
 trait AnalyzerView:
   def run(): Unit

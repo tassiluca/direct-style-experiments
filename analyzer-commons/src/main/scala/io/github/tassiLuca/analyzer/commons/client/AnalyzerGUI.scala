@@ -1,9 +1,17 @@
-package io.github.tassiLuca.analyzer.client
-
-import io.github.tassiLuca.analyzer.client.{AnalyzerView, AppController, OrganizationReport}
+package io.github.tassiLuca.analyzer.commons.client
 
 import java.awt.BorderLayout
-import javax.swing.*
+import javax.swing.{
+  JFrame,
+  WindowConstants,
+  JTextField,
+  JButton,
+  JLabel,
+  JScrollPane,
+  JTable,
+  JOptionPane,
+  SwingUtilities,
+}
 import javax.swing.table.DefaultTableModel
 
 class AnalyzerGUI(controller: AppController) extends AnalyzerView:
@@ -24,20 +32,20 @@ class AnalyzerGUI(controller: AppController) extends AnalyzerView:
 
   private class MainFrame(controller: AppController) extends JFrame:
     import io.github.tassiLuca.utils.ScalaSwingFacade.{*, given}
-    
+
     setTitle("GitHub Organization Analyzer")
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
-    val inputField = JTextField(20)
-    val runButton = JButton("GO!")
-    val cancelButton = JButton("Cancel")
-    val contributionsCols = Array[AnyRef]("Login", "Contributions")
-    val contributionsModel = DefaultTableModel(contributionsCols, 0)
-    val contributionsTable = JTable(contributionsModel)
-    val repoDetailsCols = Array[AnyRef]("Name", "Issues", "Stars", "Last release")
-    val repoDetailsModel = DefaultTableModel(repoDetailsCols, 0)
-    val repoDetailsTable = JTable(repoDetailsModel)
-    val stateText = JLabel()
-    val mainPanel = createPanel(
+    private val inputField = JTextField(20)
+    private val runButton = JButton("GO!")
+    private val cancelButton = JButton("Cancel")
+    private val contributionsCols = Array[AnyRef]("Login", "Contributions")
+    private val contributionsModel = DefaultTableModel(contributionsCols, 0)
+    private val contributionsTable = JTable(contributionsModel)
+    private val repoDetailsCols = Array[AnyRef]("Name", "Issues", "Stars", "Last release")
+    private val repoDetailsModel = DefaultTableModel(repoDetailsCols, 0)
+    private val repoDetailsTable = JTable(repoDetailsModel)
+    private val stateText = JLabel()
+    private val mainPanel = createPanel(
       (createPanel(JLabel("Organization"), inputField, runButton, cancelButton), BorderLayout.NORTH),
       (createPanel(JScrollPane(contributionsTable), JScrollPane(repoDetailsTable)), BorderLayout.CENTER),
       (createPanel(stateText), BorderLayout.SOUTH),
