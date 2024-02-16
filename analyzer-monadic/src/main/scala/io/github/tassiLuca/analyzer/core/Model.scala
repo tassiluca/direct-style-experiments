@@ -1,4 +1,4 @@
-package io.github.tassiLuca.analyzer.monadic.core
+package io.github.tassiLuca.analyzer.core
 
 import upickle.default.ReadWriter
 

@@ -1,4 +1,4 @@
-package io.github.tassiLuca.analyzer.monadic.core
+package io.github.tassiLuca.analyzer.core
 
 import sttp.client3.HttpClientFutureBackend
 import sttp.model.Uri
