@@ -9,6 +9,9 @@ coroutines = "1.7.3"
 
 [libraries]
 scala-stdlib = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
+sttp = { module = "com.softwaremill.sttp.client3:core_3", version.ref = "sttp" }
+sttp-upickle = { module = "com.softwaremill.sttp.client3:upickle_3", version.ref = "sttp" }
+cats-core = "org.typelevel:cats-core_3:2.10.0"
 scalatest = "org.scalatest:scalatest_3:3.2.17"
 flexmark = "com.vladsch.flexmark:flexmark-all:0.64.8"
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
@@ -22,8 +25,6 @@ retrofit-serialization-converter = "com.jakewharton.retrofit:retrofit2-kotlinx-s
 kotlinx-serialization-json = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2"
 kotest-junit5-jvm = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
-sttp = { module = "com.softwaremill.sttp.client3:core_3", version.ref = "sttp" }
-sttp-upickle = { module = "com.softwaremill.sttp.client3:upickle_3", version.ref = "sttp" }
 
 [bundles]
 kotlin-testing = [ "kotest-junit5-jvm", "kotest-assertions-core-jvm", "mockito-core" ]
