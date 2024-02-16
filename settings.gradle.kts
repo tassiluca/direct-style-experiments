@@ -19,6 +19,7 @@ include(
     ":rears-core",
     ":smart-home",
     ":back-and-forth",
-    ":analyzer-direct",
+    ":analyzer-commons",
     ":analyzer-monadic",
+    ":analyzer-direct",
 )

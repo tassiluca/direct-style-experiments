@@ -13,5 +13,5 @@ dependencies {
     implementation(libs.retrofit.serialization.converter)
     implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.retrofit.mock)
-    api(project(":commons"))
+    api(project(":analyzer-commons"))
 }
