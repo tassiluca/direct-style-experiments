@@ -1,6 +1,7 @@
-package io.github.tassiLuca.analyzer.core
+package io.github.tassiLuca.analyzer.core.direct
 
 import gears.async.Async
+import io.github.tassiLuca.analyzer.core.{Contribution, Release, Repository}
 
 trait GitHubService:
   def repositoriesOf(organizationName: String)(using Async): Either[String, Set[Repository]]

@@ -1,7 +1,8 @@
 package io.github.tassiLuca.analyzer.client
 
 import gears.async.{Async, Future}
-import io.github.tassiLuca.analyzer.core.{Analyzer, RepositoryReport}
+import io.github.tassiLuca.analyzer.core.RepositoryReport
+import io.github.tassiLuca.analyzer.core.direct.Analyzer
 
 type OrganizationReport = (Map[String, Long], Set[RepositoryReport])
 

@@ -1,10 +1,11 @@
-package io.github.tassiLuca.analyzer.core
+package io.github.tassiLuca.analyzer.core.direct
 
-import gears.async.{Async, Future}
 import gears.async.Future.Collector
+import gears.async.{Async, Future}
+import io.github.tassiLuca.analyzer.core.{Repository, RepositoryReport}
+import io.github.tassiLuca.boundaries.EitherConversions.given
 import io.github.tassiLuca.boundaries.either
 import io.github.tassiLuca.boundaries.either.?
-import io.github.tassiLuca.boundaries.EitherConversions.given
 import io.github.tassiLuca.utils.ChannelClosedConverter.tryable
 
 trait Analyzer:
