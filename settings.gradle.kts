@@ -20,4 +20,5 @@ include(
     ":smart-home",
     ":back-and-forth",
     ":analyzer",
+    ":analyzer-monadic",
 )
