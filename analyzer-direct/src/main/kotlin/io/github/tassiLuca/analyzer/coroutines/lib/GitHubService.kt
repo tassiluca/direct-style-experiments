@@ -6,7 +6,6 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Retrofit
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
 
@@ -35,7 +34,6 @@ interface GitHubService {
         /** Creates a new [GitHubService] instance. */
         fun create(): GitHubService {
             val authToken = System.getenv("GH_TOKEN")
-            require(authToken.isNotBlank())
             val httpClient = OkHttpClient.Builder()
                 .addInterceptor { chain ->
                     val request = chain.request().newBuilder()
@@ -49,7 +47,6 @@ interface GitHubService {
             val retrofit = Retrofit.Builder()
                 .baseUrl("https://api.github.com")
                 .addConverterFactory(Json { ignoreUnknownKeys = true }.asConverterFactory(contentType))
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .client(httpClient)
                 .build()
             return retrofit.create(GitHubService::class.java)
