@@ -20,7 +20,7 @@ class GitHubServiceTest extends AnyFunSpec with Matchers {
           val result = gitHubService.repositoriesOf(organization)
           result.isRight shouldBe true
           result.foreach { repos =>
-            repos.size should be > 0
+            repos.size should be > 30
             repos.foreach(_.organization shouldBe organization)
             repos.count(_.name == repository) shouldBe 1
           }
@@ -29,6 +29,12 @@ class GitHubServiceTest extends AnyFunSpec with Matchers {
       it("should return an error message if the organization does not exist") {
         Async.blocking:
           val result = gitHubService.repositoriesOf("non-existent-organization")
+          result.isLeft shouldBe true
+      }
+
+      it("should return a error message if the organization doesn't exist") {
+        Async.blocking:
+          val result = gitHubService.repositoriesOf("4315950311")
           result.isLeft shouldBe true
       }
     }
