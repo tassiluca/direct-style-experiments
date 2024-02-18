@@ -11,6 +11,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit.serialization.converter)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.coroutines.swing)
     testImplementation(libs.retrofit.mock)
     api(project(":analyzer-commons"))
 }
@@ -35,13 +36,15 @@ tasks.create<JavaExec>("runKotlin") {
     group = "Application"
     description = "Runs the Kotlin client application based on direct style, i.e. coroutines."
     loadProjectEnvironmentVariables().forEach(environment::put)
-    mainClass.set("io.github.tassiLuca.analyzer.coroutines.LauncherKt")
+    mainClass.set("io.github.tassiLuca.analyzerkt.client.LauncherKt")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
 fun loadProjectEnvironmentVariables(): Map<String, String> =
     file(rootDir.path).resolveAll("analyzer-commons", ".env").loadEnvironmentVariables().also {
-        require(it.contains("GH_TOKEN")) { "A file '.env' with `GH_TOKEN` entry is required in `analyzer-commons`." }
+        require(it.contains("GH_TOKEN") || System.getenv().containsKey("GH_TOKEN")) {
+            "`GH_TOKEN` environment variable is required."
+        }
     }
 
 fun File.resolveAll(vararg paths: String): File = paths.fold(this) { f, s -> f.resolve(s) }

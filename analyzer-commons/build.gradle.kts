@@ -3,3 +3,7 @@ dependencies {
     implementation(libs.sttp.upickle)
     api(project(":commons"))
 }
+
+tasks.jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

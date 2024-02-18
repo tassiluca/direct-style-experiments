@@ -1,4 +1,4 @@
-package io.github.tassiLuca.analyzer.coroutines.lib
+package io.github.tassiLuca.analyzerkt.lib
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -28,7 +28,7 @@ data class Contribution(
     /** The login name of the contributor. */
     @SerialName("login") val user: String,
     /** The number of contributions. */
-    val contributions: Int,
+    val contributions: Long,
 )
 
 /** A GitHub release. */
@@ -49,7 +49,7 @@ data class RepositoryReport(
     /** The number of stars. */
     val stars: Int,
     /** The number of contributions. */
-    val contributions: Set<Contribution>,
+    val contributions: List<Contribution>,
     /** The last release. */
     val lastRelease: Release?,
 )

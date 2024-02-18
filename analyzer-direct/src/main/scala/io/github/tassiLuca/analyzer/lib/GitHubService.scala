@@ -24,13 +24,13 @@ object GitHubService:
     override def repositoriesOf(
         organizationName: String,
     )(using Async): Either[String, Seq[Repository]] =
-      performRequest[Repository](uri"$baseUrl/orgs/$organizationName/repos")
+      paginatedRequest[Repository](uri"$baseUrl/orgs/$organizationName/repos")
 
     override def contributorsOf(
         organizationName: String,
         repositoryName: String,
     )(using Async): Either[String, Seq[Contribution]] =
-      performRequest[Contribution](uri"$baseUrl/repos/$organizationName/$repositoryName/contributors")
+      paginatedRequest[Contribution](uri"$baseUrl/repos/$organizationName/$repositoryName/contributors")
 
     override def lastReleaseOf(
         organizationName: String,
@@ -38,7 +38,10 @@ object GitHubService:
     )(using Async): Either[String, Release] =
       plainRequest[Release](uri"$baseUrl/repos/$organizationName/$repositoryName/releases/latest")
 
-    private def performRequest[T](endpoint: Uri)(using Reader[T]): Either[String, Seq[T]] =
+    private def plainRequest[T](endpoint: Uri)(using Reader[T]): Either[String, T] =
+      doRequest(endpoint).body.map(read[T](_))
+
+    private def paginatedRequest[T](endpoint: Uri)(using Reader[T]): Either[String, Seq[T]] =
       @tailrec
       def withPagination(partialResponse: Either[String, Seq[T]])(next: Option[Uri]): Either[String, Seq[T]] =
         next match
@@ -48,9 +51,6 @@ object GitHubService:
             val next = nextPage(response)
             withPagination(partialResponse.flatMap(pr => response.body.map(pr ++ read[Seq[T]](_))))(next)
       withPagination(Right(Seq[T]()))(Some(endpoint))
-
-    private def plainRequest[T](endpoint: Uri)(using Reader[T]): Either[String, T] =
-      doRequest(endpoint).body.map(read[T](_))
 
     private def doRequest(endpoint: Uri): Response[Either[String, String]] =
       SimpleHttpClient().send(request.get(endpoint))
