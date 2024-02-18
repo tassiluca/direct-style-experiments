@@ -2,9 +2,6 @@ package io.github.tassiLuca.analyzer.lib
 
 import gears.async.Async
 import io.github.tassiLuca.analyzer.commons.lib.{Contribution, Release, Repository}
-import io.github.tassiLuca.boundaries.either
-import sttp.client3.Response
-import sttp.model.Uri
 
 import scala.annotation.tailrec
 
@@ -17,7 +14,8 @@ object GitHubService:
   def apply(): GitHubService = GitHubServiceImpl()
 
   private class GitHubServiceImpl extends GitHubService:
-    import sttp.client3.{SimpleHttpClient, UriContext, basicRequest}
+    import sttp.model.Uri
+    import sttp.client3.{SimpleHttpClient, UriContext, basicRequest, Response}
     import upickle.default.{read, Reader}
 
     private val baseUrl = "https://api.github.com"
@@ -61,6 +59,5 @@ object GitHubService:
       .headers("Link")
       .flatMap(_.split(","))
       .find(_.contains("rel=\"next\""))
-      .map(_.split(";").head)
-      .map(_.strip().stripPrefix("<").stripSuffix(">"))
+      .map(_.takeWhile(_ != ';').trim.stripPrefix("<").stripSuffix(">"))
       .flatMap(Uri.parse(_).toOption)
