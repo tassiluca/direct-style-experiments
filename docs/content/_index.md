@@ -15,5 +15,6 @@ Analyze aspects such as:
 
 1. [Boundary and break](./docs/01-boundaries)
 2. [Blog posts service example: a direct-style vs monadic comparison](./docs/02-blog-posts-ws)
-
-TBD
+3. [Channels](./docs/03-channels.md)
+4. [IoT example](./docs/04-rears.md)
+5. [Going further](./docs/05-going-further.md)
