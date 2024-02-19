@@ -7,6 +7,8 @@ enableGitInfo = true # to enable 'Last Modified by' date and git author informat
 [markup]
   [markup.highlight]
     style = 'catppuccin-latte'
+  [goldmark.renderer]
+    unsafe = true
 
 [module]
     [[module.imports]]

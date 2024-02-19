@@ -28,12 +28,12 @@ The example has been implemented using:
 The example (and every subsequent one) is organized in three gradle submodules:
 
 {{< mermaid class="optional" >}}
-flowchart TD
-    commons[blog-ws-commons]
-    monadic[blog-ws-monadic]
-    direct[blog-ws-direct]
-    direct --> commons
-    monadic --> commons
+flowchart
+  commons[blog-ws-commons]
+  monadic[blog-ws-monadic]
+  direct[blog-ws-direct]
+  direct --> commons
+  monadic --> commons
 {{< /mermaid >}}
 
 - `blog-ws-commons` contains code which has been reused for both the monadic and direct versions;
@@ -76,7 +76,7 @@ To implement the service two components have been conceived, following the Cake 
 
 Both must be designed in an async way.
 
-### 1st version: current Future monadic
+### Current monadic `Future`
 
 The interface of the repository and services component of the monadic version are presented hereafter and their complete implementation is available [here]().
 
@@ -168,9 +168,96 @@ This implementation shows the limits of the current monadic `Future` mechanism:
 - since the publication of a post can be performed only if both of these checks succeeds, it is desirable that, whenever one of the two fails, the other get cancelled.
 Unfortunately, currently, Scala Futures are not cancellable and provides no _structured concurrency_ mechanism.
 
+- moreover, they lack referential transparency, i.e. future starts running when they are defined. This mean that passing a reference to a future is not the same as passing the referenced expression.
+
 ### Direct style: Scala version with `gears`
 
+#### API
 
+The API of the gears library is presented hereafter and is built on top of four main abstractions, three of them are here presented (the fourth in next example):
+
+- **`Async`** context is **"a capability that allows a computation to suspend while waiting for the result of an async source"**. Code that has access to an instance of the `Async` trait is said to be in an async context and it is able to suspend its execution. Usually it is provided via `given` instances.
+- **`Async.Source`** modeling an asynchronous source of data that can be polled or awaited by suspending the computation, as well as composed using combinator functions.
+- **`Future`s** are the primary (in fact, the only) active elements that encapsulate a control flow that, eventually, will deliver a result (either a computed or a failure value that contains an exception). Since `Future`s are `Async.Source`s they can be awaited and combined with other `Future`s, suspending their execution.
+  - **`Task`s** are the abstraction created to create delayed `Future`s, responding to the lack of referential transparency problem. They takes the body of a `Future` as an argument; its `run` method converts that body to a `Future`, starting its execution.
+
+Going back to our example, the interface of both the repository and service components becomes:
+
+```scala
+/** The component exposing blog posts repositories. */
+trait PostsRepositoryComponent:
+  context: PostsModel =>
+
+  /** The repository instance. */
+  val repository: PostsRepository
+
+  /** The repository in charge of storing and retrieving blog posts. */
+  trait PostsRepository:
+    /** Save the given [[post]]. */
+    def save(post: Post)(using Async): Post
+
+    /** Return true if a post exists with the given title, false otherwise. */
+    def exists(postTitle: Title)(using Async): Boolean
+
+    /** Load the post with the given [[postTitle]]. */
+    def load(postTitle: Title)(using Async): Option[Post]
+
+    /** Load all the saved post. */
+    def loadAll()(using Async): LazyList[Post]
+```
+
+```scala
+/** The blog posts service component. */
+trait PostsServiceComponent:
+  context: PostsRepositoryComponent with PostsModel =>
+
+  /** The blog post service instance. */
+  val service: PostsService
+
+  /** The service exposing a set of functionalities to interact with blog posts. */
+  trait PostsService:
+    /** Creates a new blog post with the given [[title]] and [[body]], authored by [[authorId]], or a string explaining
+      * the reason of the failure.
+      */
+    def create(authorId: AuthorId, title: Title, body: Body)(using Async): Either[String, Post]
+
+    /** Get a post from its [[title]] or a string explaining the reason of the failure. */
+    def get(title: Title)(using Async): Either[String, Post]
+
+    /** Gets all the stored blog posts in a lazy manner or a string explaining the reason of the failure. */
+    def all()(using Async): Either[String, LazyList[Post]]
+```
+
+As you can see, `Future`s are gone and the return type it's just the result of their intent (expressed with `Either` to return a meaningful message in case of failure). The fact they are _suspendable_ is expressed by means of the `Async` context which is required to invoke those function.
+
+> Key inspiring principle (actually, "stolen" by Kotlin)
+>
+> ***&#10077;Concurrency is hard! Concurrency has to be explicit!&#10078;***
+
+By default the code is serial. If you want to opt-in concurrency you have to explicitly use a `Future` or `Task` that spawn a new virtual thread, that executes it asynchronously allowing the caller to continue its execution.
+
+The other important key feature of the proposed direct style is the support to **structured concurrency with cancellation**. This allow the nesting of future, meaning that the lifetime of nested computations is contained within the lifetime of enclosing ones, ensuring that...
+
+The implementation of the `create` function with direct style in gears looks like this:
+
+```scala
+override def create(authorId: AuthorId, title: Title, body: Body)(using Async): Either[String, Post] =
+  if context.repository.exists(title)
+  then Left(s"A post entitled $title already exists")
+  else either:
+    val f = Future:
+      val content = verifyContent(title, body).run // spawn of a new Future
+      val author = authorBy(authorId).run // spawn of a new Future
+      content.zip(author).await
+    val (post, author) = f.awaitResult.?
+    context.repository.save(Post(author, post.?._1, post.?._2, Date()))
+
+/* Pretending to make a call to the Authorship Service that keeps track of authorized authors. */
+private def authorBy(id: AuthorId): Task[Author] = ???
+
+/* Some local computation that verifies the content of the post is appropriate (e.g. not offensive, ...). */
+private def verifyContent(title: Title, body: Body): Task[Either[String, PostContent]] = ???
+```
 
 - description of APIs
   - Async `Source` and `Listeners`
