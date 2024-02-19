@@ -23,9 +23,10 @@ trait PostsModel:
   /** A post author and their info. */
   case class Author(authorId: AuthorId, name: String, surname: String)
 
-  /** A function that verifies the content of the post, returning [[Right]] with the content of the post if the
-    * verification succeeds or [[Left]] with the reason why failed.
+  /** A function that verifies the content of the post, returning [[Right]] with the content of
+    * the post if the verification succeeds or [[Left]] with the reason why failed.
     */
   type ContentVerifier = (Title, Body) => Either[String, PostContent]
 
+  /** A function that verifies the author has appropriate permissions, returning their information. */
   type AuthorsVerifier = AuthorId => Author

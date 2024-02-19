@@ -19,9 +19,7 @@ trait PostsRepositoryComponent:
     /** @return a [[Future]] completed with true if a post exists with the given title, false otherwise. */
     def exists(postTitle: Title)(using ExecutionContext): Future[Boolean]
 
-    /** @return
-      *   a [[Future]] completed with a full optional with the post with the given [[postTitle]] or an empty optional.
-      */
+    /** @return a [[Future]] completed either with a defined optional post with given [[postTitle]] or an empty one. */
     def load(postTitle: Title)(using ExecutionContext): Future[Option[Post]]
 
     /** Load the post with the given [[postTitle]]. */

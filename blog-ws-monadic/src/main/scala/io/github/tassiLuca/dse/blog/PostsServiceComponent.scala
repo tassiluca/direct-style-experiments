@@ -55,11 +55,10 @@ trait PostsServiceComponent:
         "PostsService".simulatesBlocking(s"getting author $id info...", maxDuration = 1_000)
         authorsVerifier(id)
 
-      /* Some local computation that verifies the content of the post is appropriate (e.g. not offensive, ...). */
-      private def verifyContent(title: Title, body: Body)(using ExecutionContext): Future[PostContent] =
-        Future:
-          "PostsService".simulatesBlocking(s"verifying content of the post '$title'", minDuration = 1_000)
-          contentVerifier(title, body) match { case Left(e) => throw RuntimeException(e); case Right(v) => v }
+      /* Some local computation that verifies the content of the post is appropriate. */
+      private def verifyContent(title: Title, body: Body)(using ExecutionContext): Future[PostContent] = Future:
+        "PostsService".simulatesBlocking(s"verifying content of the post '$title'", minDuration = 1_000)
+        contentVerifier(title, body) match { case Left(e) => throw RuntimeException(e); case Right(v) => v }
 
       override def get(title: Title)(using ExecutionContext): Future[Post] =
         context.repository.load(title).map(_.get)

@@ -54,7 +54,7 @@ trait PostsServiceComponent:
         "PostsService".simulates(s"getting author $id info...", maxDuration = 1_000)
         authorsVerifier(id)
 
-      /* Some local computation that verifies the content of the post is appropriate (e.g. not offensive, ...). */
+      /* Some local computation that verifies the content of the post is appropriate. */
       private def verifyContent(title: Title, body: Body): Task[Either[String, PostContent]] = Task:
         "PostsService".simulates(s"verifying content of post '$title'", minDuration = 1_000)
         contentVerifier(title, body)
