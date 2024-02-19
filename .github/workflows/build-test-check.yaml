@@ -10,6 +10,7 @@ on:
       - 'LICENSE'
       - 'README.md'
       - 'renovate.json'
+      - 'docs/**'
   pull_request:
   workflow_dispatch:
 
@@ -38,8 +39,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Check
         run: ./gradlew check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build
         run: ./gradlew classes testClasses
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   success:
     needs: build

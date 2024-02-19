@@ -20,7 +20,6 @@ include(
     ":blog-ws-monadic",
     ":rears-core",
     ":smart-home",
-    ":back-and-forth",
     ":analyzer-commons",
     ":analyzer-monadic",
     ":analyzer-direct",

@@ -11,7 +11,7 @@ Analyze aspects such as:
 > - how and when to use one approach rather than the other 
 > - any limitations and difficulties encountered in using them
 
-## Roadmap
+## Table of contents
 
 1. [Boundary and break](./docs/01-boundaries)
 2. [Blog posts service example: a direct-style vs monadic comparison](./docs/02-blog-posts-ws)
