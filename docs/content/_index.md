@@ -14,6 +14,6 @@ Analyze aspects such as:
 ## Roadmap
 
 1. [Boundary and break](./docs/01-boundaries)
-2. [Blog posts service example: a direct-style vs monadic comparison](./docs/02-blog-posts-service)
+2. [Blog posts service example: a direct-style vs monadic comparison](./docs/02-blog-posts-ws)
 
 TBD
