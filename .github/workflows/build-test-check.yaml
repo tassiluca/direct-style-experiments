@@ -32,12 +32,14 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: ${{ matrix.jvm_version }}
-      - name: Build
-        run: ./gradlew classes testClasses
       - name: Test
         run: ./gradlew test
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Check
         run: ./gradlew check
+      - name: Build
+        run: ./gradlew classes testClasses
 
   success:
     needs: build
