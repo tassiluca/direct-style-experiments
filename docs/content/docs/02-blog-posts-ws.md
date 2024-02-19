@@ -380,7 +380,10 @@ Other combinator methods, available on `Future`s instance:
 
 TO FINISH
 
+kotlin coroutines
 
 w.r.t. kotlin coroutines:
 
 - "Finally, about function coloring: Capabilities are actually much better here than other language's proposals such as suspend or async which feel clunky in comparison. This becomes obvious when you consider higher order functions. Capabilities let us define a single map (with no change in signature compared to now!) that works for sync as well as async function arguments. That's the real breakthrough here, which will make everything work so much smoother. I have talked about this elsewhere and this response is already very long, so I will leave it at that."
+
+how suspension is implemented

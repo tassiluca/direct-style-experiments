@@ -1,8 +1,23 @@
 package io.github.tassiLuca.smarthome.coroutines.core
 
+import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration
+
 /** A thermostat. */
-class Thermostat : SensorSourceConsumer<TemperatureEntry> {
+class Thermostat(
+    override val period: Duration,
+    override val coroutineContext: CoroutineContext,
+) : ScheduledConsumer<TemperatureEntry, List<TemperatureEntry>> {
+
+    @get:Synchronized @set:Synchronized
+    override var state: List<TemperatureEntry> = emptyList()
+
     override suspend fun react(e: TemperatureEntry) {
-        TODO("Not yet implemented")
+        println("Thermostat reacts to temperature ${e.temperature} from ${e.sourceUnit}")
+        state = state + e
+    }
+
+    override suspend fun update() {
+        println("Thermostat updates its state: $state")
     }
 }

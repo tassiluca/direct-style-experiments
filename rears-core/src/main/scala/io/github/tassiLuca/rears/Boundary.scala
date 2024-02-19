@@ -21,10 +21,10 @@ trait State[E]:
   consumer: Consumer[E] =>
 
   private var _state: Option[E] = None
-  def state: Option[E] = _state
+  def state: Option[E] = synchronized(_state)
   override def asRunnable: Task[Unit] = Task {
     listeningChannel.asInstanceOf[Channel[Try[E]]].read().foreach { e =>
       react(e)
-      _state = e.toOption
+      synchronized { _state = e.toOption }
     }
   }.schedule(RepeatUntilFailure())

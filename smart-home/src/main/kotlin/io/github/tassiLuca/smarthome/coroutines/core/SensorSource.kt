@@ -2,12 +2,6 @@ package io.github.tassiLuca.smarthome.coroutines.core
 
 import kotlinx.coroutines.flow.SharedFlow
 
-/** A consumer of sensor events. */
-interface SensorSourceConsumer<in E : SensorEvent> {
-    /** Reacts to a sensor event. */
-    suspend fun react(e: E)
-}
-
 /** A source of sensor events. */
 interface SensorSource<out E : SensorEvent> {
     /** The flow of sensor events. */

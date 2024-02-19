@@ -15,7 +15,9 @@ gitHooks {
 rootProject.name = "direct-style-experiments"
 include(
     ":commons",
-    ":blog-core-ws",
+    ":blog-ws-commons",
+    ":blog-ws-direct",
+    ":blog-ws-monadic",
     ":rears-core",
     ":smart-home",
     ":back-and-forth",
