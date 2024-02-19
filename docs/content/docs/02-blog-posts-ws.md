@@ -181,6 +181,88 @@ The API of the gears library is presented hereafter and is built on top of four 
 - **`Future`s** are the primary (in fact, the only) active elements that encapsulate a control flow that, eventually, will deliver a result (either a computed or a failure value that contains an exception). Since `Future`s are `Async.Source`s they can be awaited and combined with other `Future`s, suspending their execution.
   - **`Task`s** are the abstraction created to create delayed `Future`s, responding to the lack of referential transparency problem. They takes the body of a `Future` as an argument; its `run` method converts that body to a `Future`, starting its execution.
 
+{{< mermaid >}}
+classDiagram
+  class Cancellable {
+    &#60;&#60;trait&#62;&#62;
+    +group: CompletionGroup
+    +cancel()
+    +link(group: CompletionGroup)
+    +unlink()
+  }
+
+  class Tracking {
+    &#60;&#60;trait&#62;&#62;
+    +isCancelled Boolean
+  }
+  Cancellable <|-- Tracking
+
+  class CompletionGroup {
+    +add(member: Cancellable)
+    +drop(member: Cancellable)
+  }
+  Tracking <|-- CompletionGroup 
+
+  class Async {
+    &#60;&#60;trait&#62;&#62;
+    +group: CompletionGroup
+    +await[T](src: Async.Source[T]) T
+    +withGroup(group: CompletionGroup) Async
+    +current() Async$
+    +blocking[T](body: Async ?=> T) T$
+    +group[T](body: Async ?=> T) T$
+  }
+  Async *--> CompletionGroup
+
+  class `Async.Source[+T]` {
+    &#60;&#60;trait&#62;&#62;
+    +poll(k: Listener[T]) Boolean
+    +poll() Option[T]
+    +onComplete(k: Listener[T])
+    +dropListener(k: Listener[T])
+    +awaitResult() T
+  }
+
+  Async *--> `Async.Source[+T]`
+
+  class `Listener[-T]` {
+    &#60;&#60;trait&#62;&#62;
+    +lock: Listener.ListenerLock | Null
+    +complete(data: T, source: Async.Source[T])
+    +completeNow(data: T, source: Async.Source[T]) Boolean
+    +apply[T](consumer: (T, Source[T]) => Unit) Listener[T]$
+  }
+
+  `Async.Source[+T]` *--> `Listener[-T]`
+
+  class OriginalSource {
+    &#60;&#60;abstract class&#62;&#62;
+  }
+  `Async.Source[+T]` <|-- OriginalSource
+
+  class `Future[+T]` {
+    &#60;&#60;trait&#62;&#62;
+    +apply[T](body: Async ?=> T) Future[T]$
+    +now[T](result: Try[T]) Future[T]
+    +zip[U](f2: Future[U]) Future[T, U]
+    +alt(f2: Future[T]) Future[T]
+    +altWithCancel(f2: Future[T]) Future[T]
+  }
+  class `Promise[+T]` {
+    &#60;&#60;trait&#62;&#62;
+    +asFuture Future[T]
+    +complete(result: Try[T]) Unit
+  }
+  OriginalSource <|-- `Future[+T]`
+  `Future[+T]` <|-- `Promise[+T]`
+
+  class `Task[+T]` {
+    +apply(body: (Async, AsyncOperations) ?=> T) Task[T]$
+    +run: Future[+T]
+  }
+  `Task[+T]` *--> `Future[+T]`
+{{< /mermaid >}}
+
 Going back to our example, the interface of both the repository and service components becomes:
 
 ```scala
