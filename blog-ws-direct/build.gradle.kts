@@ -1,3 +1,4 @@
 dependencies {
-    api(project(":blog-ws-commons"))
+    implementation(project(":blog-ws-commons"))
+    testImplementation(project(":blog-ws-commons"))
 }

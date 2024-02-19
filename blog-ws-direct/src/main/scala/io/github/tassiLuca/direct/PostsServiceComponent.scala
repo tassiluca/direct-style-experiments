@@ -18,8 +18,8 @@ trait PostsServiceComponent:
 
   /** The service exposing a set of functionalities to interact with blog posts. */
   trait PostsService:
-    /** Creates a new blog post with the given [[title]] and [[body]], authored by [[authorId]], or a string explaining
-      * the reason of the failure.
+    /** Creates a new blog post with the given [[title]] and [[body]], authored by [[authorId]],
+      * or a string explaining the reason of the failure.
       */
     def create(authorId: AuthorId, title: Title, body: Body)(using Async): Either[String, Post]
 
