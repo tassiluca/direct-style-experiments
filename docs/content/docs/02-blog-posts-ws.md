@@ -175,7 +175,7 @@ The API of the gears library is presented hereafter and is built on top of four 
 {{< mermaid >}}
 classDiagram
   class Async {
-    &#60;&#60;trait&#62;&#62;
+    << trait >>
     +group: CompletionGroup
     +withGroup(group: CompletionGroup) Async
     +await[T](src: Async.Source[T]) T
@@ -185,7 +185,7 @@ classDiagram
   }
 
   class `Async.Source[+T]` {
-    &#60;&#60;trait&#62;&#62;
+    << trait >>
     +poll(k: Listener[T]) Boolean
     +poll() Option[T]
     +onComplete(k: Listener[T])
@@ -196,12 +196,12 @@ classDiagram
   Async *--> `Async.Source[+T]`
 
   class OriginalSource {
-    &#60;&#60;abstract class&#62;&#62;
+    << abstract class >>
   }
   `Async.Source[+T]` <|-- OriginalSource
 
   class `Listener[-T]` {
-    &#60;&#60;trait&#62;&#62;
+    << trait >>
     +lock: Listener.ListenerLock | Null
     +complete(data: T, source: Async.Source[T])
     +completeNow(data: T, source: Async.Source[T]) Boolean
@@ -211,7 +211,7 @@ classDiagram
   `Async.Source[+T]` *--> `Listener[-T]`
 
   class `Future[+T]` {
-    &#60;&#60;trait&#62;&#62;
+    << trait >>
     +apply[T](body: Async ?=> T) Future[T]$
     +now[T](result: Try[T]) Future[T]
     +zip[U](f2: Future[U]) Future[T, U]
@@ -219,7 +219,7 @@ classDiagram
     +altWithCancel(f2: Future[T]) Future[T]
   }
   class `Promise[+T]` {
-    &#60;&#60;trait&#62;&#62;
+    << trait >>
     +asFuture Future[T]
     +complete(result: Try[T])
   }
@@ -233,7 +233,7 @@ classDiagram
   `Future[+T]` <--* `Task[+T]`
 
   class Cancellable {
-    &#60;&#60;trait&#62;&#62;
+    << trait >>
     +group: CompletionGroup
     +cancel()
     +link(group: CompletionGroup)
@@ -243,7 +243,7 @@ classDiagram
   Cancellable <|-- `Future[+T]`
 
   class Tracking {
-    &#60;&#60;trait&#62;&#62;
+    << trait >>
     +isCancelled Boolean
   }
   Cancellable <|-- Tracking
