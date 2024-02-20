@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="boundary / break # Source code
+Provides a cleaner alternative to non-local returns; boundary: is short for boundary.apply: with the indented code below it passed as the body block is a context function that is called within boundary.apply to return the block of code shown in the example
+Users don’t define Label instances themselves. Instead, this is done inside the implementation of boundary.apply to provide the capability of doing a non-local return.">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
+<meta property="og:description" content="boundary / break # Source code
+Provides a cleaner alternative to non-local returns; boundary: is short for boundary.apply: with the indented code below it passed as the body block is a context function that is called within boundary.apply to return the block of code shown in the example
+Users don’t define Label instances themselves. Instead, this is done inside the implementation of boundary.apply to provide the capability of doing a non-local return." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/01-boundaries/" /><meta property="article:section" content="docs" />
+
+<meta property="article:modified_time" content="2024-02-13T17:44:49+01:00" />
+
+<title>01 Boundaries | PPS-22-direct-style-experiments</title>
+<link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
+<link rel="icon" href="/PPS-22-direct-style-experiments/favicon.png" >
+<link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/01-boundaries/">
+<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.f8de3645fe00591b41524aee174e19edd98a22255a2930a0cdc82a94835ba387.css" integrity="sha256-&#43;N42Rf4AWRtBUkruF04Z7dmKIiVaKTCgzcgqlINbo4c=" crossorigin="anonymous">
+  <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.a9b74616ba761f7d5ea318daea061e33b549a5b71fab4c65c47cfcccbb9b5b4a.js" integrity="sha256-qbdGFrp2H31eoxja6gYeM7VJpbcfq0xlxHz8zLubW0o=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/PPS-22-direct-style-experiments/"><span>PPS-22-direct-style-experiments</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/PPS-22-direct-style-experiments/docs/01-boundaries/" class="active">01 Boundaries</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/PPS-22-direct-style-experiments/docs/02-blog-posts-ws/" class="">02 Blog Posts Ws</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/PPS-22-direct-style-experiments/docs/03-channels/" class="">03 Channels</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/PPS-22-direct-style-experiments/docs/04-rears/" class="">04 Rears</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/PPS-22-direct-style-experiments/docs/05-going-further/" class="">05 Going Further</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/PPS-22-direct-style-experiments/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>01 Boundaries</strong>
+
+  <label for="toc-control">
+    
+    <img src="/PPS-22-direct-style-experiments/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#what-can-we-do-with-boundary-and-break-mechanism">What can we do with boundary and break mechanism?</a>
+      <ul>
+        <li><a href="#optional"><code>Optional</code></a></li>
+        <li><a href="#rust-like-result--">Rust-like <code>Result</code> + <code>?</code></a></li>
+        <li><a href="#either--"><code>Either</code> + <code>?</code></a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><h1 id="boundary--break">
+  <code>boundary / break</code>
+  <a class="anchor" href="#boundary--break">#</a>
+</h1>
+<p><a href="https://github.com/lampepfl/dotty/blob/3.3.0-RC4/library/src/scala/util/boundary.scala">Source code</a></p>
+<ul>
+<li>Provides a cleaner alternative to non-local returns;
+<ul>
+<li><code>boundary:</code> is short for <code>boundary.apply:</code> with the indented code below it passed as the body
+<ul>
+<li>
+<p><code>block</code> is a context function that is called within boundary.apply to return the block of code shown in the example</p>
+</li>
+<li>
+<p>Users don’t define <code>Label</code> instances themselves. Instead, this is done inside the implementation of <code>boundary.apply</code> to provide the capability of doing a non-local return.</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** Run `body` with freshly generated label as implicit argument. Catch any
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"> *  breaks associated with that label and return their results instead of
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"> *  `body`&#39;s result.
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"> */</span>
+</span></span><span style="display:flex;"><span>inline <span style="color:#8839ef">def</span> apply<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>inline body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#04a5e5;font-weight:bold">?=&gt;</span> T<span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">T</span> <span style="color:#04a5e5;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">val</span> local <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]()</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">try</span> body<span style="color:#04a5e5;font-weight:bold">(</span>using local<span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">catch</span> <span style="color:#8839ef">case</span> ex<span style="color:#8839ef">:</span> <span style="color:#d20f39">Break</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#1e66f5;font-weight:bold">@unchecked</span> <span style="color:#8839ef">=&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">if</span> ex<span style="color:#04a5e5;font-weight:bold">.</span>label eq local then ex<span style="color:#04a5e5;font-weight:bold">.</span>value
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">else</span> <span style="color:#8839ef">throw</span> ex
+</span></span></code></pre></div><ul>
+<li>we don’t want users to call break without an enclosing boundary. That’s why break requires an in-scope given instance of Label, which the implementation of boundary.apply creates before it calls the code block you provide. If your code block calls break, a given Label will be in-scope.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>non-localbreaks are logically implemented as non-fatal exceptions and the implementation is optimized to suppress unnecessary stack trace generation. Stack traces are unnecessary because we are handling these exceptions, not barfing them on the user!</li>
+<li>optimizations: Better performance is provided when a break occurs to the enclosing scope inside the same method (i.e., the same stack frame), where it can be rewritten to a jump call.</li>
+</ul>
+</li>
+</ul>
+<h2 id="what-can-we-do-with-boundary-and-break-mechanism">
+  What can we do with boundary and break mechanism?
+  <a class="anchor" href="#what-can-we-do-with-boundary-and-break-mechanism">#</a>
+</h2>
+<h3 id="optional">
+  <code>Optional</code>
+  <a class="anchor" href="#optional">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">object</span> <span style="color:#df8e1d">optional</span><span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">inline</span> <span style="color:#d20f39">def</span> <span style="color:#d20f39">apply</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>inline body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">None.</span><span style="color:#8839ef">type</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#04a5e5;font-weight:bold">?=&gt;</span> T<span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Option</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span>
+</span></span><span style="display:flex;"><span>    boundary<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Some</span><span style="color:#04a5e5;font-weight:bold">(</span>body<span style="color:#04a5e5;font-weight:bold">))</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  extension <span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>o<span style="color:#8839ef">:</span> <span style="color:#d20f39">Option</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">])</span>
+</span></span><span style="display:flex;"><span>    inline <span style="color:#8839ef">def</span> <span style="color:#04a5e5;font-weight:bold">?(</span>using label<span style="color:#8839ef">:</span> <span style="color:#d20f39">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">None.</span><span style="color:#8839ef">type</span><span style="color:#04a5e5;font-weight:bold">])</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">T</span> <span style="color:#04a5e5;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>      o<span style="color:#04a5e5;font-weight:bold">.</span>getOrElse<span style="color:#04a5e5;font-weight:bold">(</span>break<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">None</span><span style="color:#04a5e5;font-weight:bold">))</span>
+</span></span></code></pre></div><h3 id="rust-like-result--">
+  Rust-like <code>Result</code> + <code>?</code>
+  <a class="anchor" href="#rust-like-result--">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">object</span> <span style="color:#df8e1d">result</span><span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">sealed</span> <span style="color:#d20f39">trait</span> <span style="color:#d20f39">Result</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">+T</span><span style="color:#04a5e5;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">case</span> <span style="color:#8839ef">class</span> <span style="color:#df8e1d">Ok</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">+T</span><span style="color:#04a5e5;font-weight:bold">](</span>t<span style="color:#8839ef">:</span> <span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">extends</span> <span style="color:#df8e1d">Result</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">case</span> <span style="color:#8839ef">class</span> <span style="color:#df8e1d">Error</span><span style="color:#04a5e5;font-weight:bold">(</span>e<span style="color:#8839ef">:</span> <span style="color:#d20f39">String</span><span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">extends</span> <span style="color:#df8e1d">Result</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Nothing</span><span style="color:#04a5e5;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  inline <span style="color:#8839ef">def</span> apply<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>inline body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Error</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#04a5e5;font-weight:bold">?=&gt;</span> T<span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Result</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span>
+</span></span><span style="display:flex;"><span>    boundary<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Ok</span><span style="color:#04a5e5;font-weight:bold">(</span>body<span style="color:#04a5e5;font-weight:bold">))</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  extension <span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>r<span style="color:#8839ef">:</span> <span style="color:#d20f39">Result</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">])</span>
+</span></span><span style="display:flex;"><span>    inline <span style="color:#8839ef">def</span> <span style="color:#04a5e5;font-weight:bold">?(</span>using <span style="color:#df8e1d">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Error</span><span style="color:#04a5e5;font-weight:bold">])</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">T</span> <span style="color:#04a5e5;font-weight:bold">=</span> r <span style="color:#8839ef">match</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Ok</span><span style="color:#04a5e5;font-weight:bold">(</span>t<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> t
+</span></span><span style="display:flex;"><span>      <span style="color:#8839ef">case</span> e <span style="color:#8839ef">@</span> <span style="color:#df8e1d">Error</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#8839ef">_</span><span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> break<span style="color:#04a5e5;font-weight:bold">(</span>e<span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span></code></pre></div><h3 id="either--">
+  <code>Either</code> + <code>?</code>
+  <a class="anchor" href="#either--">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">object</span> <span style="color:#df8e1d">either</span><span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">inline</span> <span style="color:#d20f39">def</span> <span style="color:#d20f39">apply</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">](</span>inline body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Left</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">Nothing</span><span style="color:#04a5e5;font-weight:bold">]]</span> <span style="color:#04a5e5;font-weight:bold">?=&gt;</span> R<span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span>
+</span></span><span style="display:flex;"><span>    boundary<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Right</span><span style="color:#04a5e5;font-weight:bold">(</span>body<span style="color:#04a5e5;font-weight:bold">))</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  extension <span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">](</span>e<span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">])</span>
+</span></span><span style="display:flex;"><span>    inline <span style="color:#8839ef">def</span> <span style="color:#04a5e5;font-weight:bold">?(</span>using <span style="color:#df8e1d">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Left</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">Nothing</span><span style="color:#04a5e5;font-weight:bold">]])</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">R</span> <span style="color:#04a5e5;font-weight:bold">=</span> e <span style="color:#8839ef">match</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Right</span><span style="color:#04a5e5;font-weight:bold">(</span>value<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> value
+</span></span><span style="display:flex;"><span>      <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Left</span><span style="color:#04a5e5;font-weight:bold">(</span>value<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> break<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Left</span><span style="color:#04a5e5;font-weight:bold">(</span>value<span style="color:#04a5e5;font-weight:bold">))</span>
+</span></span></code></pre></div></article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/211e1a97732eee7c51dc78b860c6878e878d3ec8" title='Last modified by Luca Tassinari | February 13, 2024' target="_blank" rel="noopener">
+      <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
+      <span>February 13, 2024</span>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#what-can-we-do-with-boundary-and-break-mechanism">What can we do with boundary and break mechanism?</a>
+      <ul>
+        <li><a href="#optional"><code>Optional</code></a></li>
+        <li><a href="#rust-like-result--">Rust-like <code>Result</code> + <code>?</code></a></li>
+        <li><a href="#either--"><code>Either</code> + <code>?</code></a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
