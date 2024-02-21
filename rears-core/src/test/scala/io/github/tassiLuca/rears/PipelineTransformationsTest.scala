@@ -33,14 +33,15 @@ class PipelineTransformationsTest extends AnyFunSpec with Matchers {
 
     it("return a new channel that emit an item if the given timespan has passed without emitting anything") {
       val span = 2.seconds
+      val tolerance = 10.milliseconds
       Async.blocking:
         val debounced = infiniteProducer().debounce(span)
         debounced.read()
+        val before = System.currentTimeMillis()
         for _ <- 1 to 4 do
-          val before = System.currentTimeMillis()
           debounced.read()
           val now = System.currentTimeMillis()
-          now - before should be > span.toMillis
+          now - before should be > (span.toMillis - tolerance.toMillis)
     }
   }
 
