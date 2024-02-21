@@ -1,4 +1,4 @@
-# Blog posts service example: a direct-style vs monadic comparison
+# Basic asynchronous constructs
 
 ## The need for a new `Future` construct
 
@@ -228,7 +228,7 @@ classDiagram
 
   class `Task[+T]` {
     +apply(body: (Async, AsyncOperations) ?=> T) Task[T]$
-    +run: Future[+T]
+    +run(using Async, AsyncOperations) Future[+T]
   }
   `Future[+T]` <--* `Task[+T]`
 
@@ -379,6 +379,8 @@ Other combinator methods, available on `Future`s instance:
 ---
 
 TO FINISH
+
+tests
 
 kotlin coroutines
 
