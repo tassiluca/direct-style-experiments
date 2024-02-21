@@ -49,3 +49,62 @@ class TasksTest extends AnyFunSpec with Matchers {
     }
   }
 }
+
+//// "Weird" behaviour
+//  "test" should "work" in {
+//    Async.blocking:
+//      @volatile var end = false
+//      val timer = Timer(2 seconds)
+//      Future {
+//        timer.run()
+//      }
+//      val f = Future:
+//        val tf = Future {
+//          timer.src.awaitResult; end = true
+//        }
+//        val tr = Task {
+//          if end then Failure(Error()) else println("hello")
+//        }.schedule(RepeatUntilFailure()).run
+//        tf.altWithCancel(tr).awaitResult
+//      println(f.awaitResult)
+//  }
+//
+//  "test" should "not work" in {
+//    Async.blocking:
+//      val timer = Timer(2 seconds)
+//      Future {
+//        timer.run()
+//      }
+//      val f = Future:
+//        val tf = Future {
+//          timer.src.awaitResult
+//        }
+//        val tr = Task {
+//          println("hello")
+//        }.schedule(RepeatUntilFailure).run // non c'è chiamata bloccante, se ci fosse andrebbe bene
+//        tf.altWithCancel(tr).awaitResult
+//        tr.cancel()
+//      println(f.awaitResult)
+//  }
+
+//  object TestCancellation3:
+//
+//    class Producer3(using Async):
+//      val channel = UnboundedChannel[Int]()
+//
+//      def run(): Future[Unit] = Task {
+//        channel.send(Random.nextInt())
+//      }.schedule(Every(1_000)).run
+//
+//      def cancel(): Unit = Async.current.group.cancel()
+//
+//    @main def testCancellation(): Unit =
+//      Async.blocking:
+//        val p = Producer3()
+//        val f1 = p.run()
+//        val f2 = Task {
+//          println(s"${p.channel.read()}!")
+//        }.schedule(Every(1_000)).run
+//        Thread.sleep(10_000)
+//        p.cancel()
+//        p.run().awaitResult
