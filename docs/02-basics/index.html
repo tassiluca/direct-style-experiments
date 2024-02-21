@@ -3,27 +3,27 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Blog posts service example: a direct-style vs monadic comparison # The need for a new Future construct # The current implementation of the Future monadic construct suffers the following main cons:
+<meta name="description" content="Basic asynchronous constructs # The need for a new Future construct # The current implementation of the Future monadic construct suffers the following main cons:
 Lack of referential transparency; Lack of cancellation mechanisms and structured concurrency; Accidental Sequentiality. To show these weaknesses in practice, a simple example of the core of a web service implementation is presented.
 Example: a blog posts service # Idea: develop a very simple (mocked) service which allows to retrieve and store from a repository blog posts, performing checks on the content and author before the actual storage.">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
-<meta property="og:description" content="Blog posts service example: a direct-style vs monadic comparison # The need for a new Future construct # The current implementation of the Future monadic construct suffers the following main cons:
+<meta property="og:description" content="Basic asynchronous constructs # The need for a new Future construct # The current implementation of the Future monadic construct suffers the following main cons:
 Lack of referential transparency; Lack of cancellation mechanisms and structured concurrency; Accidental Sequentiality. To show these weaknesses in practice, a simple example of the core of a web service implementation is presented.
 Example: a blog posts service # Idea: develop a very simple (mocked) service which allows to retrieve and store from a repository blog posts, performing checks on the content and author before the actual storage." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/02-blog-posts-ws/" /><meta property="article:section" content="docs" />
+<meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/02-basics/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-02-19T23:07:39+01:00" />
+<meta property="article:modified_time" content="2024-02-21T10:56:36+01:00" />
 
-<title>02 Blog Posts Ws | PPS-22-direct-style-experiments</title>
+<title>02 Basics | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
 <link rel="icon" href="/PPS-22-direct-style-experiments/favicon.png" >
-<link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/02-blog-posts-ws/">
+<link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/02-basics/">
 <link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.f8de3645fe00591b41524aee174e19edd98a22255a2930a0cdc82a94835ba387.css" integrity="sha256-&#43;N42Rf4AWRtBUkruF04Z7dmKIiVaKTCgzcgqlINbo4c=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.a9b74616ba761f7d5ea318daea061e33b549a5b71fab4c65c47cfcccbb9b5b4a.js" integrity="sha256-qbdGFrp2H31eoxja6gYeM7VJpbcfq0xlxHz8zLubW0o=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.5e370f3a40ee651c8ef762860d43d599969ffb7c52173e45c6f61160a4273ee3.js" integrity="sha256-XjcPOkDuZRyO92KGDUPVmZaf&#43;3xSFz5FxvYRYKQnPuM=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -88,7 +88,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/PPS-22-direct-style-experiments/docs/02-blog-posts-ws/" class="active">02 Blog Posts Ws</a>
+    <a href="/PPS-22-direct-style-experiments/docs/02-basics/" class="active">02 Basics</a>
   
 
         </li>
@@ -127,7 +127,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/PPS-22-direct-style-experiments/docs/05-going-further/" class="">05 Going Further</a>
+    <a href="/PPS-22-direct-style-experiments/docs/05-conclusions/" class="">05 Conclusions</a>
   
 
         </li>
@@ -169,7 +169,7 @@ https://github.com/alex-shpak/hugo-book
     <img src="/PPS-22-direct-style-experiments/svg/menu.svg" class="book-icon" alt="Menu" />
   </label>
 
-  <strong>02 Blog Posts Ws</strong>
+  <strong>02 Basics</strong>
 
   <label for="toc-control">
     
@@ -205,9 +205,9 @@ https://github.com/alex-shpak/hugo-book
 
       
       
-  <article class="markdown book-article"><h1 id="blog-posts-service-example-a-direct-style-vs-monadic-comparison">
-  Blog posts service example: a direct-style vs monadic comparison
-  <a class="anchor" href="#blog-posts-service-example-a-direct-style-vs-monadic-comparison">#</a>
+  <article class="markdown book-article"><h1 id="basic-asynchronous-constructs">
+  Basic asynchronous constructs
+  <a class="anchor" href="#basic-asynchronous-constructs">#</a>
 </h1>
 <h2 id="the-need-for-a-new-future-construct">
   The need for a new <code>Future</code> construct
@@ -408,7 +408,7 @@ Unfortunately, currently, Scala Futures are not cancellable and provides no <em>
 <p class="mermaid">
 classDiagram
   class Async {
-    &#60;&#60;trait&#62;&#62;
+    << trait >>
     +group: CompletionGroup
     +withGroup(group: CompletionGroup) Async
     +await[T](src: Async.Source[T]) T
@@ -418,7 +418,7 @@ classDiagram
   }
 
   class `Async.Source[+T]` {
-    &#60;&#60;trait&#62;&#62;
+    << trait >>
     +poll(k: Listener[T]) Boolean
     +poll() Option[T]
     +onComplete(k: Listener[T])
@@ -429,12 +429,12 @@ classDiagram
   Async *--> `Async.Source[+T]`
 
   class OriginalSource {
-    &#60;&#60;abstract class&#62;&#62;
+    << abstract class >>
   }
   `Async.Source[+T]` <|-- OriginalSource
 
   class `Listener[-T]` {
-    &#60;&#60;trait&#62;&#62;
+    << trait >>
     +lock: Listener.ListenerLock | Null
     +complete(data: T, source: Async.Source[T])
     +completeNow(data: T, source: Async.Source[T]) Boolean
@@ -444,7 +444,7 @@ classDiagram
   `Async.Source[+T]` *--> `Listener[-T]`
 
   class `Future[+T]` {
-    &#60;&#60;trait&#62;&#62;
+    << trait >>
     +apply[T](body: Async ?=> T) Future[T]$
     +now[T](result: Try[T]) Future[T]
     +zip[U](f2: Future[U]) Future[T, U]
@@ -452,7 +452,7 @@ classDiagram
     +altWithCancel(f2: Future[T]) Future[T]
   }
   class `Promise[+T]` {
-    &#60;&#60;trait&#62;&#62;
+    << trait >>
     +asFuture Future[T]
     +complete(result: Try[T])
   }
@@ -461,12 +461,12 @@ classDiagram
 
   class `Task[+T]` {
     +apply(body: (Async, AsyncOperations) ?=> T) Task[T]$
-    +run: Future[+T]
+    +run(using Async, AsyncOperations) Future[+T]
   }
   `Future[+T]` <--* `Task[+T]`
 
   class Cancellable {
-    &#60;&#60;trait&#62;&#62;
+    << trait >>
     +group: CompletionGroup
     +cancel()
     +link(group: CompletionGroup)
@@ -476,7 +476,7 @@ classDiagram
   Cancellable <|-- `Future[+T]`
 
   class Tracking {
-    &#60;&#60;trait&#62;&#62;
+    << trait >>
     +isCancelled Boolean
   }
   Cancellable <|-- Tracking
@@ -629,6 +629,7 @@ classDiagram
 </table>
 <hr>
 <p>TO FINISH</p>
+<p>tests</p>
 <p>kotlin coroutines</p>
 <p>w.r.t. kotlin coroutines:</p>
 <ul>
@@ -644,9 +645,9 @@ classDiagram
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/8e249c689b92521b4da5bd4bc655aabba03ff44b" title='Last modified by Luca Tassinari | February 19, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/c26f6555197c9597da1b4582b4cc72283ae81605" title='Last modified by Luca Tassinari | February 21, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>February 19, 2024</span>
+      <span>February 21, 2024</span>
     </a>
   </div>
 
