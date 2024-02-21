@@ -7,21 +7,20 @@ import io.github.tassiLuca.analyzer.commons.lib.{Repository, RepositoryReport}
 import io.github.tassiLuca.boundaries.EitherConversions.given
 import io.github.tassiLuca.boundaries.either
 import io.github.tassiLuca.boundaries.either.?
-import io.github.tassiLuca.utils.ChannelClosedConverter.tryable
+import io.github.tassiLuca.utils.ChannelsPimping.tryable
 
 trait Analyzer:
   def analyze(organizationName: String)(
-      updateResults: Async ?=> RepositoryReport => Unit,
+      updateResults: RepositoryReport => Unit,
   )(using Async): Either[String, Seq[RepositoryReport]]
 
 object Analyzer:
-  def ofGitHub: Analyzer = GitHubAnalyzer()
+  def of(service: GitHubService): Analyzer = GitHubAnalyzer(service)
 
-  private class GitHubAnalyzer extends Analyzer:
-    private val gitHubService = GitHubService()
+  private class GitHubAnalyzer(gitHubService: GitHubService) extends Analyzer:
 
     override def analyze(organizationName: String)(
-        updateResults: Async ?=> RepositoryReport => Unit,
+        updateResults: RepositoryReport => Unit,
     )(using Async): Either[String, Seq[RepositoryReport]] = either:
       val reposInfo = gitHubService
         .repositoriesOf(organizationName).?
@@ -34,4 +33,4 @@ object Analyzer:
       private def performAnalysis(using Async): Future[RepositoryReport] = Future:
         val contributions = Future { gitHubService.contributorsOf(r.organization, r.name) }
         val release = Future { gitHubService.lastReleaseOf(r.organization, r.name) }
-        lib.RepositoryReport(r.name, r.issues, r.stars, contributions.await.getOrElse(Seq()), release.await.toOption)
+        RepositoryReport(r.name, r.issues, r.stars, contributions.await.getOrElse(Seq()), release.await.toOption)

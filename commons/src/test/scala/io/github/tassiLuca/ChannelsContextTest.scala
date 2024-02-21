@@ -15,17 +15,17 @@ class ChannelsContextTest extends AnyFunSpec with Matchers {
   val itemsProduced = 10
 
   describe("Channels") {
-//    it("should receive all produced items") {
-//      var i = 0
-//      val channel = BufferedChannel[Int](itemsProduced)
-//      Async.blocking:
-//        channel.consume {
-//          case Left(_) => ()
-//          case Right(_) => i = i + 1
-//        }.run
-//        produceOn(channel).run.await // waiting for producer to finish
-//        i shouldBe itemsProduced
-//    }
+    it("should receive all produced items") {
+      var i = 0
+      val channel = BufferedChannel[Int](itemsProduced)
+      Async.blocking:
+        channel.consume {
+          case Left(_) => ()
+          case Right(_) => i = i + 1
+        }.run
+        produceOn(channel).run.await // waiting for producer to finish
+        i shouldBe itemsProduced
+    }
   }
 
   describe("Consumer") {

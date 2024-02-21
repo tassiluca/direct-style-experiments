@@ -39,9 +39,9 @@ class MainFrame(controller: AppController) extends JFrame:
   getContentPane.add(mainPanel)
 
   def showError(errorMsg: String): Unit =
-    endSession()
+    ended()
     JOptionPane.showMessageDialog(this, errorMsg, "Error!", JOptionPane.ERROR_MESSAGE)
 
-  def endSession(): Unit = stateText.setText("Computation ended.")
+  def ended(): Unit = stateText.setText("Computation ended.")
 
   def cancelled(): Unit = stateText.setText("Computation canceled.")

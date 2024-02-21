@@ -1,70 +1,36 @@
 package io.github.tassiLuca.analyzer.lib
 
 import cats.data.EitherT
+import cats.implicits.toTraverseOps
 import io.github.tassiLuca.analyzer.commons.lib
 import io.github.tassiLuca.analyzer.commons.lib.{Repository, RepositoryReport}
-
-import scala.concurrent.{Await, ExecutionContext, Future}
+import monix.eval.Task
 
 trait Analyzer:
   def analyze(organizationName: String)(
       updateResult: RepositoryReport => Unit,
-  )(using ExecutionContext): Future[Either[String, Seq[RepositoryReport]]]
-
-  def analyze2(organizationName: String)(
-      updateResult: RepositoryReport => Unit,
-  )(using ExecutionContext): EitherT[Future, String, Seq[RepositoryReport]]
+  ): EitherT[Task, String, Seq[RepositoryReport]]
 
 object Analyzer:
-  def ofGitHub(): Analyzer = new AnalyzerImpl()
+  def ofGitHub(): Analyzer = AnalyzerImpl()
 
   private class AnalyzerImpl extends Analyzer:
     private val gitHubService = GitHubService()
 
     override def analyze(organizationName: String)(
         updateResult: RepositoryReport => Unit,
-    )(using ExecutionContext): Future[Either[String, Seq[RepositoryReport]]] =
-      gitHubService.repositoriesOf(organizationName).flatMap {
-        case Left(error) => Future.successful(Left(error))
-        case Right(repos) =>
-          val futuresReports: Seq[Future[RepositoryReport]] = repos.map(performAnalysis)
-          val futureSeqOfReports: Future[Seq[RepositoryReport]] = Future.sequence(futuresReports)
-          futureSeqOfReports.map(Right(_))
-      }
-
-    override def analyze2(organizationName: String)(
-        updateResult: RepositoryReport => Unit,
-    )(using ExecutionContext): EitherT[Future, String, Seq[RepositoryReport]] =
-      import cats.implicits.toTraverseOps
+    ): EitherT[Task, String, Seq[RepositoryReport]] =
       for
-        repositories <- EitherT(gitHubService.repositoriesOf(organizationName))
-        reports <- repositories.traverse(r => EitherT.right(r.idiomaticAnalysis))
+        repositories <- gitHubService.repositoriesOf(organizationName)
+        reports <- repositories.traverse(r => EitherT.right(r.performAnalysis(updateResult)))
       yield reports
 
     extension (r: Repository)
-      private def performAnalysis(using ExecutionContext): Future[RepositoryReport] =
-        val contributionsTask = gitHubService.contributorsOf(r.organization, r.name)
-        val releaseTask = gitHubService.lastReleaseOf(r.organization, r.name)
+      private def performAnalysis(updateResult: RepositoryReport => Unit): Task[RepositoryReport] =
+        val contributorsTask = gitHubService.contributorsOf(r.organization, r.name).value
+        val releaseTask = gitHubService.lastReleaseOf(r.organization, r.name).value
         for
-          contributions <- contributionsTask
-          lastRelease <- releaseTask
-        yield lib.RepositoryReport(r.name, r.issues, r.stars, contributions.getOrElse(Seq.empty), lastRelease.toOption)
-
-      private def idiomaticAnalysis(using ExecutionContext): Future[RepositoryReport] =
-        import cats.implicits.catsSyntaxTuple2Semigroupal
-        (gitHubService.contributorsOf(r.organization, r.name), gitHubService.lastReleaseOf(r.organization, r.name))
-          .mapN { case (contributions, lastRelease) =>
-            lib.RepositoryReport(r.name, r.issues, r.stars, contributions.getOrElse(Seq.empty), lastRelease.toOption)
-          }
-
-@main def testAnalyzer(): Unit =
-  given ExecutionContext = ExecutionContext.global
-  val result = Analyzer.ofGitHub().analyze("unibo-spe")(report => println(report))
-  Await.ready(result, scala.concurrent.duration.Duration.Inf)
-  println(s">> $result")
-
-@main def testAnalyzerWithCats(): Unit =
-  given ExecutionContext = ExecutionContext.global
-  val result = Analyzer.ofGitHub().analyze2("unibo-spe")(report => println(report)).value
-  Await.ready(result, scala.concurrent.duration.Duration.Inf)
-  println(s">> $result")
+          result <- Task.parZip2(contributorsTask, releaseTask)
+          report = RepositoryReport(r.name, r.issues, r.stars, result._1.getOrElse(Seq.empty), result._2.toOption)
+          _ <- Task(updateResult(report))
+        yield report

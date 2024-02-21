@@ -24,7 +24,7 @@ class AnalyzerGUI(controller: AppController) : AnalyzerView {
         )
     }
 
-    override fun endComputation() = SwingUtilities.invokeLater { gui.endSession() }
+    override fun endComputation() = SwingUtilities.invokeLater { gui.ended() }
 
     override fun error(errorMessage: String) = SwingUtilities.invokeLater { gui.showError(errorMessage) }
 
