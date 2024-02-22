@@ -17,6 +17,12 @@ class ThermostatHubManagerTest extends AnyFlatSpec with Matchers {
       override def on(using Async): Unit = ???
       override def off(using Async): Unit = ???
 
+    override val dashboard: Dashboard = new Dashboard:
+      override def updateTemperature(entries: Seq[TemperatureEntry]): Unit = ???
+      override def newHeaterState(state: HeaterState): Unit = ???
+
+      override def newAlert(msg: String): Unit = ???
+
     override val alertSystem: AlertSystem = new AlertSystem:
       override def notify(message: String)(using Async): Unit = ???
 

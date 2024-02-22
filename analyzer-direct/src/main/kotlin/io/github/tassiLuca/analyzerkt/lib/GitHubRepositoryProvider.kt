@@ -14,18 +14,16 @@ class GitHubRepositoryProvider(private val gitHubService: GitHubService) {
     suspend fun repositoriesOf(organizationName: String): Result<List<Repository>> =
         paginatedRequest { gitHubService.organizationRepositories(organizationName, it).awaitResponse() }
 
-    @Suppress("SuspendFunWithFlowReturnType")
     /** Returns the repositories of the given [organizationName] as [Flow]. */
-    suspend fun flowingRepositoriesOf(organizationName: String): Flow<List<Repository>> =
+    fun flowingRepositoriesOf(organizationName: String): Flow<List<Repository>> =
         paginatedFlowRequest { gitHubService.organizationRepositories(organizationName, it).awaitResponse() }
 
     /** Returns the contributors of the given [organizationName] and [repositoryName]. */
     suspend fun contributorsOf(organizationName: String, repositoryName: String): Result<List<Contribution>> =
         paginatedRequest { gitHubService.contributorsOf(organizationName, repositoryName, it).awaitResponse() }
 
-    @Suppress("SuspendFunWithFlowReturnType")
     /** Returns the contributors of the given [organizationName] and [repositoryName] as [Flow]. */
-    suspend fun flowingContributorsOf(organizationName: String, repositoryName: String): Flow<List<Contribution>> =
+    fun flowingContributorsOf(organizationName: String, repositoryName: String): Flow<List<Contribution>> =
         paginatedFlowRequest { gitHubService.contributorsOf(organizationName, repositoryName, it).awaitResponse() }
 
     /** Returns the last release of the given [organizationName] and [repositoryName]. */
@@ -54,8 +52,7 @@ class GitHubRepositoryProvider(private val gitHubService: GitHubService) {
         return withPagination(emptyList(), 1)
     }
 
-    @Suppress("SuspendFunWithFlowReturnType")
-    private suspend fun <T> paginatedFlowRequest(requestCall: suspend (Int) -> Response<List<T>>): Flow<List<T>> {
+    private fun <T> paginatedFlowRequest(requestCall: suspend (Int) -> Response<List<T>>): Flow<List<T>> {
         suspend fun FlowCollector<List<T>>.withPagination(next: Int?) {
             return when (next) {
                 null -> {}
