@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content=" Direct style for Functional Reactive Programming: an analysis in Scala &amp; Kotlin # Goals of the project # Develop a few examples (not too complex) using asynchronous constructs and try to implement these examples in the two variants: using the current implementation of futures based on monadic constructs and the style that adopts gears (direct style). Analyze aspects such as:
-ergonomicity of the two styles (which one results more thoughtful and/or verbose) which of the two approaches has a real advantage in adoption, and when Pros and cons of the two styles how and when to use one approach rather than the other any limitations and difficulties encountered in using them Table of contents # Boundary and break Blog posts service example: a direct-style vs monadic comparison Channels IoT example Going further ">
+ergonomicity of the two styles (which one results more thoughtful and/or verbose) which of the two approaches has a real advantage in adoption, and when Pros and cons of the two styles how and when to use one approach rather than the other any limitations and difficulties encountered in using them Table of contents # Boundary and break Basic asynchronous constructs Channels as a communication primitive Reactive-like direct style Conclusions ">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
@@ -17,9 +17,9 @@ ergonomicity of the two styles (which one results more thoughtful and/or verbose
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
 <link rel="icon" href="/PPS-22-direct-style-experiments/favicon.png" >
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/">
-<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.f8de3645fe00591b41524aee174e19edd98a22255a2930a0cdc82a94835ba387.css" integrity="sha256-&#43;N42Rf4AWRtBUkruF04Z7dmKIiVaKTCgzcgqlINbo4c=" crossorigin="anonymous">
+<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.f57cd8d7b32fcb6fe52f977b168a7cdd5f7ce45f6c69221b19c15bb8a9aeea82.css" integrity="sha256-9XzY17Mvy2/lL5d7Fop83V985F9saSIbGcFbuKmu6oI=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.5e370f3a40ee651c8ef762860d43d599969ffb7c52173e45c6f61160a4273ee3.js" integrity="sha256-XjcPOkDuZRyO92KGDUPVmZaf&#43;3xSFz5FxvYRYKQnPuM=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.8adfd36327438c2f5f875a0495116001a6a9010a4bb13e1a16b1a87105a22724.js" integrity="sha256-it/TYydDjC9fh1oElRFgAaapAQpLsT4aFrGocQWiJyQ=" crossorigin="anonymous"></script>
 <link rel="alternate" type="application/rss+xml" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/index.xml" title="PPS-22-direct-style-experiments" />
 <!--
 Made with Book Theme
@@ -220,11 +220,11 @@ Analyze aspects such as:</p>
   <a class="anchor" href="#table-of-contents">#</a>
 </h2>
 <ol>
-<li><a href="./docs/01-boundaries">Boundary and break</a></li>
-<li><a href="./docs/02-basics">Blog posts service example: a direct-style vs monadic comparison</a></li>
-<li><a href="./docs/03-channels.md">Channels</a></li>
-<li><a href="./docs/04-rears.md">IoT example</a></li>
-<li><a href="./docs/05-going-further.md">Going further</a></li>
+<li><a href="./docs/01-boundaries"><code>Boundary</code> and <code>break</code></a></li>
+<li><a href="./docs/02-basics">Basic asynchronous constructs</a></li>
+<li><a href="./docs/03-channels.md">Channels as a communication primitive</a></li>
+<li><a href="./docs/04-rears.md">Reactive-like direct style</a></li>
+<li><a href="./docs/05-going-further.md">Conclusions</a></li>
 </ol>
 </article>
  
@@ -235,9 +235,9 @@ Analyze aspects such as:</p>
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/c26f6555197c9597da1b4582b4cc72283ae81605" title='Last modified by Luca Tassinari | February 21, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/58419fa40065e73a1c79eb0bf81a3a743104532b" title='Last modified by Luca Tassinari | February 22, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>February 21, 2024</span>
+      <span>February 22, 2024</span>
     </a>
   </div>
 

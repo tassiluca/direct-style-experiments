@@ -3,23 +3,27 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="An attempt to bring reactivity principles in gears # classDiagram class `Task[&#43;T]` { &#43;apply(body: (Async, AsyncOperations) ?=&gt; T) Task[T]$ &#43;run(using Async, AsyncOperations) Future[&#43;T] &#43;schedule(s: TaskSchedule) Task[T] } `Task[&#43;T]` o--&gt; TaskSchedule class TaskSchedule { &lt;&lt; enum &gt;&gt; &#43; Every(millis: Long, maxRepetitions: Long = 0) &#43; ExponentialBackoff(millis: Long, exponentialBase: Int = 2, maxRepetitions: Long = 0) &#43; FibonacciBackoff(millis: Long, maxRepetitions: Long = 0) &#43; RepeatUntilFailure(millis: Long = 0, maxRepetitions: Long = 0) &#43; RepeatUntilSuccess(millis: Long = 0, maxRepetitions: Long = 0) } classDiagram namespace javaio { class Closeable { &lt;&lt; interface &gt;&gt; &#43;close() } } class `ChannelMultiplexer[T]` { &lt;&lt; trait &gt;&gt; &#43;run()(using Async) &#43;addPublisher(c: ReadableChannel[T]) &#43;removePublisher(c: ReadableChannel[T]) &#43;addSubscriber(c: SendableChannel[Try[T]]) &#43;removeSubscriber(c: SendableChannel[Try[T]]) } Closeable &lt;|-- `ChannelMultiplexer[T]` Gears:">
+<meta name="description" content="An attempt to bring reactivity principles in gears # So far, we&rsquo;ve explored the basics of asynchronous abstraction mechanisms provided by the direct style of the Scala Gears and Kotlin Coroutines frameworks.
+The goal of this last example is to investigate, using a simple example, whether these two frameworks offers sufficient idiomatic abstractions to deal with reactive-like systems.
+Smart Hub System example # Idea: in an IoT context a multitude of sensors of different types, each replicated to ensure accurate measurements, transmit their measurements to a central hub, which in turns needs to react, in real-time, forwarding to the appropriate controller the data, possibly running some kind of transformation, enabling controllers to make decisions based on their respective logic.">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
-<meta property="og:description" content="An attempt to bring reactivity principles in gears # classDiagram class `Task[&#43;T]` { &#43;apply(body: (Async, AsyncOperations) ?=&gt; T) Task[T]$ &#43;run(using Async, AsyncOperations) Future[&#43;T] &#43;schedule(s: TaskSchedule) Task[T] } `Task[&#43;T]` o--&gt; TaskSchedule class TaskSchedule { &lt;&lt; enum &gt;&gt; &#43; Every(millis: Long, maxRepetitions: Long = 0) &#43; ExponentialBackoff(millis: Long, exponentialBase: Int = 2, maxRepetitions: Long = 0) &#43; FibonacciBackoff(millis: Long, maxRepetitions: Long = 0) &#43; RepeatUntilFailure(millis: Long = 0, maxRepetitions: Long = 0) &#43; RepeatUntilSuccess(millis: Long = 0, maxRepetitions: Long = 0) } classDiagram namespace javaio { class Closeable { &lt;&lt; interface &gt;&gt; &#43;close() } } class `ChannelMultiplexer[T]` { &lt;&lt; trait &gt;&gt; &#43;run()(using Async) &#43;addPublisher(c: ReadableChannel[T]) &#43;removePublisher(c: ReadableChannel[T]) &#43;addSubscriber(c: SendableChannel[Try[T]]) &#43;removeSubscriber(c: SendableChannel[Try[T]]) } Closeable &lt;|-- `ChannelMultiplexer[T]` Gears:" />
+<meta property="og:description" content="An attempt to bring reactivity principles in gears # So far, we&rsquo;ve explored the basics of asynchronous abstraction mechanisms provided by the direct style of the Scala Gears and Kotlin Coroutines frameworks.
+The goal of this last example is to investigate, using a simple example, whether these two frameworks offers sufficient idiomatic abstractions to deal with reactive-like systems.
+Smart Hub System example # Idea: in an IoT context a multitude of sensors of different types, each replicated to ensure accurate measurements, transmit their measurements to a central hub, which in turns needs to react, in real-time, forwarding to the appropriate controller the data, possibly running some kind of transformation, enabling controllers to make decisions based on their respective logic." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/04-rears/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-02-21T10:56:36+01:00" />
+<meta property="article:modified_time" content="2024-02-22T11:01:27+01:00" />
 
 <title>04 Rears | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
 <link rel="icon" href="/PPS-22-direct-style-experiments/favicon.png" >
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/04-rears/">
-<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.f8de3645fe00591b41524aee174e19edd98a22255a2930a0cdc82a94835ba387.css" integrity="sha256-&#43;N42Rf4AWRtBUkruF04Z7dmKIiVaKTCgzcgqlINbo4c=" crossorigin="anonymous">
+<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.f57cd8d7b32fcb6fe52f977b168a7cdd5f7ce45f6c69221b19c15bb8a9aeea82.css" integrity="sha256-9XzY17Mvy2/lL5d7Fop83V985F9saSIbGcFbuKmu6oI=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.5e370f3a40ee651c8ef762860d43d599969ffb7c52173e45c6f61160a4273ee3.js" integrity="sha256-XjcPOkDuZRyO92KGDUPVmZaf&#43;3xSFz5FxvYRYKQnPuM=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.8adfd36327438c2f5f875a0495116001a6a9010a4bb13e1a16b1a87105a22724.js" integrity="sha256-it/TYydDjC9fh1oElRFgAaapAQpLsT4aFrGocQWiJyQ=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -179,7 +183,17 @@ https://github.com/alex-shpak/hugo-book
   <aside class="hidden clearfix">
     
   
-<nav id="TableOfContents"></nav>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#smart-hub-system-example">Smart Hub System example</a>
+      <ul>
+        <li><a href="#scala-gears-version">Scala Gears version</a></li>
+        <li><a href="#kotlin-coroutines-version">Kotlin Coroutines version</a></li>
+      </ul>
+    </li>
+    <li><a href="#conclusions">Conclusions</a></li>
+  </ul>
+</nav>
 
 
 
@@ -194,6 +208,28 @@ https://github.com/alex-shpak/hugo-book
   An attempt to bring reactivity principles in gears
   <a class="anchor" href="#an-attempt-to-bring-reactivity-principles-in-gears">#</a>
 </h1>
+<p>So far, we&rsquo;ve explored the basics of asynchronous abstraction mechanisms provided by the direct style of the Scala Gears and Kotlin Coroutines frameworks.</p>
+<p>The goal of this last example is to investigate, using a simple example, whether these two frameworks offers sufficient idiomatic abstractions to deal with <strong>reactive-like systems</strong>.</p>
+<h2 id="smart-hub-system-example">
+  Smart Hub System example
+  <a class="anchor" href="#smart-hub-system-example">#</a>
+</h2>
+<blockquote class="book-hint info">
+  <strong>Idea</strong>: in an IoT context a multitude of sensors of different types, each replicated to ensure accurate measurements, transmit their measurements to a central hub, which in turns needs to react, in real-time, forwarding to the appropriate controller the data, possibly running some kind of transformation, enabling controllers to make decisions based on their respective logic.
+</blockquote>
+
+<h3 id="scala-gears-version">
+  Scala Gears version
+  <a class="anchor" href="#scala-gears-version">#</a>
+</h3>
+<p>Before delving into the example, two abstractions of Gears, yet not covered, are introduced:</p>
+<ul>
+<li><code>Task</code>s provide a way, not only to run asynchronous computation, essentially wrapping a <code>Future</code>, but also to schedule it, possibly repeating it. Different scheduling strategies are available: <code>Every</code>, <code>ExponentialBackoff</code>, <code>FibonacciBackoff</code>, <code>RepeatUntilFailure</code>, <code>RepeatUntilSuccess</code>.
+<ul>
+<li>This allows implementing easily proactive like systems, like a game loop.</li>
+</ul>
+</li>
+</ul>
 
 
 <script src="/PPS-22-direct-style-experiments/mermaid.min.js"></script>
@@ -208,7 +244,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<p class="mermaid">
+<p class="mermaid smaller">
 classDiagram
   class `Task[+T]` {
     +apply(body: (Async, AsyncOperations) ?=> T) Task[T]$
@@ -228,9 +264,21 @@ classDiagram
   }
 </p>
 
+<ul>
+<li>To avoid the <em>work stealing behavior</em> of channels consumers, a <code>ChannelMultiplexer</code> can be used. It is essentially a container of producing and consuming channels, which can be added and removed at runtime. Internally, it is implemented with a thread that continuously races the set of publishers and once it reads a value, it forwards it to each subscriber channel.
+<ul>
+<li>Order is guaranteed only per producer;</li>
+<li>Typically, the consumer creates a channel and adds it to the multiplexer, then start reading from it, possibly using a scheduled task.
+<ul>
+<li>if the consumer attaches the channel after the producer started, the values sent during this interval are lost, like <em>hot observables</em> in Rx.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 
 
-<p class="mermaid">
+<p class="mermaid smallest">
 classDiagram
   namespace javaio {
     class Closeable {
@@ -251,24 +299,83 @@ classDiagram
   Closeable <|-- `ChannelMultiplexer[T]`
 </p>
 
-<p><img src="../../res/img/rears.svg" alt="expected result" /></p>
+<p>In the proposed strawman Scala Gears library, there are no other kind of abstractions, neither a way to manipulate channels with functions inspired by Rx.</p>
+<p>The attempt was to somehow extend this framework adding first class support for the concept of <code>Producer</code> and <code>Consumer</code> and implement some of the most common Rx operators, just as a proof of concept, completely leaving out performances concerns.</p>
+<p>[Sources can be found in the <code>rears</code> submodule]</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** A publisher, i.e. a runnable active entity producing items on a channel. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">Publisher</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span><span style="color:#04a5e5;font-weight:bold">]</span><span style="color:#df8e1d">:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** The [[Channel]] to send items to. */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">protected</span> <span style="color:#8839ef">val</span> channel<span style="color:#8839ef">:</span> <span style="color:#d20f39">Channel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">UnboundedChannel</span><span style="color:#04a5e5;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** @return a runnable [[Task]]. */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">def</span> asRunnable<span style="color:#8839ef">:</span> <span style="color:#d20f39">Task</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Unit</span><span style="color:#04a5e5;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** @return a [[ReadableChannel]] where produced items are placed. */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">def</span> publishingChannel<span style="color:#8839ef">:</span> <span style="color:#d20f39">ReadableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> channel<span style="color:#04a5e5;font-weight:bold">.</span>asReadable
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** A consumer, i.e. a runnable active entity devoted to consuming data from a channel. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">Consumer</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span><span style="color:#04a5e5;font-weight:bold">]</span><span style="color:#df8e1d">:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** The [[SendableChannel]] to send items to. */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">val</span> listeningChannel<span style="color:#8839ef">:</span> <span style="color:#d20f39">SendableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Try</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span><span style="color:#04a5e5;font-weight:bold">]]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">UnboundedChannel</span><span style="color:#04a5e5;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** @return a runnable [[Task]]. */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">def</span> asRunnable<span style="color:#8839ef">:</span> <span style="color:#d20f39">Task</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Unit</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Task</span> <span style="color:#04a5e5;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    listeningChannel<span style="color:#04a5e5;font-weight:bold">.</span>asInstanceOf<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Channel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Try</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span><span style="color:#04a5e5;font-weight:bold">]]].</span>read<span style="color:#04a5e5;font-weight:bold">().</span>foreach<span style="color:#04a5e5;font-weight:bold">(</span>react<span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#04a5e5;font-weight:bold">}.</span>schedule<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">RepeatUntilFailure</span><span style="color:#04a5e5;font-weight:bold">())</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** The suspendable reaction triggered upon a new read of an item succeeds. */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">protected</span> <span style="color:#8839ef">def</span> react<span style="color:#04a5e5;font-weight:bold">(</span>e<span style="color:#8839ef">:</span> <span style="color:#d20f39">Try</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span><span style="color:#04a5e5;font-weight:bold">])(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Unit</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** A mixin to make consumers stateful. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">State</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span><span style="color:#04a5e5;font-weight:bold">]</span><span style="color:#df8e1d">:</span>
+</span></span><span style="display:flex;"><span>  consumer<span style="color:#8839ef">:</span> <span style="color:#d20f39">Consumer</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">private</span> <span style="color:#8839ef">var</span> <span style="color:#df8e1d">_state</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Option</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">None</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">def</span> state<span style="color:#8839ef">:</span> <span style="color:#d20f39">Option</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> synchronized<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">_state</span><span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">override</span> <span style="color:#8839ef">def</span> asRunnable<span style="color:#8839ef">:</span> <span style="color:#d20f39">Task</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Unit</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Task</span> <span style="color:#04a5e5;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    listeningChannel<span style="color:#04a5e5;font-weight:bold">.</span>asInstanceOf<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Channel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Try</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span><span style="color:#04a5e5;font-weight:bold">]]].</span>read<span style="color:#04a5e5;font-weight:bold">().</span>foreach <span style="color:#04a5e5;font-weight:bold">{</span> e <span style="color:#8839ef">=&gt;</span>
+</span></span><span style="display:flex;"><span>      react<span style="color:#04a5e5;font-weight:bold">(</span>e<span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>      synchronized <span style="color:#04a5e5;font-weight:bold">{</span> <span style="color:#df8e1d">_state</span> <span style="color:#8839ef">=</span> e<span style="color:#04a5e5;font-weight:bold">.</span>toOption <span style="color:#04a5e5;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#04a5e5;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#04a5e5;font-weight:bold">}.</span>schedule<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">RepeatUntilFailure</span><span style="color:#04a5e5;font-weight:bold">())</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">object</span> <span style="color:#df8e1d">Controller</span><span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">def</span> <span style="color:#d20f39">oneToMany</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span>, <span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">](</span>
+</span></span><span style="display:flex;"><span>      publisherChannel<span style="color:#8839ef">:</span> <span style="color:#d20f39">ReadableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">],</span>
+</span></span><span style="display:flex;"><span>      consumers<span style="color:#8839ef">:</span> <span style="color:#d20f39">Set</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Consumer</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">]],</span>
+</span></span><span style="display:flex;"><span>      transformation<span style="color:#8839ef">:</span> <span style="color:#d20f39">PipelineTransformation</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span>, <span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> identity<span style="color:#04a5e5;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Task</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Unit</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Task</span><span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#d20f39">val</span> <span style="color:#d20f39">multiplexer</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#df8e1d">ChannelMultiplexer</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">]()</span>
+</span></span><span style="display:flex;"><span>    consumers<span style="color:#04a5e5;font-weight:bold">.</span>foreach<span style="color:#04a5e5;font-weight:bold">(</span>c <span style="color:#8839ef">=&gt;</span> multiplexer<span style="color:#04a5e5;font-weight:bold">.</span>addSubscriber<span style="color:#04a5e5;font-weight:bold">(</span>c<span style="color:#04a5e5;font-weight:bold">.</span>listeningChannel<span style="color:#04a5e5;font-weight:bold">))</span>
+</span></span><span style="display:flex;"><span>    multiplexer<span style="color:#04a5e5;font-weight:bold">.</span>addPublisher<span style="color:#04a5e5;font-weight:bold">(</span>transformation<span style="color:#04a5e5;font-weight:bold">(</span>publisherChannel<span style="color:#04a5e5;font-weight:bold">))</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">// blocking call: the virtual thread on top of which this task is 
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>    <span style="color:#9ca0b0;font-style:italic">// executed needs to block to continue publishing publisher&#39;s events 
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>    <span style="color:#9ca0b0;font-style:italic">// towards the consumer by means of the multiplexer.
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>    multiplexer<span style="color:#04a5e5;font-weight:bold">.</span>run<span style="color:#04a5e5;font-weight:bold">()</span>
+</span></span></code></pre></div><hr>
+<p>Implemented transformation functions:</p>
+<ul>
+<li><code>filter</code></li>
+<li><code>debounce</code></li>
+<li><code>groupBy</code></li>
+<li><code>buffer</code></li>
+<li><code>bufferWithin</code></li>
+</ul>
+<p>Pay attention to: Async ?=&gt;</p>
 <hr>
-<p>Gears:</p>
-<ul>
-<li>Task scheduling
-<ul>
-<li>Pro and cons</li>
-<li>proactiveness</li>
-<li><code>Producer</code> + <code>Consumer</code> design</li>
-</ul>
-</li>
-<li>Manipulation of channels with functions inspired by Rx</li>
-</ul>
-<p>Kotlin:</p>
-<ul>
-<li>flows</li>
-</ul>
+<p>Going back to the example, here is presented a schema summarizing the proposed design of the system.</p>
+<p><img src="../../res/img/rears.svg" alt="system design of the example" /></p>
 <hr>
+<h3 id="kotlin-coroutines-version">
+  Kotlin Coroutines version
+  <a class="anchor" href="#kotlin-coroutines-version">#</a>
+</h3>
+<h2 id="conclusions">
+  Conclusions
+  <a class="anchor" href="#conclusions">#</a>
+</h2>
 </article>
  
       
@@ -278,9 +385,9 @@ classDiagram
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/c26f6555197c9597da1b4582b4cc72283ae81605" title='Last modified by Luca Tassinari | February 21, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/58419fa40065e73a1c79eb0bf81a3a743104532b" title='Last modified by Luca Tassinari | February 22, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>February 21, 2024</span>
+      <span>February 22, 2024</span>
     </a>
   </div>
 
@@ -314,7 +421,17 @@ classDiagram
       <div class="book-toc-content">
         
   
-<nav id="TableOfContents"></nav>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#smart-hub-system-example">Smart Hub System example</a>
+      <ul>
+        <li><a href="#scala-gears-version">Scala Gears version</a></li>
+        <li><a href="#kotlin-coroutines-version">Kotlin Coroutines version</a></li>
+      </ul>
+    </li>
+    <li><a href="#conclusions">Conclusions</a></li>
+  </ul>
+</nav>
 
 
  

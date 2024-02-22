@@ -13,15 +13,15 @@ classDiagram class `SendableChannel[-T]` { &lt;&lt; trait &gt;&gt; &#43;sendSour
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/03-channels/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-02-21T10:56:36+01:00" />
+<meta property="article:modified_time" content="2024-02-22T11:01:27+01:00" />
 
 <title>03 Channels | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
 <link rel="icon" href="/PPS-22-direct-style-experiments/favicon.png" >
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/03-channels/">
-<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.f8de3645fe00591b41524aee174e19edd98a22255a2930a0cdc82a94835ba387.css" integrity="sha256-&#43;N42Rf4AWRtBUkruF04Z7dmKIiVaKTCgzcgqlINbo4c=" crossorigin="anonymous">
+<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.f57cd8d7b32fcb6fe52f977b168a7cdd5f7ce45f6c69221b19c15bb8a9aeea82.css" integrity="sha256-9XzY17Mvy2/lL5d7Fop83V985F9saSIbGcFbuKmu6oI=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.5e370f3a40ee651c8ef762860d43d599969ffb7c52173e45c6f61160a4273ee3.js" integrity="sha256-XjcPOkDuZRyO92KGDUPVmZaf&#43;3xSFz5FxvYRYKQnPuM=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.8adfd36327438c2f5f875a0495116001a6a9010a4bb13e1a16b1a87105a22724.js" integrity="sha256-it/TYydDjC9fh1oElRFgAaapAQpLsT4aFrGocQWiJyQ=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -183,12 +183,13 @@ https://github.com/alex-shpak/hugo-book
   
 <nav id="TableOfContents">
   <ul>
-    <li><a href="#organization-analyzer-example">Organization analyzer example</a>
+    <li><a href="#github-organization-analyzer-example">GitHub organization analyzer example</a>
       <ul>
-        <li><a href="#analyzer-and-app-controller">Analyzer and App controller</a></li>
+        <li><a href="#analyzer-and-app-controller">Analyzer and App Controller</a></li>
         <li><a href="#github-service">GitHub service</a></li>
       </ul>
     </li>
+    <li><a href="#conclusions">Conclusions</a></li>
   </ul>
 </nav>
 
@@ -278,9 +279,9 @@ classDiagram
 <blockquote>
 <p>Multiple producers can send data to the channel, as well as multiple consumers can read them, <strong>but each element is handled only <em>once</em>, by <em>one</em> of them</strong>, i.e. consumers <strong>compete</strong> with each other for sent values. Once the element is handled, it is immediately removed from the channel.</p>
 </blockquote>
-<h2 id="organization-analyzer-example">
-  Organization analyzer example
-  <a class="anchor" href="#organization-analyzer-example">#</a>
+<h2 id="github-organization-analyzer-example">
+  GitHub organization analyzer example
+  <a class="anchor" href="#github-organization-analyzer-example">#</a>
 </h2>
 <p>To show channels in action an example has been prepared:</p>
 <blockquote class="book-hint info">
@@ -291,7 +292,7 @@ classDiagram
 <p><img src="../../res/img/analyzer-e2e.png" alt="expected result" /></p>
 <p>As usual, the example has been implemented using monadic <code>Future</code>s, as well as Scala gears and Kotlin Coroutines.</p>
 <h3 id="analyzer-and-app-controller">
-  Analyzer and App controller
+  Analyzer and App Controller
   <a class="anchor" href="#analyzer-and-app-controller">#</a>
 </h3>
 <p>The direct version in Scala gears exposes the following interface, taking in input an organization name and a function through which is possible to react to results while they are computed.</p>
@@ -368,6 +369,10 @@ Thanks to the fact <code>Future</code>s are cancellable objects, whenever desire
 </li>
 </ul>
 <hr>
+<h2 id="conclusions">
+  Conclusions
+  <a class="anchor" href="#conclusions">#</a>
+</h2>
 </article>
  
       
@@ -377,9 +382,9 @@ Thanks to the fact <code>Future</code>s are cancellable objects, whenever desire
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/c26f6555197c9597da1b4582b4cc72283ae81605" title='Last modified by Luca Tassinari | February 21, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/58419fa40065e73a1c79eb0bf81a3a743104532b" title='Last modified by Luca Tassinari | February 22, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>February 21, 2024</span>
+      <span>February 22, 2024</span>
     </a>
   </div>
 
@@ -415,12 +420,13 @@ Thanks to the fact <code>Future</code>s are cancellable objects, whenever desire
   
 <nav id="TableOfContents">
   <ul>
-    <li><a href="#organization-analyzer-example">Organization analyzer example</a>
+    <li><a href="#github-organization-analyzer-example">GitHub organization analyzer example</a>
       <ul>
-        <li><a href="#analyzer-and-app-controller">Analyzer and App controller</a></li>
+        <li><a href="#analyzer-and-app-controller">Analyzer and App Controller</a></li>
         <li><a href="#github-service">GitHub service</a></li>
       </ul>
     </li>
+    <li><a href="#conclusions">Conclusions</a></li>
   </ul>
 </nav>
 
