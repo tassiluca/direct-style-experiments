@@ -8,7 +8,7 @@ import io.github.tassiLuca.smarthome.core.{
   SensorHealthCheckerComponent,
   TemperatureEntry,
   ThermostatComponent,
-  ThermostatSchedulerComponent,
+  ThermostatScheduler,
 }
 
 import concurrent.duration.DurationInt
@@ -16,12 +16,10 @@ import scala.language.postfixOps
 
 trait ThermostatHubManager
     extends ThermostatComponent
-    with ThermostatSchedulerComponent
     with HVACControllerComponent
     with SensorHealthCheckerComponent[TemperatureEntry]
     with AlertSystemComponent:
-  override val scheduler: ThermostatScheduler = ThermostatScheduler(19.0)
-  override val thermostat: Thermostat = Thermostat()
+  override val thermostat: Thermostat = Thermostat(ThermostatScheduler(19.0))
   override val sensorHealthChecker: SensorHealthChecker = SensorHealthChecker()
 
   def run(source: ReadableChannel[TemperatureEntry])(using Async, AsyncOperations): Unit =

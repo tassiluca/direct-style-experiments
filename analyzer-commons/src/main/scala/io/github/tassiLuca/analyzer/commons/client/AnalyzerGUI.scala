@@ -10,6 +10,7 @@ class AnalyzerGUI(controller: AppController) extends AnalyzerView:
   override def run(): Unit =
     gui.pack()
     gui.setVisible(true)
+    Thread.sleep(Long.MaxValue)
 
   override def update(result: OrganizationReport): Unit = SwingUtilities.invokeLater(() =>
     gui.contributionsModel.setDataVector(

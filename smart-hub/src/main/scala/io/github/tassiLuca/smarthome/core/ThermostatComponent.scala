@@ -6,17 +6,18 @@ import scala.util.Try
 import io.github.tassiLuca.rears.{Consumer, State}
 
 trait ThermostatComponent:
-  context: ThermostatSchedulerComponent with HVACControllerComponent =>
+  context: HVACControllerComponent =>
 
   /** The [[Thermostat]] instance. */
   val thermostat: Thermostat
 
   /** The entity in charge of controlling the heater and conditioner actuators based on read [[TemperatureEntry]]s. */
-  trait Thermostat extends Consumer[Seq[TemperatureEntry]] with State[Seq[TemperatureEntry]]
+  trait Thermostat extends Consumer[Seq[TemperatureEntry]] with State[Seq[TemperatureEntry]]:
+    val scheduler: ThermostatScheduler
 
   object Thermostat:
-    def apply(): Thermostat = ThermostatImpl()
+    def apply(thermostatScheduler: ThermostatScheduler): Thermostat = ThermostatImpl(thermostatScheduler)
 
-    private class ThermostatImpl extends Thermostat:
+    private class ThermostatImpl(override val scheduler: ThermostatScheduler) extends Thermostat:
       override protected def react(e: Try[Seq[TemperatureEntry]])(using Async): Unit =
         println(s"[THERMOSTAT] Received $e")
