@@ -3,11 +3,11 @@ package io.github.tassiLuca.rears
 import gears.async.TaskSchedule.Every
 import gears.async.default.given
 import gears.async.{Async, AsyncOperations, SendableChannel, Task, TaskSchedule, UnboundedChannel}
-
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import scala.util.Try
+import scala.collection.immutable.Seq
+import scala.util.{Success, Try}
 
 class ControllerTest extends AnyFlatSpec with Matchers:
 
@@ -27,14 +27,11 @@ class ControllerTest extends AnyFlatSpec with Matchers:
       consumers.foreach(_.asRunnable.run)
       producer.asRunnable.run.await
       // TODO: improve with an extension method that wait for a certain amount of time,
-      //  at the expiration of which the channel are closed and stop blocking!
+      //        at the expiration of which the channel are closed and stop blocking!
       AsyncOperations.sleep(2_000) // Ensure consumers have completed their reaction to publisher's events
-    println(consumerAValues)
-    println(consumerBValues)
     consumerAValues shouldEqual consumerBValues
-    // TODO: due to asynchrony, the first item may be lost :(
-    // consumerAValues.size shouldBe items
-    // consumerBValues.size shouldBe items
+    consumerAValues shouldBe Seq.range(0, items).map(Success(_))
+    consumerBValues shouldBe Seq.range(0, items).map(Success(_))
   }
 
   def publisher: Publisher[Item] = new Publisher[Int]:
