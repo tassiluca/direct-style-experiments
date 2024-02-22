@@ -14,7 +14,6 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/commons/direct-style-experiments.commons.main.iml" filepath="$PROJECT_DIR$/.idea/modules/commons/direct-style-experiments.commons.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/commons/direct-style-experiments.commons.test.iml" filepath="$PROJECT_DIR$/.idea/modules/commons/direct-style-experiments.commons.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/direct-style-experiments.main.iml" filepath="$PROJECT_DIR$/.idea/modules/direct-style-experiments.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/smart-home/direct-style-experiments.smart-home.main.iml" filepath="$PROJECT_DIR$/.idea/modules/smart-home/direct-style-experiments.smart-home.main.iml" />
     </modules>
   </component>
 </project>

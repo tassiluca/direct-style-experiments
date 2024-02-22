@@ -18,9 +18,9 @@ include(
     ":blog-ws-commons",
     ":blog-ws-direct",
     ":blog-ws-monadic",
-    ":rears-core",
-    ":smart-home",
     ":analyzer-commons",
     ":analyzer-monadic",
     ":analyzer-direct",
+    ":rears",
+    ":smart-hub",
 )
