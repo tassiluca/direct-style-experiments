@@ -24,6 +24,7 @@ class ChannelsContextTest extends AnyFunSpec with Matchers {
           case Right(_) => i = i + 1
         }.run
         produceOn(channel).run.await // waiting for producer to finish
+        AsyncOperations.sleep(1_000) // making sure consumer finishes
         i shouldBe itemsProduced
     }
   }
