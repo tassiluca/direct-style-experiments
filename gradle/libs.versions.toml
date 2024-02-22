@@ -1,6 +1,6 @@
 [versions]
 kotlin = "1.9.22"
-scala = "3.3.1"
+scala = "3.4.0"
 kotest = "5.8.0"
 mockito = "5.10.0"
 sttp = "3.9.3"
