@@ -16,7 +16,7 @@ To show these weaknesses in practice, a simple example of the core of a web serv
 
 **Idea**: develop a very simple (mocked) service which allows to retrieve and store from a repository blog posts, performing checks on the content and author before the actual storage.
 
-{{</hint>}}
+{{< /hint >}}
 
 The example has been implemented using:
 
@@ -389,3 +389,7 @@ w.r.t. kotlin coroutines:
 - "Finally, about function coloring: Capabilities are actually much better here than other language's proposals such as suspend or async which feel clunky in comparison. This becomes obvious when you consider higher order functions. Capabilities let us define a single map (with no change in signature compared to now!) that works for sync as well as async function arguments. That's the real breakthrough here, which will make everything work so much smoother. I have talked about this elsewhere and this response is already very long, so I will leave it at that."
 
 how suspension is implemented
+
+---
+
+## Conclusions

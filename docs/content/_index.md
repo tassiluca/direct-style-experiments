@@ -13,8 +13,8 @@ Analyze aspects such as:
 
 ## Table of contents
 
-1. [Boundary and break](./docs/01-boundaries)
-2. [Blog posts service example: a direct-style vs monadic comparison](./docs/02-basics)
-3. [Channels](./docs/03-channels.md)
-4. [IoT example](./docs/04-rears.md)
-5. [Going further](./docs/05-going-further.md)
+1. [`Boundary` and `break`](./docs/01-boundaries)
+2. [Basic asynchronous constructs](./docs/02-basics)
+3. [Channels as a communication primitive](./docs/03-channels.md)
+4. [Reactive-like direct style](./docs/04-rears.md)
+5. [Conclusions](./docs/05-going-further.md)

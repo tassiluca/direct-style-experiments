@@ -1,0 +1,17 @@
+.mermaid {
+    margin: 0 auto;
+    text-align: center;
+    width: auto;
+
+    svg {
+        max-width: 100%;
+    }
+
+    &.smaller {
+        width: 90%;
+    }
+
+    &.smallest {
+        width: 55%;
+    }
+}

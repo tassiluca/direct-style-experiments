@@ -52,7 +52,7 @@ Three types of channels exist:
 
 > Multiple producers can send data to the channel, as well as multiple consumers can read them, **but each element is handled only _once_, by _one_ of them**, i.e. consumers **compete** with each other for sent values. Once the element is handled, it is immediately removed from the channel.
 
-## Organization analyzer example
+## GitHub organization analyzer example
 
 To show channels in action an example has been prepared:
 
@@ -66,7 +66,7 @@ Final result:
 
 As usual, the example has been implemented using monadic `Future`s, as well as Scala gears and Kotlin Coroutines.
 
-### Analyzer and App controller
+### Analyzer and App Controller
 
 The direct version in Scala gears exposes the following interface, taking in input an organization name and a function through which is possible to react to results while they are computed.
 
@@ -154,3 +154,5 @@ With respect to reactive programming, they are still quite less reach in terms o
   - better closable
 
 ---
+
+## Conclusions
