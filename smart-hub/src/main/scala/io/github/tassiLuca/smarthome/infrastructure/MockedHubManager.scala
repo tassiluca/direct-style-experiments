@@ -8,7 +8,7 @@ import io.github.tassiLuca.smarthome.core.TemperatureEntry
 object MockedHubManager:
 
   private val temperatureSource = GraphicalTemperatureSource()
-  private val thermostatHub = MockedThermostatHubManager()
+  private val thermostatHub = new MockedThermostatHubManager() with SwingDashboard()
 
   def run(using Async, AsyncOperations): Unit =
     val channelBySensor = temperatureSource.publishingChannel.groupBy(e => e.getClass)

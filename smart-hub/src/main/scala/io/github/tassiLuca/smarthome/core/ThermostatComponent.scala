@@ -6,7 +6,7 @@ import scala.util.Try
 import io.github.tassiLuca.rears.{Consumer, State}
 
 trait ThermostatComponent:
-  context: HVACControllerComponent =>
+  context: HeaterComponent with DashboardComponent =>
 
   /** The [[Thermostat]] instance. */
   val thermostat: Thermostat
@@ -21,3 +21,4 @@ trait ThermostatComponent:
     private class ThermostatImpl(override val scheduler: ThermostatScheduler) extends Thermostat:
       override protected def react(e: Try[Seq[TemperatureEntry]])(using Async): Unit =
         println(s"[THERMOSTAT] Received $e")
+        e.foreach(entries => context.dashboard.updateTemperature(entries))

@@ -13,11 +13,9 @@ import scala.util.Random
 class ThermostatHubManagerTest extends AnyFlatSpec with Matchers {
 
   val thermostatHubManager: ThermostatHubManager = new ThermostatHubManager:
-    override val hvacController: HVACController = new HVACController:
-      override def onHeater(using Async): Unit = ???
-      override def offHeather(using Async): Unit = ???
-      override def onAirConditioner(using Async): Unit = ???
-      override def offAirConditioner(using Async): Unit = ???
+    override val heater: Heater = new Heater:
+      override def on(using Async): Unit = ???
+      override def off(using Async): Unit = ???
 
     override val alertSystem: AlertSystem = new AlertSystem:
       override def notify(message: String)(using Async): Unit = ???

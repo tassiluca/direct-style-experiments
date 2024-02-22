@@ -6,7 +6,7 @@ import io.github.tassiLuca.rears.{Consumer, State}
 import scala.util.{Failure, Success, Try}
 
 trait SensorHealthCheckerComponent[E <: SensorEvent]:
-  context: AlertSystemComponent =>
+  context: AlertSystemComponent with DashboardComponent =>
 
   /** The [[SensorHealthChecker]] instance. */
   val sensorHealthChecker: SensorHealthChecker
@@ -23,6 +23,6 @@ trait SensorHealthCheckerComponent[E <: SensorEvent]:
       override protected def react(e: Try[Seq[E]])(using Async): Unit = e match
         case Success(es) =>
           if state.isDefined && es.map(_.name) != state.map(_.map(_.name)).get then
-            println(s"[CHECKER] Detected a change: current state is $state, new e is $es")
-          else println("[CHECKER] Everything ok")
+            context.alertSystem.notify(s"Detected a change: current state is $state, new e is $es")
+            context.dashboard.newAlert(s"Detected a change: current state is $state, new e is $es")
         case Failure(es) => context.alertSystem.notify(es.getMessage)
