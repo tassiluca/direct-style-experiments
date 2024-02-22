@@ -108,3 +108,12 @@ class TasksTest extends AnyFunSpec with Matchers {
 //        Thread.sleep(10_000)
 //        p.cancel()
 //        p.run().awaitResult
+//
+//   def produceOn(channel: SendableChannel[Terminable[Item]]): Task[Unit] =
+//    var i = 0
+//    Task {
+//      println(i)
+//      i = i + 1
+//      channel.send(i)
+//    }.schedule(RepeatUntilFailure(maxRepetitions = itemsProduced))
+//
