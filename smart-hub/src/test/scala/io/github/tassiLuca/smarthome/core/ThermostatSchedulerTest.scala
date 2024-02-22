@@ -8,7 +8,7 @@ import java.time.{DayOfWeek, LocalDateTime}
 class ThermostatSchedulerTest extends AnyFlatSpec with Matchers {
 
   private val targetTemperature = 19.5
-  private val thermostatScheduler = ThermostatScheduler(targetTemperature)
+  private val thermostatScheduler = ThermostatScheduler.byHour(targetTemperature)
 
   "ThermostatScheduler" should s"be initialized to have a target temperature of $targetTemperature" in {
     thermostatScheduler.currentTarget shouldBe targetTemperature

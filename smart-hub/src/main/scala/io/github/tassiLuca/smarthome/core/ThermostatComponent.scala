@@ -19,6 +19,22 @@ trait ThermostatComponent:
     def apply(thermostatScheduler: ThermostatScheduler): Thermostat = ThermostatImpl(thermostatScheduler)
 
     private class ThermostatImpl(override val scheduler: ThermostatScheduler) extends Thermostat:
+
+      private val hysteresis = 1.5
+
       override protected def react(e: Try[Seq[TemperatureEntry]])(using Async): Unit =
-        println(s"[THERMOSTAT] Received $e")
-        e.foreach(entries => context.dashboard.updateTemperature(entries))
+        for
+          entries <- e
+          average = entries.map(_.temperature).sum / entries.size
+        yield average.evaluate()
+
+      extension (t: Temperature)
+        private def evaluate()(using Async): Unit =
+          context.dashboard.temperatureUpdated(t)
+          if t > scheduler.currentTarget + hysteresis then offHeater() else onHeater()
+
+        private def offHeater()(using Async): Unit =
+          context.heater.off(); context.dashboard.offHeaterNotified()
+
+        private def onHeater()(using Async): Unit =
+          context.heater.on(); context.dashboard.onHeaterNotified()

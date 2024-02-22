@@ -1,13 +1,11 @@
 package io.github.tassiLuca.smarthome.core
 
 trait DashboardComponent:
-  
-  enum HeaterState:
-    case ON, OFF
-  
+
   val dashboard: Dashboard
-  
+
   trait Dashboard:
-    def updateTemperature(entries: Seq[TemperatureEntry]): Unit
-    def newHeaterState(state: HeaterState): Unit
-    def newAlert(msg: String): Unit
+    def temperatureUpdated(newTemperature: Temperature): Unit
+    def onHeaterNotified(): Unit
+    def offHeaterNotified(): Unit
+    def alertNotified(msg: String): Unit

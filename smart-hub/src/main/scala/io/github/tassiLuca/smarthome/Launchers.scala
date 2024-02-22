@@ -4,5 +4,7 @@ import gears.async.default.given
 import gears.async.Async
 import io.github.tassiLuca.smarthome.infrastructure.MockedHubManager
 
-@main def launchMockedHub(): Unit = Async.blocking:
-  MockedHubManager.run
+/** The launcher of a mocked version of the application, using UI simulators. */
+@main def launchMockedHub(): Unit =
+  Async.blocking:
+    MockedHubManager().run()

@@ -13,7 +13,7 @@ trait ThermostatHubManager
     with SensorHealthCheckerComponent[TemperatureEntry]
     with AlertSystemComponent
     with DashboardComponent:
-  override val thermostat: Thermostat = Thermostat(ThermostatScheduler(19.0))
+  override val thermostat: Thermostat = Thermostat(ThermostatScheduler.byHour(19.0))
   override val sensorHealthChecker: SensorHealthChecker = SensorHealthChecker()
 
   def run(source: ReadableChannel[TemperatureEntry])(using Async, AsyncOperations): Unit =

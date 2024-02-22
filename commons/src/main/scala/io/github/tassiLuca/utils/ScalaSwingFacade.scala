@@ -9,8 +9,9 @@ object ScalaSwingFacade:
 
   given Conversion[JComponent, (JComponent, Constraint)] = c => (c, ())
 
-  def createPanel(comps: (JComponent, Constraint)*)(using layout: LayoutManager = FlowLayout()): JPanel =
-    comps.foldLeft(JPanel(layout))((p, c) => { p.add(c._1, c._2); p })
+  def createPanel(comps: (JComponent, Constraint)*)(using
+      layout: LayoutManager = FlowLayout(FlowLayout.CENTER),
+  ): JPanel = comps.foldLeft(JPanel(layout))((p, c) => { p.add(c._1, c._2); p })
 
   extension (p: JPanel)
     def addWithRepaint(c: Component): JPanel =

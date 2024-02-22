@@ -4,7 +4,7 @@ import gears.async.TaskSchedule.{Every, RepeatUntilFailure}
 import gears.async.default.given
 import gears.async.{Async, AsyncOperations, Future, ReadableChannel, Task}
 import io.github.tassiLuca.rears.groupBy
-import io.github.tassiLuca.smarthome.core.{SensorEvent, SensorSource, TemperatureEntry}
+import io.github.tassiLuca.smarthome.core.{SensorEvent, SensorSource, Temperature, TemperatureEntry}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -14,14 +14,15 @@ class ThermostatHubManagerTest extends AnyFlatSpec with Matchers {
 
   val thermostatHubManager: ThermostatHubManager = new ThermostatHubManager:
     override val heater: Heater = new Heater:
-      override def on(using Async): Unit = ???
-      override def off(using Async): Unit = ???
+      override def on()(using Async): Unit = ???
+      override def off()(using Async): Unit = ???
+      override def state: HeaterState = ???
 
     override val dashboard: Dashboard = new Dashboard:
-      override def updateTemperature(entries: Seq[TemperatureEntry]): Unit = ???
-      override def newHeaterState(state: HeaterState): Unit = ???
-
-      override def newAlert(msg: String): Unit = ???
+      override def temperatureUpdated(newTemperature: Temperature): Unit = ???
+      override def alertNotified(msg: String): Unit = ???
+      override def onHeaterNotified(): Unit = ???
+      override def offHeaterNotified(): Unit = ???
 
     override val alertSystem: AlertSystem = new AlertSystem:
       override def notify(message: String)(using Async): Unit = ???

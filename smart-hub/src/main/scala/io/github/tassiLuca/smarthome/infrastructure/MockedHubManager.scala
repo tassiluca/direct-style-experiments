@@ -5,12 +5,12 @@ import gears.async.{Async, AsyncOperations, ReadableChannel, Task}
 import io.github.tassiLuca.rears.groupBy
 import io.github.tassiLuca.smarthome.core.TemperatureEntry
 
-object MockedHubManager:
+class MockedHubManager(using Async, AsyncOperations):
 
   private val temperatureSource = GraphicalTemperatureSource()
   private val thermostatHub = new MockedThermostatHubManager() with SwingDashboard()
 
-  def run(using Async, AsyncOperations): Unit =
+  def run(): Unit =
     val channelBySensor = temperatureSource.publishingChannel.groupBy(e => e.getClass)
     Task {
       channelBySensor.read() match
