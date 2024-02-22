@@ -5,7 +5,7 @@ kotest = "5.8.0"
 mockito = "5.10.0"
 sttp = "3.9.3"
 retrofit = "2.9.0"
-coroutines = "1.7.3"
+coroutines = "1.8.0"
 
 [libraries]
 scala-stdlib = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
