@@ -17,7 +17,7 @@ trait Publisher[E]:
   def publishingChannel: ReadableChannel[E] = channel.asReadable
 
 /** A consumer, i.e. a runnable entity devoted to consume data from a channel. */
-trait Consumer[E]:
+trait Consumer[E, S]:
 
   /** The [[SendableChannel]] to send items to, where consumers listen for new items. */
   val listeningChannel: SendableChannel[Try[E]] = UnboundedChannel()
@@ -28,19 +28,19 @@ trait Consumer[E]:
   }.schedule(RepeatUntilFailure())
 
   /** The suspendable reaction triggered upon a new read of an item succeeds. */
-  protected def react(e: Try[E])(using Async): Unit
+  protected def react(e: Try[E])(using Async): S
 
-/** A mixin to make consumers stateful. */
-trait State[E]:
-  consumer: Consumer[E] =>
+/** A mixin to make consumer stateful. Its state is updated with the result of the [[react]]ion. */
+trait State[E, S]:
+  consumer: Consumer[E, S] =>
 
-  private var _state: Option[E] = None
+  private var _state: Option[S] = None
 
-  def state: Option[E] = synchronized(_state)
+  /** @return the current state of the consumer, wrapped within an [[Option]]. */
+  def state: Option[S] = synchronized(_state)
 
   override def asRunnable: Task[Unit] = Task {
     listeningChannel.asInstanceOf[Channel[Try[E]]].read().foreach { e =>
-      react(e)
-      synchronized { _state = e.toOption }
+      synchronized { _state = Some(react(e)) }
     }
   }.schedule(RepeatUntilFailure())

@@ -12,7 +12,9 @@ trait ThermostatComponent:
   val thermostat: Thermostat
 
   /** The entity in charge of controlling the heater and conditioner actuators based on read [[TemperatureEntry]]s. */
-  trait Thermostat extends Consumer[Seq[TemperatureEntry]] with State[Seq[TemperatureEntry]]:
+  trait Thermostat
+      extends Consumer[Seq[TemperatureEntry], Option[Temperature]]
+      with State[Seq[TemperatureEntry], Option[Temperature]]:
     val scheduler: ThermostatScheduler
 
   object Thermostat:
@@ -22,16 +24,16 @@ trait ThermostatComponent:
 
       private val hysteresis = 1.5
 
-      override protected def react(e: Try[Seq[TemperatureEntry]])(using Async): Unit =
-        for
-          entries <- e
-          average = entries.map(_.temperature).sum / entries.size
-        yield average.evaluate()
+      override protected def react(e: Try[Seq[TemperatureEntry]])(using Async): Option[Temperature] =
+        e.map { entries => entries.map(_.temperature).sum / entries.size }
+          .map { avg => avg.evaluate(); avg }
+          .toOption
 
       extension (t: Temperature)
         private def evaluate()(using Async): Unit =
+          val target = scheduler.currentTarget
           context.dashboard.temperatureUpdated(t)
-          if t > scheduler.currentTarget + hysteresis then offHeater() else onHeater()
+          if t > target + hysteresis then offHeater() else if t < target then onHeater()
 
         private def offHeater()(using Async): Unit =
           context.heater.off(); context.dashboard.offHeaterNotified()

@@ -12,7 +12,7 @@ trait SensorHealthCheckerComponent[E <: SensorEvent]:
   val sensorHealthChecker: SensorHealthChecker
 
   /** A generic consumer of [[SensorEvent]] that detects */
-  trait SensorHealthChecker extends Consumer[Seq[E]] with State[Seq[E]]
+  trait SensorHealthChecker extends Consumer[Seq[E], Seq[E]] with State[Seq[E], Seq[E]]
 
   object SensorHealthChecker:
 
@@ -20,7 +20,7 @@ trait SensorHealthCheckerComponent[E <: SensorEvent]:
 
     private class SensorHealthCheckerImpl extends SensorHealthChecker:
 
-      override protected def react(e: Try[Seq[E]])(using Async): Unit = e match
+      override protected def react(e: Try[Seq[E]])(using Async): Seq[E] = e match
         case Success(es) =>
           if state.isDefined && es.toSet.map(_.name) != state.map(_.toSet.map(_.name)).get then
             val alertMessage =
@@ -33,4 +33,5 @@ trait SensorHealthCheckerComponent[E <: SensorEvent]:
                  |""".stripMargin
             context.alertSystem.notify(alertMessage)
             context.dashboard.alertNotified(alertMessage)
-        case Failure(es) => context.alertSystem.notify(es.getMessage)
+          es
+        case Failure(es) => context.alertSystem.notify(es.getMessage); Seq()

@@ -6,7 +6,7 @@ object Controller:
 
   def oneToMany[T, R](
       publisherChannel: ReadableChannel[T],
-      consumers: Set[Consumer[R]],
+      consumers: Set[Consumer[R, ?]],
       transformation: PipelineTransformation[T, R] = identity,
   ): Task[Unit] = Task:
     val multiplexer = ChannelMultiplexer[R]()

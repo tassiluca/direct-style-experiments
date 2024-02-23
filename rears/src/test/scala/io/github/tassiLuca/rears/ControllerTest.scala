@@ -18,7 +18,7 @@ class ControllerTest extends AnyFlatSpec with Matchers:
     var consumerAValues = Seq[Try[Int]]()
     var consumerBValues = Seq[Try[Int]]()
     val producer = publisher
-    val consumers = Set(
+    val consumers = Set[Consumer[Int, ?]](
       consumer(e => consumerAValues = consumerAValues :+ e),
       consumer(e => consumerBValues = consumerBValues :+ e),
     )
@@ -41,6 +41,6 @@ class ControllerTest extends AnyFlatSpec with Matchers:
       i = i + 1
     }.schedule(Every(1_000, maxRepetitions = items))
 
-  def consumer(action: Try[Item] => Unit): Consumer[Int] = new Consumer[Int]:
+  def consumer(action: Try[Item] => Unit): Consumer[Int, Unit] = new Consumer[Int, Unit]:
     override val listeningChannel: SendableChannel[Try[Item]] = UnboundedChannel[Try[Int]]()
     override def react(e: Try[Item])(using Async): Unit = action(e)
