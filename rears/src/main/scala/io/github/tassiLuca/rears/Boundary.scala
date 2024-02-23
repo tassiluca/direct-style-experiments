@@ -5,21 +5,21 @@ import gears.async.TaskSchedule.RepeatUntilFailure
 
 import scala.util.Try
 
-/** A publisher, i.e. a runnable active entity producing items on a channel. */
+/** A publisher, i.e. a runnable entity producing items on a channel. */
 trait Publisher[E]:
-  /** The [[Channel]] to send items to. */
+  /** The [[Channel]] where specific [[Publisher]]s send items to. */
   protected val channel: Channel[E] = UnboundedChannel()
 
-  /** @return a runnable [[Task]]. */
+  /** @return the publisher's behavior encoded as a runnable [[Task]]. */
   def asRunnable: Task[Unit]
 
-  /** @return a [[ReadableChannel]] where produced items are placed. */
+  /** @return the [[ReadableChannel]] where produced items are placed. */
   def publishingChannel: ReadableChannel[E] = channel.asReadable
 
-/** A consumer, i.e. a runnable active entity devoted to consuming data from a channel. */
+/** A consumer, i.e. a runnable entity devoted to consume data from a channel. */
 trait Consumer[E]:
 
-  /** The [[SendableChannel]] to send items to. */
+  /** The [[SendableChannel]] to send items to, where consumers listen for new items. */
   val listeningChannel: SendableChannel[Try[E]] = UnboundedChannel()
 
   /** @return a runnable [[Task]]. */
