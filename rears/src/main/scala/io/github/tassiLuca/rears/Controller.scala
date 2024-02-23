@@ -1,8 +1,20 @@
 package io.github.tassiLuca.rears
 
+import gears.async.TaskSchedule.RepeatUntilFailure
 import gears.async.{Async, ChannelMultiplexer, ReadableChannel, Task}
+import io.github.tassiLuca.utils.ChannelsPimping.tryable
 
 object Controller:
+
+  def oneToOne[T, R](
+      publisherChannel: ReadableChannel[T],
+      consumer: Consumer[R, ?],
+      transformation: PipelineTransformation[T, R] = identity,
+  ): Task[Unit] =
+    val tranformedChannel = transformation(publisherChannel)
+    Task {
+      consumer.listeningChannel.send(tranformedChannel.read().tryable)
+    }.schedule(RepeatUntilFailure())
 
   def oneToMany[T, R](
       publisherChannel: ReadableChannel[T],

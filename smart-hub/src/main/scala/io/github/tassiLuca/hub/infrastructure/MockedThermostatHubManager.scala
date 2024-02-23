@@ -2,9 +2,9 @@ package io.github.tassiLuca.hub.infrastructure
 
 import gears.async.Async
 import io.github.tassiLuca.hub.application.ThermostatHubManager
-import io.github.tassiLuca.hub.core.DashboardComponent
+import io.github.tassiLuca.hub.core.ports.DashboardServiceComponent
 
-trait MockedThermostatHubManager extends ThermostatHubManager with DashboardComponent:
+trait MockedThermostatHubManager extends ThermostatHubManager with DashboardServiceComponent:
   override val heater: Heater = new Heater:
     private var _state = HeaterState.OFF
     override def state: HeaterState = _state
@@ -12,4 +12,4 @@ trait MockedThermostatHubManager extends ThermostatHubManager with DashboardComp
     override def off()(using Async): Unit = println("[Heater] Heater turned off"); _state = HeaterState.OFF
 
   override val alertSystem: AlertSystem = new AlertSystem:
-    override def notify(message: String)(using Async): Unit = println(s"[ALERT-SYSTEM] $message")
+    override def notify(message: String)(using Async): Unit = println(s"[Alert-System] $message")

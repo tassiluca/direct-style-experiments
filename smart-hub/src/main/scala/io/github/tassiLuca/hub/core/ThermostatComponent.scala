@@ -1,12 +1,14 @@
 package io.github.tassiLuca.hub.core
 
 import gears.async.Async
+import io.github.tassiLuca.hub.core.ports.{DashboardServiceComponent, HeaterComponent}
 
 import scala.util.Try
 import io.github.tassiLuca.rears.{Consumer, State}
 
+/** The component encapsulating the thermostat. */
 trait ThermostatComponent:
-  context: HeaterComponent & DashboardComponent =>
+  context: HeaterComponent & DashboardServiceComponent =>
 
   /** The [[Thermostat]] instance. */
   val thermostat: Thermostat
@@ -25,9 +27,10 @@ trait ThermostatComponent:
       private val hysteresis = 1.5
 
       override protected def react(e: Try[Seq[TemperatureEntry]])(using Async): Option[Temperature] =
-        e.map { entries => entries.map(_.temperature).sum / entries.size }
-          .map { avg => avg.evaluate(); avg }
-          .toOption
+        for
+          averageTemperature <- e.map { entries => entries.map(_.temperature).sum / entries.size }.toOption
+          _ = averageTemperature.evaluate()
+        yield averageTemperature
 
       extension (t: Temperature)
         private def evaluate()(using Async): Unit =

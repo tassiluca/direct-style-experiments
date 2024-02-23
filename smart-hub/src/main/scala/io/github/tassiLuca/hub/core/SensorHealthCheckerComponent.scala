@@ -1,17 +1,18 @@
 package io.github.tassiLuca.hub.core
 
 import gears.async.Async
+import io.github.tassiLuca.hub.core.ports.{AlertSystemComponent, DashboardServiceComponent}
 import io.github.tassiLuca.rears.{Consumer, State}
 
 import scala.util.{Failure, Success, Try}
 
 trait SensorHealthCheckerComponent[E <: SensorEvent]:
-  context: AlertSystemComponent & DashboardComponent =>
+  context: AlertSystemComponent & DashboardServiceComponent =>
 
   /** The [[SensorHealthChecker]] instance. */
   val sensorHealthChecker: SensorHealthChecker
 
-  /** A generic consumer of [[SensorEvent]] that detects */
+  /** A generic consumer of [[SensorEvent]] that detects probable sensing unit malfunctioning. */
   trait SensorHealthChecker extends Consumer[Seq[E], Seq[E]] with State[Seq[E], Seq[E]]
 
   object SensorHealthChecker:
