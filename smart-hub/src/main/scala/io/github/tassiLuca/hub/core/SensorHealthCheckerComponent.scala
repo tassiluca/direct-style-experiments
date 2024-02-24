@@ -4,6 +4,7 @@ import gears.async.Async
 import io.github.tassiLuca.hub.core.ports.{AlertSystemComponent, DashboardServiceComponent}
 import io.github.tassiLuca.rears.{Consumer, State}
 
+import java.util.Date
 import scala.util.{Failure, Success, Try}
 
 trait SensorHealthCheckerComponent[E <: SensorEvent]:
@@ -22,17 +23,11 @@ trait SensorHealthCheckerComponent[E <: SensorEvent]:
     private class SensorHealthCheckerImpl extends SensorHealthChecker:
 
       override protected def react(e: Try[Seq[E]])(using Async): Seq[E] = e match
-        case Success(es) =>
-          if state.isDefined && es.toSet.map(_.name) != state.map(_.toSet.map(_.name)).get then
-            val alertMessage =
-              s"""
-                 |Detected a change: ${state
-                  .map(_.toSet -- es.toSet)
-                  .get
-                  .map(_.name)
-                  .foldLeft("")((t, tt) => t + ", " + tt)} missing!
-                 |""".stripMargin
+        case Success(current) =>
+          val noMoreActiveSensors = state.map(ex => ex.map(_.name).toSet -- current.map(_.name).toSet)
+          if noMoreActiveSensors.isDefined then
+            val alertMessage = s"[${Date()}] Detected ${noMoreActiveSensors.get.mkString(", ")} no more active!"
             context.alertSystem.notify(alertMessage)
             context.dashboard.alertNotified(alertMessage)
-          es
+          current
         case Failure(es) => context.alertSystem.notify(es.getMessage); Seq()

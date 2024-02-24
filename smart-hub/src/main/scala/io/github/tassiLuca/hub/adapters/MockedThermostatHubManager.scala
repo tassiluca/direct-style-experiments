@@ -1,4 +1,4 @@
-package io.github.tassiLuca.hub.infrastructure
+package io.github.tassiLuca.hub.adapters
 
 import gears.async.Async
 import io.github.tassiLuca.hub.application.ThermostatHubManager

@@ -1,8 +1,8 @@
-package io.github.tassiLuca.hub.infrastructure
+package io.github.tassiLuca.hub.adapters
 
 import gears.async.{Async, Future, Task}
 import io.github.tassiLuca.hub.core.{SensorSource, TemperatureEntry}
-import io.github.tassiLuca.hub.infrastructure.ui.TemperatureSourceUI
+import io.github.tassiLuca.hub.adapters.ui.TemperatureSourceUI
 
 class GraphicalTemperatureSource(using Async) extends SensorSource:
 

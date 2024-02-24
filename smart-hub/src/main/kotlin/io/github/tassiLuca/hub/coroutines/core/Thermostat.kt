@@ -19,5 +19,6 @@ class Thermostat(
 
     override suspend fun update() {
         println("Thermostat updates its state: $state")
+        state = emptyList()
     }
 }

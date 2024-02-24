@@ -1,4 +1,4 @@
-package io.github.tassiLuca.hub.infrastructure.ui
+package io.github.tassiLuca.hub.adapters.ui
 
 import java.awt.{BorderLayout, Component, Dimension}
 import javax.swing.*
@@ -17,8 +17,8 @@ class TemperatureSourceUI(publishHandler: (String, Double) => Unit) extends JFra
   middle.setLayout(BoxLayout(middle, BoxLayout.Y_AXIS))
   addButton.addActionListener(_ => addSensorTo(middle))
   private val mainPanel = createPanel(
-    (addButton, BorderLayout.NORTH),
     (middle, BorderLayout.CENTER),
+    (addButton, BorderLayout.SOUTH),
   )(using BorderLayout())
   getContentPane.add(mainPanel)
 
