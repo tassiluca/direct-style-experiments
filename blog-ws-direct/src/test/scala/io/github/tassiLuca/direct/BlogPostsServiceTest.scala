@@ -14,7 +14,7 @@ class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
   val postTitle = "A hello world post"
   val postBody = "Hello World Scala Gears!"
 
-  def newBlogPostsAppInstance(): BlogPostsApp with CheckFlag = new BlogPostsApp with CheckFlag:
+  def newBlogPostsAppInstance(): BlogPostsApp & CheckFlag = new BlogPostsApp with CheckFlag:
     private var _completedChecks: Set[Check] = Set.empty
     override def completedChecks: Set[Check] = _completedChecks
     override val contentVerifier: ContentVerifier = (t, b) =>

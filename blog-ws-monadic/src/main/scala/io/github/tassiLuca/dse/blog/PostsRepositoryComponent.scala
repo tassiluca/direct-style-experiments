@@ -34,7 +34,7 @@ trait PostsRepositoryComponent:
 
       override def save(post: Post)(using ExecutionContext): Future[Post] = Future:
         require(!posts.exists(_.title == post.title), "A post with same title has already been saved")
-        "PostsRepository" simulatesBlocking s"saving post '${post.title}'"
+        "PostsRepository".simulatesBlocking(s"saving post '${post.title}'")
         synchronized { posts = posts + post }
         post
 
@@ -42,9 +42,9 @@ trait PostsRepositoryComponent:
         posts.exists(_.title == postTitle)
 
       override def load(postTitle: Title)(using ExecutionContext): Future[Option[Post]] = Future:
-        "PostsRepository" simulatesBlocking s"loading post '$postTitle'"
+        "PostsRepository".simulatesBlocking(s"loading post '$postTitle'")
         posts.find(_.title == postTitle)
 
       override def loadAll()(using ExecutionContext): Future[LazyList[Post]] = Future:
-        "PostsRepository" simulatesBlocking s"loading all blog posts"
+        "PostsRepository".simulatesBlocking(s"loading all blog posts")
         LazyList.from(posts)

@@ -8,7 +8,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 /** The component blog posts service. */
 trait PostsServiceComponent:
-  context: PostsRepositoryComponent with PostsModel =>
+  context: PostsRepositoryComponent & PostsModel =>
 
   /** The blog post service instance. */
   val service: PostsService

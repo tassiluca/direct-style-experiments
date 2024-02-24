@@ -68,7 +68,7 @@ class PipelineTransformationsTest extends AnyFunSpec with Matchers {
         val c = UnboundedChannel[Int]()
         infiniteProducer(every = 3000 milliseconds, channel = c)
         infiniteProducer(every = 3500 milliseconds, channel = c)
-        val buffered = c bufferWithin (2 seconds)
+        val buffered = c.bufferWithin(2 seconds)
         for i <- 0 to 3 do buffered.read() shouldBe Right(List(i, i))
     }
   }

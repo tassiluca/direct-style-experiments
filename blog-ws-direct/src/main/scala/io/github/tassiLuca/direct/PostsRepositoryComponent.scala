@@ -33,7 +33,7 @@ trait PostsRepositoryComponent:
 
       override def save(post: Post)(using Async): Post =
         require(!exists(post.title), "A post with same title has already been saved")
-        "PostsRepository" simulates s"saving post '${post.title}'"
+        "PostsRepository".simulates(s"saving post '${post.title}'")
         synchronized { posts = posts + post }
         post
 
@@ -41,9 +41,9 @@ trait PostsRepositoryComponent:
         posts.exists(_.title == postTitle)
 
       override def load(postTitle: Title)(using Async): Option[Post] =
-        "PostsRepository" simulates s"loading post '$postTitle'"
+        "PostsRepository".simulates(s"loading post '$postTitle'")
         posts.find(_.title == postTitle)
 
       override def loadAll()(using Async): LazyList[Post] =
-        "PostsRepository" simulates s"loading all blog posts"
+        "PostsRepository".simulates(s"loading all blog posts")
         LazyList.from(posts)
