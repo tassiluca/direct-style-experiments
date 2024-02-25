@@ -4,6 +4,10 @@
             "language": "markdown",
             "scheme": "file",
             "pattern": "content/docs/03-channels.md"
+        },
+        {
+            "language": "markdown",
+            "scheme": "file"
         }
     ]
 }

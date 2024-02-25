@@ -1,7 +1,7 @@
 package io.github.tassiLuca.boundaries.examples
 
-import io.github.tassiLuca.boundaries.result
-import io.github.tassiLuca.boundaries.result.{Error, Ok, Result}
+import io.github.tassiLuca.boundaries.resultant
+import io.github.tassiLuca.boundaries.resultant.{Error, Ok, Result}
 
 object ResultExamples extends App:
 
@@ -15,7 +15,7 @@ object ResultExamples extends App:
     Error("The user doesn't exists")
 
   def together(): Result[String] =
-    result:
+    resultant:
       val user = getUser("101").?
       val address = getAddress(user).?
       user + address

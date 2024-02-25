@@ -3,8 +3,10 @@ package io.github.tassiLuca.boundaries
 import scala.util.boundary
 import scala.util.boundary.{Label, break}
 
-object result:
+/** Represents a computation that will hopefully return [[Ok]] with its result or an [[Error]] otherwise. */
+object resultant:
 
+  /** A rust-like `Result` error type. */
   sealed trait Result[+T]
   case class Ok[+T](t: T) extends Result[T]
   case class Error(e: String) extends Result[Nothing]
