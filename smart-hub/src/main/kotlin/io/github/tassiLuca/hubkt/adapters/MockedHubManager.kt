@@ -1,7 +1,7 @@
-package io.github.tassiLuca.hub.coroutines.infrastructure
+package io.github.tassiLuca.hubkt.adapters
 
-import io.github.tassiLuca.hub.coroutines.application.ThermostatHubManager
-import io.github.tassiLuca.hub.coroutines.core.TemperatureEntry
+import io.github.tassiLuca.hubkt.application.ThermostatHubManager
+import io.github.tassiLuca.hubkt.core.TemperatureEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -10,8 +10,11 @@ import kotlin.coroutines.CoroutineContext
 /** A mocked hub manager. */
 class MockedHubManager(coroutineContext: CoroutineContext) {
 
+    /** The dashboard. */
+    val dashboard = SwingDashboard()
+
     /** The thermostat hub. */
-    val thermostatHub = ThermostatHubManager(coroutineContext)
+    val thermostatHub = ThermostatHubManager(dashboard, coroutineContext)
 
     /** The sensor source. */
     val sensorSource = GraphicalTemperatureSource()

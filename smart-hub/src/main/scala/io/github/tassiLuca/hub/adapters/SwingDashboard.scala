@@ -1,7 +1,7 @@
 package io.github.tassiLuca.hub.adapters
 
 import io.github.tassiLuca.hub.adapters.ui.DashboardUI
-import io.github.tassiLuca.hub.core.Temperature
+import io.github.tassiLuca.hub.core.{Luminosity, LuminosityEntry, Temperature}
 import io.github.tassiLuca.hub.core.ports.DashboardServiceComponent
 
 import javax.swing.SwingUtilities
@@ -23,4 +23,9 @@ trait SwingDashboard(view: DashboardUI) extends DashboardServiceComponent:
 
     override def alertNotified(msg: String): Unit = SwingUtilities.invokeLater { () =>
       view.alertsModel.insertRow(0, Array[AnyRef](msg))
+    }
+
+    override def luminosityUpdate(luminosity: Seq[LuminosityEntry]): Unit = SwingUtilities.invokeLater { () =>
+      view.luminosityModel.clear()
+      luminosity.foreach(l => view.luminosityModel.addElement(s"${l.sensorName} -> ${l.luminosity} lux"))
     }

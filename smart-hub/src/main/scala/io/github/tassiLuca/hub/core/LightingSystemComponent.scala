@@ -11,14 +11,11 @@ trait LightingSystemComponent:
 
   val lightingSystem: LightingSystem
 
-  trait LightingSystem
-      extends Consumer[Seq[LuminosityEntry], Seq[LuminosityEntry]]
-      with State[Seq[LuminosityEntry], Seq[LuminosityEntry]]
+  trait LightingSystem extends Consumer[Seq[LuminosityEntry], Unit]
 
   object LightingSystem:
     def apply(): LightingSystem = LightingSystemImpl()
 
     private class LightingSystemImpl extends LightingSystem:
-      override protected def react(e: Try[Seq[LuminosityEntry]])(using Async): Seq[LuminosityEntry] =
-        println(s"[LIGHTING SYSTEM] Received $e")
-        e.getOrElse(Seq())
+      override protected def react(e: Try[Seq[LuminosityEntry]])(using Async): Unit =
+        e.map(les => context.dashboard.luminosityUpdate(les))

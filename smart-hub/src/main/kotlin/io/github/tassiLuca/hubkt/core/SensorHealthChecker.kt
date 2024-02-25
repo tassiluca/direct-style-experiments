@@ -1,4 +1,4 @@
-package io.github.tassiLuca.hub.coroutines.core
+package io.github.tassiLuca.hubkt.core
 
 /** A sensor health checker. */
 class SensorHealthChecker<in E : SensorEvent> : SensorSourceConsumer<E, List<String>> {

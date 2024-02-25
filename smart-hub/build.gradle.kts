@@ -9,6 +9,11 @@ tasks.create<JavaExec>("runScala") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
+tasks.create<JavaExec>("runKotlin") {
+    mainClass.set("io.github.tassiLuca.hubkt.LauncherKt")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
 tasks.jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

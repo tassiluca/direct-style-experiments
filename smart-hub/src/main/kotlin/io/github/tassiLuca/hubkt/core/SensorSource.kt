@@ -1,6 +1,9 @@
-package io.github.tassiLuca.hub.coroutines.core
+package io.github.tassiLuca.hubkt.core
 
 import kotlinx.coroutines.flow.SharedFlow
+
+/** A temperature data type, expressed in Celsius degrees. */
+typealias Temperature = Double
 
 /** A source of sensor events. */
 interface SensorSource<out E : SensorEvent> {

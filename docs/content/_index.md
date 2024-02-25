@@ -15,6 +15,6 @@ Analyze aspects such as:
 
 1. [`Boundary` and `break`](./docs/01-boundaries)
 2. [Basic asynchronous constructs](./docs/02-basics)
-3. [Channels as a communication primitive](./docs/03-channels.md)
-4. [Reactive-like direct style](./docs/04-rears.md)
-5. [Conclusions](./docs/05-going-further.md)
+3. [Channels as a communication primitive](./docs/03-channels)
+4. [Reactive-like direct style](./docs/04-rears)
+5. [Conclusions](./docs/05-going-further)

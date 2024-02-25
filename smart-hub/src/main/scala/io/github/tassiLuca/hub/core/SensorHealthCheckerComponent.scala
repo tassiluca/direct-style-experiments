@@ -25,7 +25,7 @@ trait SensorHealthCheckerComponent[E <: SensorEvent]:
       override protected def react(e: Try[Seq[E]])(using Async): Seq[E] = e match
         case Success(current) =>
           val noMoreActiveSensors = state.map(ex => ex.map(_.name).toSet -- current.map(_.name).toSet)
-          if noMoreActiveSensors.isDefined then
+          if noMoreActiveSensors.isDefined && noMoreActiveSensors.get.nonEmpty then
             val alertMessage = s"[${Date()}] Detected ${noMoreActiveSensors.get.mkString(", ")} no more active!"
             context.alertSystem.notify(alertMessage)
             context.dashboard.alertNotified(alertMessage)

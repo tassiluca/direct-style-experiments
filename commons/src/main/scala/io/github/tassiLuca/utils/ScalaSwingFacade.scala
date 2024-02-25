@@ -1,11 +1,11 @@
 package io.github.tassiLuca.utils
 
 import java.awt.{Component, FlowLayout, LayoutManager}
-import javax.swing.{JComponent, JPanel}
+import javax.swing.{JComponent, JFrame, JPanel, WindowConstants}
 
 object ScalaSwingFacade:
 
-  type Constraint = Any
+  private type Constraint = Any
 
   given Conversion[JComponent, (JComponent, Constraint)] = c => (c, ())
 
@@ -19,3 +19,10 @@ object ScalaSwingFacade:
       p.revalidate()
       p.repaint()
       p
+
+  extension (f: JFrame)
+    def display(): Unit =
+      f.pack()
+      f.setVisible(true)
+      f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
+      f.setLocationRelativeTo(null)
