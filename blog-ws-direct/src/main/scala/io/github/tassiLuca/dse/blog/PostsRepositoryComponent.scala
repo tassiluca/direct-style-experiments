@@ -1,4 +1,4 @@
-package io.github.tassiLuca.direct
+package io.github.tassiLuca.dse.blog
 
 import gears.async.Async
 import io.github.tassiLuca.dse.blog.core.{PostsModel, simulates}

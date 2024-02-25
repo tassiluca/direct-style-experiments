@@ -17,6 +17,7 @@ include(
     ":commons",
     ":blog-ws-commons",
     ":blog-ws-direct",
+    ":blog-ws-direct-kt",
     ":blog-ws-monadic",
     ":analyzer-commons",
     ":analyzer-monadic",

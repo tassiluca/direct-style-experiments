@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     scala
@@ -13,10 +15,13 @@ allprojects {
 
     with(rootProject.libs.plugins) {
         apply(plugin = "scala")
-        apply(plugin = scalatest.get().pluginId)
         apply(plugin = kotlin.jvm.get().pluginId)
         apply(plugin = dokka.get().pluginId)
         apply(plugin = kotlin.qa.get().pluginId)
+    }
+
+    if (!this.name.contains("kt")) {
+        apply(plugin = rootProject.libs.plugins.scalatest.get().pluginId)
     }
 
     repositories {
@@ -60,6 +65,17 @@ allprojects {
                     freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
                 }
             }
+        }
+    }
+
+    tasks.test {
+        useJUnitPlatform()
+        testLogging {
+            showStandardStreams = true
+            showCauses = true
+            showStackTraces = true
+            events(*TestLogEvent.values())
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
         }
     }
 }
