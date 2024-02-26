@@ -2,24 +2,37 @@ package io.github.tassiLuca
 
 import gears.async.TaskSchedule.RepeatUntilFailure
 import gears.async.default.given
-import gears.async.{Async, Task, TaskSchedule}
+import gears.async.{
+  Async,
+  AsyncOperations,
+  Future,
+  ReadableChannel,
+  SendableChannel,
+  Task,
+  TaskSchedule,
+  Timer,
+  UnboundedChannel,
+}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-import scala.util.Failure
+import scala.language.postfixOps
+import scala.concurrent.duration.DurationInt
+import scala.util.{Failure, Success, Try}
 
 class TasksTest extends AnyFunSpec with Matchers {
+
+  val items = 5
 
   describe("Tasks") {
     describe("when scheduled with RepeatUntilFailure") {
       it("do not leave the Async context if millis = 0 and no suspending calls are performed") {
         var i = 0
         Async.blocking:
-          val t = Task {
+          Task {
             i = i + 1
-            if i == 5 then Failure(Error()) else i
-          }
-          t.schedule(TaskSchedule.RepeatUntilFailure()).run
+            if i == items then Failure(Error()) else i
+          }.schedule(TaskSchedule.RepeatUntilFailure()).run
         i shouldBe 5
       }
 
@@ -27,93 +40,65 @@ class TasksTest extends AnyFunSpec with Matchers {
         it("leaves the Async context") {
           var i = 0
           Async.blocking:
-            val t = Task {
+            Task {
               i = i + 1
-              if i == 5 then Failure(Error()) else i
-            }
-            t.schedule(TaskSchedule.RepeatUntilFailure(1)).run
-          i should be < 5
+              if i == items then Failure(Error()) else i
+            }.schedule(TaskSchedule.RepeatUntilFailure(millis = 1)).run
+          i should be < items
         }
 
         it("unless an await is called on the future") {
           var i = 0
           Async.blocking:
-            val t = Task {
+            Task {
               i = i + 1
-              if i == 5 then Failure(Error()) else i
-            }
-            t.schedule(TaskSchedule.RepeatUntilFailure(1)).run.await
+              if i == items then Failure(Error()) else i
+            }.schedule(TaskSchedule.RepeatUntilFailure(millis = 1)).run.await
           i shouldBe 5
+        }
+      }
+
+      describe("with blocking operation and high-order functions") {
+        it("if no Async label is present do not leave the Async context") {
+          var consumedItems = 0
+          Async.blocking:
+            val timer = Timer(2.seconds)
+            Future(timer.run())
+            produce { _ =>
+              timer.src.awaitResult
+              consumedItems = consumedItems + 1
+              if consumedItems == items then Failure(Error()) else Success(())
+            }
+          consumedItems shouldBe items
+        }
+
+        it("with Async label leaves immediately the Async context") {
+          var consumedItems = 0
+          Async.blocking:
+            val timer = Timer(1.seconds)
+            Future(timer.run())
+            produceWithLabel { _ =>
+              timer.src.awaitResult
+              consumedItems = consumedItems + 1
+              if consumedItems == items then Failure(Error()) else Success(())
+            }
+          consumedItems should be < items
         }
       }
     }
   }
+
+  def produce[T](action: SendableChannel[T] => Try[Unit])(using Async): ReadableChannel[T] =
+    val channel = UnboundedChannel[T]()
+    Task {
+      action(channel.asSendable)
+    }.schedule(RepeatUntilFailure()).run
+    channel.asReadable
+
+  def produceWithLabel[T](action: Async ?=> SendableChannel[T] => Try[Unit])(using Async): ReadableChannel[T] =
+    val channel = UnboundedChannel[T]()
+    Task {
+      action(channel.asSendable)
+    }.schedule(RepeatUntilFailure()).run
+    channel.asReadable
 }
-
-//// "Weird" behaviour
-//  "test" should "work" in {
-//    Async.blocking:
-//      @volatile var end = false
-//      val timer = Timer(2 seconds)
-//      Future {
-//        timer.run()
-//      }
-//      val f = Future:
-//        val tf = Future {
-//          timer.src.awaitResult; end = true
-//        }
-//        val tr = Task {
-//          if end then Failure(Error()) else println("hello")
-//        }.schedule(RepeatUntilFailure()).run
-//        tf.altWithCancel(tr).awaitResult
-//      println(f.awaitResult)
-//  }
-//
-//  "test" should "not work" in {
-//    Async.blocking:
-//      val timer = Timer(2 seconds)
-//      Future {
-//        timer.run()
-//      }
-//      val f = Future:
-//        val tf = Future {
-//          timer.src.awaitResult
-//        }
-//        val tr = Task {
-//          println("hello")
-//        }.schedule(RepeatUntilFailure).run // non c'è chiamata bloccante, se ci fosse andrebbe bene
-//        tf.altWithCancel(tr).awaitResult
-//        tr.cancel()
-//      println(f.awaitResult)
-//  }
-
-//  object TestCancellation3:
-//
-//    class Producer3(using Async):
-//      val channel = UnboundedChannel[Int]()
-//
-//      def run(): Future[Unit] = Task {
-//        channel.send(Random.nextInt())
-//      }.schedule(Every(1_000)).run
-//
-//      def cancel(): Unit = Async.current.group.cancel()
-//
-//    @main def testCancellation(): Unit =
-//      Async.blocking:
-//        val p = Producer3()
-//        val f1 = p.run()
-//        val f2 = Task {
-//          println(s"${p.channel.read()}!")
-//        }.schedule(Every(1_000)).run
-//        Thread.sleep(10_000)
-//        p.cancel()
-//        p.run().awaitResult
-//
-//   def produceOn(channel: SendableChannel[Terminable[Item]]): Task[Unit] =
-//    var i = 0
-//    Task {
-//      println(i)
-//      i = i + 1
-//      channel.send(i)
-//    }.schedule(RepeatUntilFailure(maxRepetitions = itemsProduced))
-//
