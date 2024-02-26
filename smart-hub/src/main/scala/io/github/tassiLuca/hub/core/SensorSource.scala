@@ -1,6 +1,6 @@
 package io.github.tassiLuca.hub.core
 
-import io.github.tassiLuca.rears.Publisher
+import io.github.tassiLuca.rears.Producer
 
 /** The temperature value, in a certain moment in time, expressed in °C. */
 type Temperature = Double
@@ -9,7 +9,7 @@ type Temperature = Double
 type Luminosity = Double
 
 /** A generic source of [[SensorEvent]] (e.g. a MQTT broker). */
-trait SensorSource extends Publisher[SensorEvent]
+trait SensorSource extends Producer[SensorEvent]
 
 /** A detection performed by a sensing unit. */
 sealed trait SensorEvent(val name: String)

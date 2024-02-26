@@ -5,9 +5,9 @@ import gears.async.TaskSchedule.RepeatUntilFailure
 
 import scala.util.Try
 
-/** A publisher, i.e. a runnable entity producing items on a channel. */
-trait Publisher[E]:
-  /** The [[Channel]] where specific [[Publisher]]s send items to. */
+/** A producer, i.e. a runnable entity producing items on a channel. */
+trait Producer[E]:
+  /** The [[Channel]] where specific [[Producer]]s send items to. */
   protected val channel: Channel[E] = UnboundedChannel()
 
   /** @return the publisher's behavior encoded as a runnable [[Task]]. */
@@ -30,13 +30,15 @@ trait Consumer[E, S]:
   /** The suspendable reaction triggered upon a new read of an item succeeds. */
   protected def react(e: Try[E])(using Async): S
 
-/** A mixin to make consumer stateful. Its state is updated with the result of the [[react]]ion. */
+/** A mixin to make consumer stateful. Its state is updated with the result of the [[react]]ion.
+  * Initially its state is set to [[initialValue]].
+  */
 trait State[E, S](initialValue: S):
   consumer: Consumer[E, S] =>
 
   private var _state: S = initialValue
 
-  /** @return the current state of the consumer, wrapped within an [[Option]]. */
+  /** @return the current state of the consumer. */
   def state: S = synchronized(_state)
 
   override def asRunnable: Task[Unit] = Task {

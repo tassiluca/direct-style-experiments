@@ -34,7 +34,7 @@ class ControllerTest extends AnyFlatSpec with Matchers:
     consumerBValues shouldBe Seq.range(0, items).map(Success(_))
   }
 
-  def publisher: Publisher[Item] = new Publisher[Int]:
+  def publisher: Producer[Item] = new Producer[Int]:
     private var i = 0
     override def asRunnable: Task[Unit] = Task {
       channel.send(i)
