@@ -1,10 +1,10 @@
 package io.github.tassiLuca.hub.adapters
 
 import gears.async.Async
-import io.github.tassiLuca.hub.application.ThermostatHubManager
+import io.github.tassiLuca.hub.application.ThermostatManager
 import io.github.tassiLuca.hub.core.ports.DashboardServiceComponent
 
-trait MockedThermostatHubManager extends ThermostatHubManager with DashboardServiceComponent:
+trait MockedThermostatManager extends ThermostatManager with DashboardServiceComponent:
   override val heater: Heater = new Heater:
     private var _state = HeaterState.OFF
     override def state: HeaterState = _state

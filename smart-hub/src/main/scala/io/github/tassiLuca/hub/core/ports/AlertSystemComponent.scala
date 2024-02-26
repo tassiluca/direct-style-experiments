@@ -2,10 +2,10 @@ package io.github.tassiLuca.hub.core.ports
 
 import gears.async.Async
 
-/** The component encapsulating the alert system. */
+/** The component encapsulating the alert system port. */
 trait AlertSystemComponent:
 
-  /** The alert system instance. */
+  /** The [[AlertSystem]] instance. */
   val alertSystem: AlertSystem
 
   /** The alert system port though which is possible to notify alerts. */

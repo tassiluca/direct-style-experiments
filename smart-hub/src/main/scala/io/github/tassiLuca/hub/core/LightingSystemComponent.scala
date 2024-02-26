@@ -2,15 +2,18 @@ package io.github.tassiLuca.hub.core
 
 import gears.async.Async
 import io.github.tassiLuca.hub.core.ports.{DashboardServiceComponent, LampsComponent}
-import io.github.tassiLuca.rears.{Consumer, State}
+import io.github.tassiLuca.rears.Consumer
 
 import scala.util.Try
 
+/** The component encapsulating the [[LightingSystem]] entity. */
 trait LightingSystemComponent:
   context: LampsComponent & DashboardServiceComponent =>
 
+  /** The [[LightingSystem]] instance. */
   val lightingSystem: LightingSystem
 
+  /** A consumer of [[LuminosityEntry]], in charge of controlling the lamps. */
   trait LightingSystem extends Consumer[Seq[LuminosityEntry], Unit]
 
   object LightingSystem:

@@ -1,9 +1,9 @@
 package io.github.tassiLuca.hub.adapters
 
 import gears.async.{Async, Future, Task}
-import io.github.tassiLuca.utils.ScalaSwingFacade.display
 import io.github.tassiLuca.hub.adapters.ui.SourceUI
 import io.github.tassiLuca.hub.core.{LuminosityEntry, SensorSource, TemperatureEntry}
+import io.github.tassiLuca.utils.ScalaSwingFacade.display
 
 class GraphicalSource(using Async) extends SensorSource:
 

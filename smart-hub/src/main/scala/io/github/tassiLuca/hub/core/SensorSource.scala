@@ -8,7 +8,7 @@ type Temperature = Double
 /** The value of luminosity, in a certain moment in time. */
 type Luminosity = Double
 
-/** A generic source of [[SensorEvent]]. */
+/** A generic source of [[SensorEvent]] (e.g. a MQTT broker). */
 trait SensorSource extends Publisher[SensorEvent]
 
 /** A detection performed by a sensing unit. */

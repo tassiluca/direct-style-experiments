@@ -2,13 +2,13 @@ package io.github.tassiLuca.hub.core.ports
 
 import gears.async.Async
 
-/** The component encapsulating the heater actuator. */
+/** The component encapsulating the heater port. */
 trait HeaterComponent:
 
   /** The instance in charge of controlling heater actuator. */
   val heater: Heater
 
-  /** Heater actuator controller. */
+  /** Heater actuator port through which is possible to turning on and off the heater. */
   trait Heater:
     enum HeaterState:
       case ON, OFF

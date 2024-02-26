@@ -11,9 +11,9 @@ object Controller:
       consumer: Consumer[R, ?],
       transformation: PipelineTransformation[T, R] = identity,
   ): Task[Unit] =
-    val tranformedChannel = transformation(publisherChannel)
+    val transformedChannel = transformation(publisherChannel)
     Task {
-      consumer.listeningChannel.send(tranformedChannel.read().tryable)
+      consumer.listeningChannel.send(transformedChannel.read().tryable)
     }.schedule(RepeatUntilFailure())
 
   def oneToMany[T, R](

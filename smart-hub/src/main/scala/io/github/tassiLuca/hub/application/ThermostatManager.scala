@@ -2,13 +2,19 @@ package io.github.tassiLuca.hub.application
 
 import gears.async.{Async, AsyncOperations, ReadableChannel}
 import io.github.tassiLuca.hub.core.ports.{AlertSystemComponent, DashboardServiceComponent, HeaterComponent}
-import io.github.tassiLuca.hub.core.{SensorHealthCheckerComponent, TemperatureEntry, ThermostatComponent, ThermostatScheduler}
+import io.github.tassiLuca.hub.core.{
+  SensorHealthCheckerComponent,
+  TemperatureEntry,
+  ThermostatComponent,
+  ThermostatScheduler,
+}
 import io.github.tassiLuca.rears.{Controller, bufferWithin}
 
-import concurrent.duration.{Duration, DurationInt}
+import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
-trait ThermostatHubManager
+/** The thermostat manager. */
+trait ThermostatManager
     extends ThermostatComponent
     with SensorHealthCheckerComponent[TemperatureEntry]
     with HeaterComponent
@@ -16,15 +22,14 @@ trait ThermostatHubManager
     with DashboardServiceComponent:
   override val thermostat: Thermostat = Thermostat(ThermostatScheduler.byHour(19))
   override val sensorHealthChecker: SensorHealthChecker = SensorHealthChecker()
+  private val samplingWindow = 5 seconds
 
-  def run(
-      source: ReadableChannel[TemperatureEntry],
-      samplingWindow: Duration,
-  )(using Async, AsyncOperations): Unit =
+  /** Runs the manager, spawning a new controller consuming the given [[source]] of events. */
+  def run(source: ReadableChannel[TemperatureEntry])(using Async, AsyncOperations): Unit =
     thermostat.asRunnable.run
     sensorHealthChecker.asRunnable.run
     Controller.oneToMany(
       publisherChannel = source,
       consumers = Set(thermostat, sensorHealthChecker),
-      transformation = r => r.bufferWithin(5.seconds),
+      transformation = r => r.bufferWithin(samplingWindow),
     ).run

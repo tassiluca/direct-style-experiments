@@ -19,9 +19,10 @@ object ChannelsPimping:
     def foreach[U](f: T => U)(using Async): Unit =
       c.read() match
         case Left(Channel.Closed) => ()
-        case Right(value) => value match
-          case Terminated => ()
-          case v: T => f(v); foreach(f)
+        case Right(value) =>
+          value match
+            case Terminated => ()
+            case v: T => f(v); foreach(f)
 
   extension [T](e: Either[Channel.Closed, T])
     def tryable: Try[T] = e match

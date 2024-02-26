@@ -2,27 +2,32 @@ package io.github.tassiLuca.hub.core
 
 import gears.async.Async
 import io.github.tassiLuca.hub.core.ports.{DashboardServiceComponent, HeaterComponent}
-
-import scala.util.Try
 import io.github.tassiLuca.rears.{Consumer, State}
 
-/** The component encapsulating the thermostat. */
+import scala.util.Try
+
+/** The component encapsulating the [[Thermostat]] entity. */
 trait ThermostatComponent:
   context: HeaterComponent & DashboardServiceComponent =>
 
   /** The [[Thermostat]] instance. */
   val thermostat: Thermostat
 
-  /** The entity in charge of controlling the heater and conditioner actuators based on read [[TemperatureEntry]]s. */
+  /** A [[state]]ful consumer of [[TemperatureEntry]]s in charge of controlling
+    * the heater and keeping track of the last detection average temperature.
+    */
   trait Thermostat
       extends Consumer[Seq[TemperatureEntry], Option[Temperature]]
       with State[Seq[TemperatureEntry], Option[Temperature]]:
     val scheduler: ThermostatScheduler
 
   object Thermostat:
-    def apply(thermostatScheduler: ThermostatScheduler): Thermostat = ThermostatImpl(thermostatScheduler)
+    /** Creates a [[Thermostat]] with the given [[thermostatScheduler]]. */
+    def apply(scheduler: ThermostatScheduler): Thermostat = ThermostatImpl(scheduler)
 
-    private class ThermostatImpl(override val scheduler: ThermostatScheduler) extends Thermostat:
+    private class ThermostatImpl(override val scheduler: ThermostatScheduler)
+        extends Thermostat
+        with State[Seq[TemperatureEntry], Option[Temperature]](None):
 
       private val hysteresis = 1.5
 
@@ -34,12 +39,14 @@ trait ThermostatComponent:
 
       extension (t: Temperature)
         private def evaluate()(using Async): Unit =
-          val target = scheduler.currentTarget
           context.dashboard.temperatureUpdated(t)
+          val target = scheduler.currentTarget
           if t > target + hysteresis then offHeater() else if t < target then onHeater()
 
         private def offHeater()(using Async): Unit =
-          context.heater.off(); context.dashboard.offHeaterNotified()
+          context.heater.off()
+          context.dashboard.offHeaterNotified()
 
         private def onHeater()(using Async): Unit =
-          context.heater.on(); context.dashboard.onHeaterNotified()
+          context.heater.on()
+          context.dashboard.onHeaterNotified()

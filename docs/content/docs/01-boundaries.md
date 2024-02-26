@@ -23,8 +23,8 @@
 
 {{< hint info >}}
 
-`boundary` and `break` can be particularly useful for **error handling** (evidence of which will be given in later examples) and **inner loops** where we need a **short exit path**.
-But, most importantly, they **lay the foundations** (along with a `resume` mechanism) for building new **concurrency abstractions** based on **suspensions**, **direct style**.
+`boundary` and `break` can be particularly useful for **error handling** (later examples will show some use cases) and **inner loops** where we need a **short exit path**.
+But, most importantly, they **lay the foundations** (along with a **`resume` mechanism**) for building new **direct-style concurrency abstractions** based on **suspensions**.
 
 {{< /hint >}}
 
@@ -51,7 +51,6 @@ object optional:
 ```
 
 ### Rust-like `Result` + `?`
-
 
 ### `Either` + `?`
 

@@ -31,16 +31,16 @@ trait Consumer[E, S]:
   protected def react(e: Try[E])(using Async): S
 
 /** A mixin to make consumer stateful. Its state is updated with the result of the [[react]]ion. */
-trait State[E, S]:
+trait State[E, S](initialValue: S):
   consumer: Consumer[E, S] =>
 
-  private var _state: Option[S] = None
+  private var _state: S = initialValue
 
   /** @return the current state of the consumer, wrapped within an [[Option]]. */
-  def state: Option[S] = synchronized(_state)
+  def state: S = synchronized(_state)
 
   override def asRunnable: Task[Unit] = Task {
     listeningChannel.asInstanceOf[Channel[Try[E]]].read().foreach { e =>
-      synchronized { _state = Some(react(e)) }
+      synchronized { _state = react(e) }
     }
   }.schedule(RepeatUntilFailure())
