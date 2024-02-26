@@ -12,7 +12,7 @@
       <link>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/01-boundaries/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/01-boundaries/</guid>
-      <description>boundary / break # Source code&#xA;Provides a cleaner alternative to non-local returns; boundary: is short for boundary.apply: with the indented code below it passed as the body block is a context function that is called within boundary.apply to return the block of code shown in the example&#xA;Users don’t define Label instances themselves. Instead, this is done inside the implementation of boundary.apply to provide the capability of doing a non-local return.</description>
+      <description>boundary &amp;amp; break # boundary &amp;amp; break mechanism provides a cleaner alternative to non-local returns:&#xA;boundary: is short for boundary.apply: the indented code below it is passed as body is a context function that is called within boundary.apply to break an in-scope given instance of Label is required (i.e. is impossible break without an enclosing boundary) Users don&amp;rsquo;t define Label instances themselves. Instead, this is done inside the implementation of boundary.</description>
     </item>
     <item>
       <title></title>

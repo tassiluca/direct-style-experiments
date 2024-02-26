@@ -3,27 +3,25 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="boundary / break # Source code
-Provides a cleaner alternative to non-local returns; boundary: is short for boundary.apply: with the indented code below it passed as the body block is a context function that is called within boundary.apply to return the block of code shown in the example
-Users don’t define Label instances themselves. Instead, this is done inside the implementation of boundary.apply to provide the capability of doing a non-local return.">
+<meta name="description" content="boundary &amp; break # boundary &amp; break mechanism provides a cleaner alternative to non-local returns:
+boundary: is short for boundary.apply: the indented code below it is passed as body is a context function that is called within boundary.apply to break an in-scope given instance of Label is required (i.e. is impossible break without an enclosing boundary) Users don&rsquo;t define Label instances themselves. Instead, this is done inside the implementation of boundary.">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
-<meta property="og:description" content="boundary / break # Source code
-Provides a cleaner alternative to non-local returns; boundary: is short for boundary.apply: with the indented code below it passed as the body block is a context function that is called within boundary.apply to return the block of code shown in the example
-Users don’t define Label instances themselves. Instead, this is done inside the implementation of boundary.apply to provide the capability of doing a non-local return." />
+<meta property="og:description" content="boundary &amp; break # boundary &amp; break mechanism provides a cleaner alternative to non-local returns:
+boundary: is short for boundary.apply: the indented code below it is passed as body is a context function that is called within boundary.apply to break an in-scope given instance of Label is required (i.e. is impossible break without an enclosing boundary) Users don&rsquo;t define Label instances themselves. Instead, this is done inside the implementation of boundary." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/01-boundaries/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-02-13T17:44:49+01:00" />
+<meta property="article:modified_time" content="2024-02-26T12:05:31+01:00" />
 
 <title>01 Boundaries | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
 <link rel="icon" href="/PPS-22-direct-style-experiments/favicon.png" >
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/01-boundaries/">
-<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.f57cd8d7b32fcb6fe52f977b168a7cdd5f7ce45f6c69221b19c15bb8a9aeea82.css" integrity="sha256-9XzY17Mvy2/lL5d7Fop83V985F9saSIbGcFbuKmu6oI=" crossorigin="anonymous">
+<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.52e9c97a2cdb2f96e1db1d9e68e4f7a24ffeb36d11f3e9913b0126d572bfff9f.css" integrity="sha256-UunJeizbL5bh2x2eaOT3ok/&#43;s20R8&#43;mROwEm1XK//58=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.8adfd36327438c2f5f875a0495116001a6a9010a4bb13e1a16b1a87105a22724.js" integrity="sha256-it/TYydDjC9fh1oElRFgAaapAQpLsT4aFrGocQWiJyQ=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.ab4267e75236ada82371ce248ae32c029db3d55c83940108e85b57f0316758f7.js" integrity="sha256-q0Jn51I2ragjcc4kiuMsAp2z1VyDlAEI6FtX8DFnWPc=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -185,7 +183,7 @@ https://github.com/alex-shpak/hugo-book
   
 <nav id="TableOfContents">
   <ul>
-    <li><a href="#what-can-we-do-with-boundary-and-break-mechanism">What can we do with boundary and break mechanism?</a>
+    <li><a href="#modeling-error-handling-data-types-with-non-local-breaks">Modeling error handling data types with non-local breaks</a>
       <ul>
         <li><a href="#optional"><code>Optional</code></a></li>
         <li><a href="#rust-like-result--">Rust-like <code>Result</code> + <code>?</code></a></li>
@@ -205,87 +203,100 @@ https://github.com/alex-shpak/hugo-book
       
       
   <article class="markdown book-article"><h1 id="boundary--break">
-  <code>boundary / break</code>
+  <code>boundary</code> &amp; <code>break</code>
   <a class="anchor" href="#boundary--break">#</a>
 </h1>
-<p><a href="https://github.com/lampepfl/dotty/blob/3.3.0-RC4/library/src/scala/util/boundary.scala">Source code</a></p>
+<p><code>boundary</code> &amp; <code>break</code> mechanism provides a cleaner alternative to non-local returns:</p>
 <ul>
-<li>Provides a cleaner alternative to non-local returns;
+<li><code>boundary:</code> is short for <code>boundary.apply:</code></li>
+<li>the indented code below it is passed as <code>body</code> is a context function that is called within <code>boundary.apply</code>
 <ul>
-<li><code>boundary:</code> is short for <code>boundary.apply:</code> with the indented code below it passed as the body
-<ul>
-<li>
-<p><code>block</code> is a context function that is called within boundary.apply to return the block of code shown in the example</p>
-</li>
-<li>
-<p>Users don’t define <code>Label</code> instances themselves. Instead, this is done inside the implementation of <code>boundary.apply</code> to provide the capability of doing a non-local return.</p>
-<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** Run `body` with freshly generated label as implicit argument. Catch any
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"> *  breaks associated with that label and return their results instead of
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"> *  `body`&#39;s result.
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"> */</span>
+<li>to <code>break</code> an in-scope <code>given</code> instance of <code>Label</code> is required (i.e. is impossible <code>break</code> without an enclosing <code>boundary</code>)</li>
+<li>Users don&rsquo;t define <code>Label</code> instances themselves. Instead, this is done inside the implementation of <code>boundary.apply</code> to provide the capability of doing a non-local return [<a href="https://github.com/lampepfl/dotty/blob/3.3.0-RC4/library/src/scala/util/boundary.scala">Source code</a>]
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** Run `body` with freshly generated label as implicit argument. 
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * Catch any breaks associated with that label and return their 
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * results instead of `body`&#39;s result.
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  */</span>
 </span></span><span style="display:flex;"><span>inline <span style="color:#8839ef">def</span> apply<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>inline body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#04a5e5;font-weight:bold">?=&gt;</span> T<span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">T</span> <span style="color:#04a5e5;font-weight:bold">=</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">val</span> local <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]()</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">try</span> body<span style="color:#04a5e5;font-weight:bold">(</span>using local<span style="color:#04a5e5;font-weight:bold">)</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">catch</span> <span style="color:#8839ef">case</span> ex<span style="color:#8839ef">:</span> <span style="color:#d20f39">Break</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#1e66f5;font-weight:bold">@unchecked</span> <span style="color:#8839ef">=&gt;</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">if</span> ex<span style="color:#04a5e5;font-weight:bold">.</span>label eq local then ex<span style="color:#04a5e5;font-weight:bold">.</span>value
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">else</span> <span style="color:#8839ef">throw</span> ex
-</span></span></code></pre></div><ul>
-<li>we don’t want users to call break without an enclosing boundary. That’s why break requires an in-scope given instance of Label, which the implementation of boundary.apply creates before it calls the code block you provide. If your code block calls break, a given Label will be in-scope.</li>
+</span></span></code></pre></div></li>
+<li>non-local breaks are implemented as non-fatal exceptions: the implementation is optimized to suppress unnecessary stack traces (which makes exceptions very slow); stack traces are useless since the exceptions are managed rather than exposed to the user abruptly
+<ul>
+<li>enhanced performance is achieved when a break occurs within the same method, allowing it to be rewritten as a jump call to the enclosing scope within the same stack frame.</li>
 </ul>
 </li>
 </ul>
 </li>
-<li>non-localbreaks are logically implemented as non-fatal exceptions and the implementation is optimized to suppress unnecessary stack trace generation. Stack traces are unnecessary because we are handling these exceptions, not barfing them on the user!</li>
-<li>optimizations: Better performance is provided when a break occurs to the enclosing scope inside the same method (i.e., the same stack frame), where it can be rewritten to a jump call.</li>
 </ul>
-</li>
-</ul>
-<h2 id="what-can-we-do-with-boundary-and-break-mechanism">
-  What can we do with boundary and break mechanism?
-  <a class="anchor" href="#what-can-we-do-with-boundary-and-break-mechanism">#</a>
+<blockquote class="book-hint info">
+  <code>boundary</code> and <code>break</code> can be particularly useful for <strong>error handling</strong> (later examples will show some use cases) and <strong>inner loops</strong> where we need a <strong>short exit path</strong>.
+But, most importantly, they <strong>lay the foundations</strong> (along with a <strong><code>resume</code> mechanism</strong>) for building new <strong>direct-style concurrency abstractions</strong> based on <strong>suspensions</strong>.
+</blockquote>
+
+<h2 id="modeling-error-handling-data-types-with-non-local-breaks">
+  Modeling error handling data types with non-local breaks
+  <a class="anchor" href="#modeling-error-handling-data-types-with-non-local-breaks">#</a>
 </h2>
 <h3 id="optional">
   <code>Optional</code>
   <a class="anchor" href="#optional">#</a>
 </h3>
-<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">object</span> <span style="color:#df8e1d">optional</span><span style="color:#8839ef">:</span>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** Represents a computation that will hopefully return 
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * [[Some]]thing or simply [[None]] if it can&#39;t. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">object</span> <span style="color:#df8e1d">optional</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">inline</span> <span style="color:#d20f39">def</span> <span style="color:#d20f39">apply</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>inline body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">None.</span><span style="color:#8839ef">type</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#04a5e5;font-weight:bold">?=&gt;</span> T<span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Option</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">/**</span> <span style="color:#d20f39">Defines</span> <span style="color:#d20f39">the</span> <span style="color:#d20f39">boundary</span> <span style="color:#d20f39">for</span> <span style="color:#d20f39">an</span> <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">Option</span><span style="color:#04a5e5;font-weight:bold">]]</span> returning computation<span style="color:#04a5e5;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#04a5e5;font-weight:bold">*</span> whose <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">body</span><span style="color:#04a5e5;font-weight:bold">]]</span> is given in input<span style="color:#04a5e5;font-weight:bold">.</span> <span style="color:#04a5e5;font-weight:bold">*/</span>
+</span></span><span style="display:flex;"><span>  inline <span style="color:#8839ef">def</span> apply<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>inline body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">None.</span><span style="color:#8839ef">type</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#04a5e5;font-weight:bold">?=&gt;</span> T<span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Option</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span>
 </span></span><span style="display:flex;"><span>    boundary<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Some</span><span style="color:#04a5e5;font-weight:bold">(</span>body<span style="color:#04a5e5;font-weight:bold">))</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  extension <span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>o<span style="color:#8839ef">:</span> <span style="color:#d20f39">Option</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">])</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** @return the enclosed [[Option]] object if defined, or break 
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">      * to the enclosing boundary with [[None]]. */</span>
 </span></span><span style="display:flex;"><span>    inline <span style="color:#8839ef">def</span> <span style="color:#04a5e5;font-weight:bold">?(</span>using label<span style="color:#8839ef">:</span> <span style="color:#d20f39">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">None.</span><span style="color:#8839ef">type</span><span style="color:#04a5e5;font-weight:bold">])</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">T</span> <span style="color:#04a5e5;font-weight:bold">=</span>
 </span></span><span style="display:flex;"><span>      o<span style="color:#04a5e5;font-weight:bold">.</span>getOrElse<span style="color:#04a5e5;font-weight:bold">(</span>break<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">None</span><span style="color:#04a5e5;font-weight:bold">))</span>
 </span></span></code></pre></div><h3 id="rust-like-result--">
   Rust-like <code>Result</code> + <code>?</code>
   <a class="anchor" href="#rust-like-result--">#</a>
 </h3>
-<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">object</span> <span style="color:#df8e1d">result</span><span style="color:#8839ef">:</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">sealed</span> <span style="color:#d20f39">trait</span> <span style="color:#d20f39">Result</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">+T</span><span style="color:#04a5e5;font-weight:bold">]</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">case</span> <span style="color:#8839ef">class</span> <span style="color:#df8e1d">Ok</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">+T</span><span style="color:#04a5e5;font-weight:bold">](</span>t<span style="color:#8839ef">:</span> <span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">extends</span> <span style="color:#df8e1d">Result</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">case</span> <span style="color:#8839ef">class</span> <span style="color:#df8e1d">Error</span><span style="color:#04a5e5;font-weight:bold">(</span>e<span style="color:#8839ef">:</span> <span style="color:#d20f39">String</span><span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">extends</span> <span style="color:#df8e1d">Result</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Nothing</span><span style="color:#04a5e5;font-weight:bold">]</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  inline <span style="color:#8839ef">def</span> apply<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>inline body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Error</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#04a5e5;font-weight:bold">?=&gt;</span> T<span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Result</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span>
-</span></span><span style="display:flex;"><span>    boundary<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Ok</span><span style="color:#04a5e5;font-weight:bold">(</span>body<span style="color:#04a5e5;font-weight:bold">))</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  extension <span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>r<span style="color:#8839ef">:</span> <span style="color:#d20f39">Result</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">])</span>
-</span></span><span style="display:flex;"><span>    inline <span style="color:#8839ef">def</span> <span style="color:#04a5e5;font-weight:bold">?(</span>using <span style="color:#df8e1d">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Error</span><span style="color:#04a5e5;font-weight:bold">])</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">T</span> <span style="color:#04a5e5;font-weight:bold">=</span> r <span style="color:#8839ef">match</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Ok</span><span style="color:#04a5e5;font-weight:bold">(</span>t<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> t
-</span></span><span style="display:flex;"><span>      <span style="color:#8839ef">case</span> e <span style="color:#8839ef">@</span> <span style="color:#df8e1d">Error</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#8839ef">_</span><span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> break<span style="color:#04a5e5;font-weight:bold">(</span>e<span style="color:#04a5e5;font-weight:bold">)</span>
-</span></span></code></pre></div><h3 id="either--">
+<h3 id="either--">
   <code>Either</code> + <code>?</code>
   <a class="anchor" href="#either--">#</a>
 </h3>
-<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">object</span> <span style="color:#df8e1d">either</span><span style="color:#8839ef">:</span>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** Represents a computation that will hopefully return a 
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * [[Right]] value, but might fail with a [[Left]] one. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">object</span> <span style="color:#df8e1d">either</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">inline</span> <span style="color:#d20f39">def</span> <span style="color:#d20f39">apply</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">](</span>inline body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Left</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">Nothing</span><span style="color:#04a5e5;font-weight:bold">]]</span> <span style="color:#04a5e5;font-weight:bold">?=&gt;</span> R<span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">/**</span> <span style="color:#d20f39">Defines</span> <span style="color:#d20f39">the</span> <span style="color:#d20f39">boundary</span> <span style="color:#d20f39">for</span> <span style="color:#d20f39">the</span> <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">]]</span> returning
+</span></span><span style="display:flex;"><span>    <span style="color:#04a5e5;font-weight:bold">*</span> computation<span style="color:#04a5e5;font-weight:bold">,</span> whose <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">body</span><span style="color:#04a5e5;font-weight:bold">]]</span> is given in input<span style="color:#04a5e5;font-weight:bold">.</span> <span style="color:#04a5e5;font-weight:bold">*/</span>
+</span></span><span style="display:flex;"><span>  inline <span style="color:#8839ef">def</span> apply<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">](</span>inline body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Left</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">Nothing</span><span style="color:#04a5e5;font-weight:bold">]]</span> <span style="color:#04a5e5;font-weight:bold">?=&gt;</span> R<span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span>
 </span></span><span style="display:flex;"><span>    boundary<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Right</span><span style="color:#04a5e5;font-weight:bold">(</span>body<span style="color:#04a5e5;font-weight:bold">))</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  extension <span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">](</span>e<span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">])</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** @return this [[Right]] value or break to the enclosing 
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">      *         boundary with the [[Left]] value. */</span>
 </span></span><span style="display:flex;"><span>    inline <span style="color:#8839ef">def</span> <span style="color:#04a5e5;font-weight:bold">?(</span>using <span style="color:#df8e1d">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Left</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">Nothing</span><span style="color:#04a5e5;font-weight:bold">]])</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">R</span> <span style="color:#04a5e5;font-weight:bold">=</span> e <span style="color:#8839ef">match</span>
 </span></span><span style="display:flex;"><span>      <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Right</span><span style="color:#04a5e5;font-weight:bold">(</span>value<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> value
 </span></span><span style="display:flex;"><span>      <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Left</span><span style="color:#04a5e5;font-weight:bold">(</span>value<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> break<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Left</span><span style="color:#04a5e5;font-weight:bold">(</span>value<span style="color:#04a5e5;font-weight:bold">))</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  extension <span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">](</span>t<span style="color:#8839ef">:</span> <span style="color:#d20f39">Try</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">])</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** @return this [[Success]] value or break to the enclosing boundary
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">      *         with a [[Left]] containing the converted `Throwable`
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">      *         exception performed by the implicit [[converter]].
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">      */</span>
+</span></span><span style="display:flex;"><span>    inline <span style="color:#8839ef">def</span> <span style="color:#04a5e5;font-weight:bold">?[</span><span style="color:#d20f39">L</span><span style="color:#04a5e5;font-weight:bold">](</span>using <span style="color:#df8e1d">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Left</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">Nothing</span><span style="color:#04a5e5;font-weight:bold">]])(</span>using converter<span style="color:#8839ef">:</span> <span style="color:#d20f39">Conversion</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Throwable</span>, <span style="color:#d20f39">L</span><span style="color:#04a5e5;font-weight:bold">])</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">R</span> <span style="color:#04a5e5;font-weight:bold">=</span> t <span style="color:#8839ef">match</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Success</span><span style="color:#04a5e5;font-weight:bold">(</span>value<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> value
+</span></span><span style="display:flex;"><span>      <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Failure</span><span style="color:#04a5e5;font-weight:bold">(</span>exception<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> break<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Left</span><span style="color:#04a5e5;font-weight:bold">(</span>converter<span style="color:#04a5e5;font-weight:bold">(</span>exception<span style="color:#04a5e5;font-weight:bold">)))</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** An object encapsulating a collection of `Throwable` given converters. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">object</span> <span style="color:#df8e1d">EitherConversions</span><span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">/**</span> <span style="color:#d20f39">Converts</span> <span style="color:#d20f39">a</span> <span style="color:#d20f39">`Throwable`</span> <span style="color:#d20f39">to</span> <span style="color:#d20f39">a</span> <span style="color:#d20f39">`String`</span> <span style="color:#d20f39">with</span> <span style="color:#d20f39">its</span> <span style="color:#d20f39">message.</span> <span style="color:#d20f39">*/</span>
+</span></span><span style="display:flex;"><span>  given <span style="color:#df8e1d">Conversion</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Throwable</span>, <span style="color:#d20f39">String</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#8839ef">_</span><span style="color:#04a5e5;font-weight:bold">.</span>getMessage
 </span></span></code></pre></div></article>
  
       
@@ -295,9 +306,9 @@ https://github.com/alex-shpak/hugo-book
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/211e1a97732eee7c51dc78b860c6878e878d3ec8" title='Last modified by Luca Tassinari | February 13, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/d1543d6961de0ed518326a57f49cb446d3c91f93" title='Last modified by Luca Tassinari | February 26, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>February 13, 2024</span>
+      <span>February 26, 2024</span>
     </a>
   </div>
 
@@ -333,7 +344,7 @@ https://github.com/alex-shpak/hugo-book
   
 <nav id="TableOfContents">
   <ul>
-    <li><a href="#what-can-we-do-with-boundary-and-break-mechanism">What can we do with boundary and break mechanism?</a>
+    <li><a href="#modeling-error-handling-data-types-with-non-local-breaks">Modeling error handling data types with non-local breaks</a>
       <ul>
         <li><a href="#optional"><code>Optional</code></a></li>
         <li><a href="#rust-like-result--">Rust-like <code>Result</code> + <code>?</code></a></li>
