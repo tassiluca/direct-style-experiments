@@ -16,13 +16,10 @@ class AnalyzerTest extends AnyFlatSpec with Matchers with MockFactory {
     Repository(1, "dse/test-2", 123, 198) -> (Seq(Contribution("mrossi", 11), Contribution("averdi", 98)), None),
   )
 
-  val gitHubService: GitHubService = mock[GitHubService]
-  val analyzer: Analyzer = Analyzer.of(gitHubService)
-
   "Analyzer" should "return the correct results if given in input an existing organization" in {
     var incrementalResults = Set[RepositoryReport]()
     Async.blocking:
-      configureSuccessfulService()
+      val analyzer = successfulService()
       val allResults = analyzer.analyze("dse") { report =>
         incrementalResults += report
       }
@@ -34,7 +31,7 @@ class AnalyzerTest extends AnyFlatSpec with Matchers with MockFactory {
   "Analyzer" should "return a failure in case the given organization doesn't exists" in {
     var incrementalResults = Set[RepositoryReport]()
     Async.blocking:
-      configureFailureService()
+      val analyzer = failingService()
       val allResults = analyzer.analyze("non-existing") { report =>
         incrementalResults += report
       }
@@ -46,7 +43,8 @@ class AnalyzerTest extends AnyFlatSpec with Matchers with MockFactory {
     RepositoryReport(repo.name, repo.issues, repo.stars, data._1, data._2)
   }.toSet
 
-  private def configureSuccessfulService(): Unit =
+  private def successfulService(): Analyzer =
+    val gitHubService: GitHubService = mock[GitHubService]
     when(gitHubService.repositoriesOf(_: String)(using _: Async)).expects("dse", *)
       .returning(Right(dummiesData.keys.toSeq))
     dummiesData.foreach { (repo, data) =>
@@ -55,8 +53,11 @@ class AnalyzerTest extends AnyFlatSpec with Matchers with MockFactory {
       when(gitHubService.lastReleaseOf(_: String, _: String)(using _: Async)).expects(repo.organization, repo.name, *)
         .returning(data._2.toRight("404, not found"))
     }
+    Analyzer.of(gitHubService)
 
-  private def configureFailureService(): Unit =
+  private def failingService(): Analyzer =
+    val gitHubService: GitHubService = mock[GitHubService]
     when(gitHubService.repositoriesOf(_: String)(using _: Async)).expects("non-existing", *)
       .returning(Left("404, not found"))
+    Analyzer.of(gitHubService)
 }

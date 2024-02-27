@@ -15,7 +15,7 @@ interface GitHubService {
 
     /** @return the repositories of the organization with the given name. */
     @GET("orgs/{organizationName}/repos")
-    fun organizationRepositories(
+    fun repositoriesOf(
         @Path("organizationName") organizationName: String,
         @Query("page") page: Int = 1,
     ): Call<List<Repository>>

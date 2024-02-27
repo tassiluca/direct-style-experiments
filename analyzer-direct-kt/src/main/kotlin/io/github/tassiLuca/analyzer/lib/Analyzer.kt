@@ -20,13 +20,11 @@ interface Analyzer {
 
     companion object {
         /** Creates a new GitHub organization [Analyzer]. */
-        fun ofGitHub(): Analyzer = GitHubAnalyzer()
+        fun ofGitHub(gitHubProvider: GitHubRepositoryProvider): Analyzer = GitHubAnalyzer(gitHubProvider)
     }
 }
 
-private class GitHubAnalyzer : Analyzer {
-
-    private val gitHubProvider = GitHubRepositoryProvider(GitHubService.create())
+private class GitHubAnalyzer(private val gitHubProvider: GitHubRepositoryProvider) : Analyzer {
 
     override suspend fun analyze(
         organizationName: String,

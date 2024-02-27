@@ -8,15 +8,17 @@ import retrofit2.Response
 import retrofit2.awaitResponse
 
 /** A facade for the [GitHubService]. */
-class GitHubRepositoryProvider(private val gitHubService: GitHubService) {
+class GitHubRepositoryProvider {
+
+    private val gitHubService: GitHubService = GitHubService.create()
 
     /** Returns the repositories of the given [organizationName]. */
     suspend fun repositoriesOf(organizationName: String): Result<List<Repository>> =
-        paginatedRequest { gitHubService.organizationRepositories(organizationName, it).awaitResponse() }
+        paginatedRequest { gitHubService.repositoriesOf(organizationName, it).awaitResponse() }
 
     /** Returns the repositories of the given [organizationName] as [Flow]. */
     fun flowingRepositoriesOf(organizationName: String): Flow<List<Repository>> =
-        paginatedFlowRequest { gitHubService.organizationRepositories(organizationName, it).awaitResponse() }
+        paginatedFlowRequest { gitHubService.repositoriesOf(organizationName, it).awaitResponse() }
 
     /** Returns the contributors of the given [organizationName] and [repositoryName]. */
     suspend fun contributorsOf(organizationName: String, repositoryName: String): Result<List<Contribution>> =

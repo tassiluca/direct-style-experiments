@@ -8,7 +8,7 @@ import kotlinx.coroutines.runBlocking
 
 class GitHubRepositoryProviderTest : FreeSpec() {
 
-    private val gitHubRepositoryProvider = GitHubRepositoryProvider(GitHubService.create())
+    private val gitHubRepositoryProvider = GitHubRepositoryProvider()
 
     init {
         "The github repository provider" - {

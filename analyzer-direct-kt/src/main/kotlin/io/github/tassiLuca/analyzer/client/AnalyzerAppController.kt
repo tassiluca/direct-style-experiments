@@ -2,6 +2,7 @@ package io.github.tassiLuca.analyzer.client
 
 import io.github.tassiLuca.analyzer.commons.client.AppController
 import io.github.tassiLuca.analyzer.lib.Analyzer
+import io.github.tassiLuca.analyzer.lib.GitHubRepositoryProvider
 import io.github.tassiLuca.analyzer.lib.RepositoryReport
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +14,7 @@ import kotlin.coroutines.CoroutineContext
 /** The analyzer application controller. */
 class AnalyzerAppController : AppController, CoroutineScope {
     private val view = AnalyzerGUI(this)
-    private val analyzer = Analyzer.ofGitHub()
+    private val analyzer = Analyzer.ofGitHub(GitHubRepositoryProvider())
     private var currentComputation: Job? = null
 
     init {
