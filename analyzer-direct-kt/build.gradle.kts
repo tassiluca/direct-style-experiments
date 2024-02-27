@@ -1,7 +1,15 @@
+plugins {
+    kotlin("plugin.serialization") version "1.9.22"
+}
+
 dependencies {
-    implementation(libs.sttp)
-    implementation(libs.sttp.upickle)
     api(project(":analyzer-commons"))
+    implementation(libs.okttp)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.serialization.converter)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.coroutines.swing)
+    testImplementation(libs.retrofit.mock)
 }
 
 tasks.test {
@@ -10,9 +18,9 @@ tasks.test {
 
 tasks.create<JavaExec>("run") {
     group = "Application"
-    description = "Runs the Scala client application based on direct style, i.e. Gears."
+    description = "Runs the Kotlin client application based on direct style, i.e. coroutines."
     loadProjectEnvironmentVariables().forEach(environment::put)
-    mainClass.set("io.github.tassiLuca.analyzer.client.directAnalyzerLauncher")
+    mainClass.set("io.github.tassiLuca.analyzer.client.LauncherKt")
     classpath = sourceSets["main"].runtimeClasspath
 }
 

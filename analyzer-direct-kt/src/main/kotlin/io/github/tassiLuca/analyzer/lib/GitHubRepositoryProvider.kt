@@ -1,4 +1,4 @@
-package io.github.tassiLuca.analyzerkt.lib
+package io.github.tassiLuca.analyzer.lib
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector

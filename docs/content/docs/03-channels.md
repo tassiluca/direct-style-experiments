@@ -145,7 +145,6 @@ Kotlin Coroutines offers, for this purpose, the abstraction of **Flow**s, which 
 
 With respect to reactive programming, they are still quite less reach in terms of operators.
 
-
 ---
 
 - Channels in Kotlin (w.r.t. gears)

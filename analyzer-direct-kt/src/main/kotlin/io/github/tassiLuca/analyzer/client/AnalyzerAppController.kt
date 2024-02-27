@@ -1,8 +1,8 @@
-package io.github.tassiLuca.analyzerkt.client
+package io.github.tassiLuca.analyzer.client
 
 import io.github.tassiLuca.analyzer.commons.client.AppController
-import io.github.tassiLuca.analyzerkt.lib.Analyzer
-import io.github.tassiLuca.analyzerkt.lib.RepositoryReport
+import io.github.tassiLuca.analyzer.lib.Analyzer
+import io.github.tassiLuca.analyzer.lib.RepositoryReport
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

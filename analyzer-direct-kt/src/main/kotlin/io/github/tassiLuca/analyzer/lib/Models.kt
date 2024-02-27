@@ -1,4 +1,4 @@
-package io.github.tassiLuca.analyzerkt.lib
+package io.github.tassiLuca.analyzer.lib
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

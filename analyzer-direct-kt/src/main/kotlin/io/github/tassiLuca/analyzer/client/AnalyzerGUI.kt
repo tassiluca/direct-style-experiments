@@ -1,4 +1,4 @@
-package io.github.tassiLuca.analyzerkt.client
+package io.github.tassiLuca.analyzer.client
 
 import io.github.tassiLuca.analyzer.commons.client.AppController
 import io.github.tassiLuca.analyzer.commons.client.ui.MainFrame

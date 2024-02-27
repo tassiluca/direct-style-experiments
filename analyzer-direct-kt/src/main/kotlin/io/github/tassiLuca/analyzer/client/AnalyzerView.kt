@@ -1,6 +1,6 @@
-package io.github.tassiLuca.analyzerkt.client
+package io.github.tassiLuca.analyzer.client
 
-import io.github.tassiLuca.analyzerkt.lib.RepositoryReport
+import io.github.tassiLuca.analyzer.lib.RepositoryReport
 
 typealias OrganizationReport = Pair<Map<String, Long>, Set<RepositoryReport>>
 
