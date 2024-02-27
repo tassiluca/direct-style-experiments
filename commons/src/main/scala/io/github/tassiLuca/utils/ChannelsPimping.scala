@@ -1,6 +1,6 @@
 package io.github.tassiLuca.utils
 
-import gears.async.{Async, Channel, ReadableChannel}
+import gears.async.{Async, Channel, ReadableChannel, SendableChannel}
 
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
@@ -13,6 +13,9 @@ object ChannelsPimping:
   type Terminated = Terminated.type
 
   type Terminable[T] = T | Terminated
+
+  extension [T](c: SendableChannel[Terminable[T]])
+    def terminate()(using Async): Unit = c.send(Terminated)
 
   extension [T: ClassTag](c: ReadableChannel[Terminable[T]])
     @tailrec

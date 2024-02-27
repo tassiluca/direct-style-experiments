@@ -1,11 +1,9 @@
 package io.github.tassiLuca.utils
 
 import gears.async.default.given
-import gears.async.Channel.Closed
-import gears.async.TaskSchedule.{Every, RepeatUntilFailure}
-import gears.async.{Async, Future, ReadableChannel, SendableChannel, Task, UnboundedChannel}
+import gears.async.TaskSchedule.Every
+import gears.async.{Async, Future, SendableChannel, Task, UnboundedChannel}
 import io.github.tassiLuca.utils.ChannelsPimping.{Terminable, Terminated}
-import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -20,7 +18,7 @@ class ChannelsPimpingTest extends AnyFunSpec with Matchers {
       val channel = UnboundedChannel[Terminable[Item]]()
       Async.blocking:
         produceOn(channel.asSendable).run.await
-        channel.send(Terminated)
+        channel.terminate()
         channel.foreach { item => collectedResult = collectedResult :+ item }
       collectedResult shouldBe Seq.range(0, itemsProduced)
     }

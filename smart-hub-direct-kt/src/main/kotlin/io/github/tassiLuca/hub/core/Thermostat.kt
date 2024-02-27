@@ -1,6 +1,6 @@
-package io.github.tassiLuca.hubkt.core
+package io.github.tassiLuca.hub.core
 
-import io.github.tassiLuca.hubkt.core.ports.DashboardService
+import io.github.tassiLuca.hub.core.ports.DashboardService
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 

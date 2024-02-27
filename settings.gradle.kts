@@ -23,5 +23,6 @@ include(
     ":analyzer-monadic",
     ":analyzer-direct",
     ":rears",
-    ":smart-hub",
+    ":smart-hub-direct",
+    ":smart-hub-direct-kt",
 )

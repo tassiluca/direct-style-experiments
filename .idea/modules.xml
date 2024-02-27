@@ -8,6 +8,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/analyzer-monadic/direct-style-experiments.analyzer-monadic.main.iml" filepath="$PROJECT_DIR$/.idea/modules/analyzer-monadic/direct-style-experiments.analyzer-monadic.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/analyzer-monadic/direct-style-experiments.analyzer-monadic.test.iml" filepath="$PROJECT_DIR$/.idea/modules/analyzer-monadic/direct-style-experiments.analyzer-monadic.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/blog-ws-commons/direct-style-experiments.blog-ws-commons.main.iml" filepath="$PROJECT_DIR$/.idea/modules/blog-ws-commons/direct-style-experiments.blog-ws-commons.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/blog-ws-commons/direct-style-experiments.blog-ws-commons.test.iml" filepath="$PROJECT_DIR$/.idea/modules/blog-ws-commons/direct-style-experiments.blog-ws-commons.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/blog-ws-direct-kt/direct-style-experiments.blog-ws-direct-kt.main.iml" filepath="$PROJECT_DIR$/.idea/modules/blog-ws-direct-kt/direct-style-experiments.blog-ws-direct-kt.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/blog-ws-direct-kt/direct-style-experiments.blog-ws-direct-kt.test.iml" filepath="$PROJECT_DIR$/.idea/modules/blog-ws-direct-kt/direct-style-experiments.blog-ws-direct-kt.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/blog-ws-direct/direct-style-experiments.blog-ws-direct.main.iml" filepath="$PROJECT_DIR$/.idea/modules/blog-ws-direct/direct-style-experiments.blog-ws-direct.main.iml" />
@@ -17,6 +18,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/commons/direct-style-experiments.commons.main.iml" filepath="$PROJECT_DIR$/.idea/modules/commons/direct-style-experiments.commons.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/commons/direct-style-experiments.commons.test.iml" filepath="$PROJECT_DIR$/.idea/modules/commons/direct-style-experiments.commons.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/direct-style-experiments.main.iml" filepath="$PROJECT_DIR$/.idea/modules/direct-style-experiments.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/smart-hub-direct-kt/direct-style-experiments.smart-hub-direct-kt.main.iml" filepath="$PROJECT_DIR$/.idea/modules/smart-hub-direct-kt/direct-style-experiments.smart-hub-direct-kt.main.iml" />
     </modules>
   </component>
 </project>

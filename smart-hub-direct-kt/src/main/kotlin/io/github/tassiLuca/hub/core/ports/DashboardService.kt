@@ -1,6 +1,6 @@
-package io.github.tassiLuca.hubkt.core.ports
+package io.github.tassiLuca.hub.core.ports
 
-import io.github.tassiLuca.hubkt.core.Temperature
+import io.github.tassiLuca.hub.core.Temperature
 
 /** The dashboard service. */
 interface DashboardService {

@@ -1,7 +1,7 @@
-package io.github.tassiLuca.hubkt.adapters
+package io.github.tassiLuca.hub.adapters
 
-import io.github.tassiLuca.hubkt.application.ThermostatHubManager
-import io.github.tassiLuca.hubkt.core.TemperatureEntry
+import io.github.tassiLuca.hub.application.ThermostatHubManager
+import io.github.tassiLuca.hub.core.TemperatureEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map

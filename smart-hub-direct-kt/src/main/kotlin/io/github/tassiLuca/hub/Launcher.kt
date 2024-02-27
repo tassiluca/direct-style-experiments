@@ -1,6 +1,6 @@
-package io.github.tassiLuca.hubkt
+package io.github.tassiLuca.hub
 
-import io.github.tassiLuca.hubkt.adapters.MockedHubManager
+import io.github.tassiLuca.hub.adapters.MockedHubManager
 import kotlinx.coroutines.runBlocking
 
 /** The application entry point. */

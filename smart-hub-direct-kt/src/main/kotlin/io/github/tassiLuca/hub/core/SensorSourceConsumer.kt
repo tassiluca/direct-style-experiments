@@ -1,4 +1,4 @@
-package io.github.tassiLuca.hubkt.core
+package io.github.tassiLuca.hub.core
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay

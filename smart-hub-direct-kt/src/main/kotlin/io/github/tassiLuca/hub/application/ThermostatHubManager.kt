@@ -1,9 +1,9 @@
-package io.github.tassiLuca.hubkt.application
+package io.github.tassiLuca.hub.application
 
-import io.github.tassiLuca.hubkt.core.SensorHealthChecker
-import io.github.tassiLuca.hubkt.core.TemperatureEntry
-import io.github.tassiLuca.hubkt.core.Thermostat
-import io.github.tassiLuca.hubkt.core.ports.DashboardService
+import io.github.tassiLuca.hub.core.SensorHealthChecker
+import io.github.tassiLuca.hub.core.TemperatureEntry
+import io.github.tassiLuca.hub.core.Thermostat
+import io.github.tassiLuca.hub.core.ports.DashboardService
 import kotlinx.coroutines.flow.Flow
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.seconds

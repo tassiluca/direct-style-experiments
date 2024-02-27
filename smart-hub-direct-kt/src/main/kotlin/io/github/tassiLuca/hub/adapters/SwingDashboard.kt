@@ -1,8 +1,8 @@
-package io.github.tassiLuca.hubkt.adapters
+package io.github.tassiLuca.hub.adapters
 
-import io.github.tassiLuca.hubkt.adapters.ui.DashboardUI
-import io.github.tassiLuca.hubkt.core.Temperature
-import io.github.tassiLuca.hubkt.core.ports.DashboardService
+import io.github.tassiLuca.hub.adapters.ui.DashboardUI
+import io.github.tassiLuca.hub.core.Temperature
+import io.github.tassiLuca.hub.core.ports.DashboardService
 
 /** Swing dashboard. */
 class SwingDashboard : DashboardService {

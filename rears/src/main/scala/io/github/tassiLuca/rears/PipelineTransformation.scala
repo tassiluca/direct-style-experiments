@@ -136,7 +136,7 @@ extension [T](r: ReadableChannel[T])(using Async)
     * -------------|-----------|----------------|---
     *              V           V                V
     * -------[1, 2, 3, 4]--[5, 6, 7]-----------[8]->
-    * </pre>  .
+    * </pre>
     */
   def bufferWithin(timespan: Duration = 5 seconds): ReadableChannel[List[T]] =
     var buffer = List[T]()

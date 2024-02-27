@@ -1,9 +1,9 @@
-package io.github.tassiLuca.hubkt.adapters
+package io.github.tassiLuca.hub.adapters
 
-import io.github.tassiLuca.hubkt.adapters.ui.TemperatureSourceUI
-import io.github.tassiLuca.hubkt.core.SensorEvent
-import io.github.tassiLuca.hubkt.core.SensorSource
-import io.github.tassiLuca.hubkt.core.TemperatureEntry
+import io.github.tassiLuca.hub.adapters.ui.TemperatureSourceUI
+import io.github.tassiLuca.hub.core.SensorEvent
+import io.github.tassiLuca.hub.core.SensorSource
+import io.github.tassiLuca.hub.core.TemperatureEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow

@@ -155,4 +155,12 @@ With respect to reactive programming, they are still quite less reach in terms o
 
 ---
 
+Points of difference between the gears and Kotlin Coroutines channels are the following:
+
+- closing a channel in gears leads to all subsequent reads returning a `Left(Closed)` preventing the consumer from finishing reading all the values sent on the channel before its closing. This is not the case for Kotlin Coroutines where closing a channel indicates that no more values are coming, but doesn't prevent consuming already sent values. Moreover, in Kotlin is possible to use a regular for loop to receive elements from a channel:
+  - [example code in kotlin]
+  - The same behavior can be achieved also in gears extending the framework with the concept of `Terminable` channel. After all, closing a channel in coroutines (or terminating it in gears) is a matter of sending a special token to the channel: the iteration stops as soon as this token is received
+
+---
+
 ## Conclusions
