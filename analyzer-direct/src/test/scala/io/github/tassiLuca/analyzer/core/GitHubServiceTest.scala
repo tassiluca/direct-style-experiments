@@ -8,26 +8,26 @@ import org.scalatest.matchers.should.Matchers
 
 class GitHubServiceTest extends AnyFunSpec with Matchers {
 
-  val DEFAULT_NUMBER_OF_RESULTS_PER_PAGE = 30
-  val gitHubService: GitHubService = GitHubService()
-  val organization = "lampepfl"
-  val repository = "dotty"
-  val odersky = "odersky"
+  private val defaultNumberOfResultsPerPage = 30
+  private val gitHubService: GitHubService = GitHubService()
+  private val organization = "lampepfl"
+  private val repository = "dotty"
+  private val odersky = "odersky"
 
-  describe("GitHubService") {
-    describe("repositoriesOf") {
-      it("should return all the repositories of a given organization") {
+  describe("The GitHubService") {
+    describe("when asked for repositories") {
+      it("of an existing organization should return all of them") {
         Async.blocking:
           val result = gitHubService.repositoriesOf(organization)
           result.isRight shouldBe true
           result.foreach { repos =>
-            repos.size should be > DEFAULT_NUMBER_OF_RESULTS_PER_PAGE
+            repos.size should be > defaultNumberOfResultsPerPage
             repos.foreach(_.organization shouldBe organization)
             repos.count(_.name == repository) shouldBe 1
           }
       }
 
-      it("should return a error message if the organization doesn't exist") {
+      it("of a non-existing organization should fail") {
         Async.blocking:
           val nonExistingOrganization = "4315950311"
           val result = gitHubService.repositoriesOf(nonExistingOrganization)
@@ -35,26 +35,26 @@ class GitHubServiceTest extends AnyFunSpec with Matchers {
       }
     }
 
-    describe("contributorsOf") {
-      it("should return all the contributors of a given repository") {
+    describe("when asked for contributors of an existing repository") {
+      it("should return all of them") {
         Async.blocking:
           val result = gitHubService.contributorsOf(organization, repository)
           result.isRight shouldBe true
           result.foreach { contributors =>
-            contributors.size should be > DEFAULT_NUMBER_OF_RESULTS_PER_PAGE
+            contributors.size should be > defaultNumberOfResultsPerPage
             contributors.exists(_.user == odersky) shouldBe true
           }
       }
     }
 
-    describe("lastReleaseOf") {
-      it("should return the last release of a repository if it exists") {
+    describe("when asked for the last release of an existing repository") {
+      it("should return it if it exists") {
         Async.blocking:
           val result = gitHubService.lastReleaseOf(organization, repository)
           result.isRight shouldBe true
       }
 
-      it("should return a error message if it does not exist") {
+      it("should fail if it does not exist") {
         Async.blocking:
           val result = gitHubService.lastReleaseOf(organization, "dotty-website")
           result.isLeft shouldBe true
