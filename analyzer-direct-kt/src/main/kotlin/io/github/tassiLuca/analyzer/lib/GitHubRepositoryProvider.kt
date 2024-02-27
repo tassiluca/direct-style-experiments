@@ -7,7 +7,7 @@ import retrofit2.HttpException
 import retrofit2.Response
 import retrofit2.awaitResponse
 
-/** A facade for [GitHubService]. */
+/** A facade for the [GitHubService]. */
 class GitHubRepositoryProvider(private val gitHubService: GitHubService) {
 
     /** Returns the repositories of the given [organizationName]. */

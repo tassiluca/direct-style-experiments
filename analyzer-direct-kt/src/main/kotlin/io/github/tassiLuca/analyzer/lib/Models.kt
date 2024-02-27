@@ -10,19 +10,19 @@ data class Repository(
     val id: Long,
     /** The full name of the repository, comprising owner organization in `<org>/<repo>` format. */
     @SerialName("full_name") val fullName: String,
-    /** The number of stars of the repository. */
+    /** The number of repository stars. */
     @SerialName("stargazers_count") val stars: Int,
-    /** The number of issues of the repository. */
+    /** The number of repository issues. */
     @SerialName("open_issues_count") val issues: Int,
 ) {
-    /** The name of the organization that owns the repository. */
+    /** The name of the owner organization. */
     val organization: String = fullName.substringBefore('/')
 
     /** The name of the repository. */
     val name: String = fullName.substringAfter('/')
 }
 
-/** A GitHub contribution. */
+/** A GitHub repository contribution. */
 @Serializable
 data class Contribution(
     /** The login name of the contributor. */
@@ -44,12 +44,12 @@ data class Release(
 data class RepositoryReport(
     /** The name of the repository. */
     val name: String,
-    /** The number of open issues. */
+    /** The issues number. */
     val issues: Int,
-    /** The number of stars. */
+    /** The stars number. */
     val stars: Int,
     /** The number of contributions. */
     val contributions: List<Contribution>,
-    /** The last release. */
+    /** The last release of the repository. */
     val lastRelease: Release?,
 )

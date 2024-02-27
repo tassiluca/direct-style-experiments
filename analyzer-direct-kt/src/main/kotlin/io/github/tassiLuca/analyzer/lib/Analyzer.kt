@@ -1,5 +1,6 @@
 package io.github.tassiLuca.analyzer.lib
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
@@ -32,23 +33,39 @@ private class GitHubAnalyzer : Analyzer {
         updateResults: suspend (RepositoryReport) -> Unit,
     ): Result<Set<RepositoryReport>> = coroutineScope {
         runCatching {
-            val channel = Channel<RepositoryReport>()
             val repositories = gitHubProvider.repositoriesOf(organizationName).getOrThrow()
-            repositories.forEach {
-                launch {
-                    val contributors = async { gitHubProvider.contributorsOf(organizationName, it.name).getOrThrow() }
-                    val release = async { gitHubProvider.lastReleaseOf(organizationName, it.name).getOrThrow() }
-                    channel.send(RepositoryReport(it.name, it.issues, it.stars, contributors.await(), release.await()))
-                }
-            }
-            var allReports = emptySet<RepositoryReport>()
-            repeat(repositories.size) {
-                val report = channel.receive()
-                allReports = allReports + report
-                updateResults(report)
-            }
-            channel.close()
-            allReports
+            val resultsChannel = analyzeAll(organizationName, repositories)
+            collectResults(resultsChannel, repositories.size, updateResults)
         }
+    }
+
+    private fun CoroutineScope.analyzeAll(
+        organizationName: String,
+        repositories: List<Repository>,
+    ): Channel<RepositoryReport> {
+        val channel = Channel<RepositoryReport>()
+        repositories.map {
+            launch {
+                val contributors = async { gitHubProvider.contributorsOf(organizationName, it.name).getOrThrow() }
+                val release = async { gitHubProvider.lastReleaseOf(organizationName, it.name).getOrThrow() }
+                channel.send(RepositoryReport(it.name, it.issues, it.stars, contributors.await(), release.await()))
+            }
+        }
+        return channel
+    }
+
+    private suspend fun collectResults(
+        resultsChannel: Channel<RepositoryReport>,
+        expectedResults: Int,
+        updateResults: suspend (RepositoryReport) -> Unit,
+    ): Set<RepositoryReport> {
+        var allReports = emptySet<RepositoryReport>()
+        repeat(expectedResults) {
+            val report = resultsChannel.receive()
+            allReports = allReports + report
+            updateResults(report)
+        }
+        resultsChannel.close()
+        return allReports
     }
 }

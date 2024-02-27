@@ -29,7 +29,8 @@ class GitHubServiceTest extends AnyFunSpec with Matchers {
 
       it("should return a error message if the organization doesn't exist") {
         Async.blocking:
-          val result = gitHubService.repositoriesOf("4315950311")
+          val nonExistingOrganization = "4315950311"
+          val result = gitHubService.repositoriesOf(nonExistingOrganization)
           result.isLeft shouldBe true
       }
     }
@@ -41,7 +42,6 @@ class GitHubServiceTest extends AnyFunSpec with Matchers {
           result.isRight shouldBe true
           result.foreach { contributors =>
             contributors.size should be > DEFAULT_NUMBER_OF_RESULTS_PER_PAGE
-            println(contributors.size)
             contributors.exists(_.user == odersky) shouldBe true
           }
       }

@@ -10,15 +10,15 @@ interface AnalyzerView {
     /** Runs the view. */
     fun run()
 
-    /** Updates the view with the given result. */
+    /** Updates the view with the given [result]. */
     fun update(result: OrganizationReport)
 
-    /** Notify the end of the computation. */
+    /** Notify the view the end of the computation. */
     fun endComputation()
 
-    /** Shows an error message. */
+    /** Display the given [errorMessage]. */
     fun error(errorMessage: String)
 
-    /** Cancels the computation. */
+    /** Notify the view the computation has been cancelled. */
     fun cancelled()
 }
