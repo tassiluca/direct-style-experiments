@@ -28,5 +28,7 @@ trait PostsModel:
     */
   type ContentVerifier = (Title, Body) => Either[String, PostContent]
 
-  /** A function that verifies the author has appropriate permissions, returning their information. */
-  type AuthorsVerifier = AuthorId => Author
+  /** A function that verifies the author has appropriate permissions, returning [[Right]]
+    * with their information or [[Left]] with the reason why failed.
+    */
+  type AuthorsVerifier = AuthorId => Either[String, Author]

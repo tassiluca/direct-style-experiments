@@ -11,7 +11,7 @@ import scala.concurrent.{Await, ExecutionContext}
 class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
 
   val timeout: FiniteDuration = 15.seconds
-  val authorId = "ltassi"
+  val authorId = "mrossi"
   val postTitle = "A hello world post"
   val postBody = "Hello World Scala Gears!"
 
@@ -26,7 +26,7 @@ class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
     override val authorsVerifier: AuthorsVerifier = a =>
       require(a == authorId, "No author with the given id matches")
       _completedChecks += Check.AuthorVerified
-      Author(a, "Luca", "Tassinari")
+      Right(Author(a, "Mario", "Rossi"))
     override val service: PostsService = PostsService(contentVerifier, authorsVerifier)
 
   given ExecutionContext = ExecutionContext.global
@@ -38,8 +38,9 @@ class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
     creation.isCompleted shouldBe true
     creation.value.get.isSuccess shouldBe true
     val query = Await.result(app.service.get(postTitle), timeout)
-    query.author shouldBe app.authorsVerifier(authorId)
-    query.body shouldBe postBody
+    query.isDefined shouldBe true
+    query.get.author shouldBe app.authorsVerifier(authorId).toOption.get
+    query.get.body shouldBe postBody
   }
 
   "Attempting to create two posts with same title" should "fail" in {

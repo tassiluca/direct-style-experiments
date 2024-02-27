@@ -10,6 +10,9 @@ object either:
   inline def apply[L, R](inline body: Label[Left[L, Nothing]] ?=> R): Either[L, R] =
     boundary(Right(body))
 
+  /** Quickly break to the enclosing boundary with a [[Left]] filled with [[l]]. */
+  inline def left[L, R](l: L)(using Label[Left[L, Nothing]]): Either[L, R] = break(Left(l))
+
   extension [L, R](e: Either[L, R])
     /** @return this [[Right]] value or break to the enclosing boundary with the [[Left]] value. */
     inline def ?(using Label[Left[L, Nothing]]): R = e match

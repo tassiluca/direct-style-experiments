@@ -19,7 +19,7 @@ trait PostsServiceComponent:
     def create(authorId: AuthorId, title: Title, body: Body)(using ExecutionContext): Future[Post]
 
     /** Get a post from its [[title]]. */
-    def get(title: Title)(using ExecutionContext): Future[Post]
+    def get(title: Title)(using ExecutionContext): Future[Option[Post]]
 
     /** Gets all the stored blog posts in a lazy manner. */
     def all()(using ExecutionContext): Future[LazyList[Post]]
@@ -53,15 +53,15 @@ trait PostsServiceComponent:
       /* Pretending to make a call to the Authorship Service that keeps track of authorized authors. */
       private def authorBy(id: AuthorId)(using ExecutionContext): Future[Author] = Future:
         "PostsService".simulatesBlocking(s"getting author $id info...", maxDuration = 1_000)
-        authorsVerifier(id)
+        authorsVerifier(id) match { case Left(e) => throw RuntimeException(e); case Right(v) => v }
 
       /* Some local computation that verifies the content of the post is appropriate. */
       private def verifyContent(title: Title, body: Body)(using ExecutionContext): Future[PostContent] = Future:
         "PostsService".simulatesBlocking(s"verifying content of the post '$title'", minDuration = 1_000)
         contentVerifier(title, body) match { case Left(e) => throw RuntimeException(e); case Right(v) => v }
 
-      override def get(title: Title)(using ExecutionContext): Future[Post] =
-        context.repository.load(title).map(_.get)
+      override def get(title: Title)(using ExecutionContext): Future[Option[Post]] =
+        context.repository.load(title)
 
       override def all()(using ExecutionContext): Future[LazyList[Post]] =
         context.repository.loadAll()
