@@ -1,6 +1,8 @@
 dependencies {
     implementation(libs.sttp)
     implementation(libs.sttp.upickle)
+    implementation("eu.monniot:scala3mock_3:0.6.0")
+    implementation("eu.monniot:scala3mock-scalatest_3:0.6.0")
     api(project(":analyzer-commons"))
 }
 

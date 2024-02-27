@@ -1,58 +1,62 @@
 package io.github.tassiLuca.analyzer.core
 
-import gears.async.default.given
+import eu.monniot.scala3mock.ScalaMocks.*
+import eu.monniot.scala3mock.scalatest.MockFactory
 import gears.async.Async
+import gears.async.default.given
 import io.github.tassiLuca.analyzer.commons.lib.{Contribution, Release, Repository, RepositoryReport}
 import io.github.tassiLuca.analyzer.lib.{Analyzer, GitHubService}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class AnalyzerTest extends AnyFlatSpec with Matchers {
+class AnalyzerTest extends AnyFlatSpec with Matchers with MockFactory {
 
-  val mockGitHubService: GitHubService = new GitHubService:
-    override def repositoriesOf(organizationName: String)(using Async): Either[String, Seq[Repository]] =
-      Right(Seq(Repository(0, "dse/test-1", 100, 10), Repository(1, "dse/test-2", 123, 198)))
-
-    override def contributorsOf(
-        organizationName: String,
-        repositoryName: String,
-    )(using Async): Either[String, Seq[Contribution]] = repositoryName match
-      case "test-1" => Right(Seq(Contribution("mrossi", 56), Contribution("lpluto", 11)))
-      case "test-2" => Right(Seq(Contribution("mrossi", 11), Contribution("averdi", 98)))
-
-    override def lastReleaseOf(organizationName: String, repositoryName: String)(using Async): Either[String, Release] =
-      repositoryName match
-        case "test-1" => Right(Release("v0.1", "2024-02-21"))
-        case _ => Left("404, not found")
-
-  val analyzer: Analyzer = Analyzer.of(mockGitHubService)
-
-  val expectedResults = Seq(
-    RepositoryReport(
-      "test-1",
-      10,
-      100,
-      Seq(Contribution("mrossi", 56), Contribution("lpluto", 11)),
-      Some(Release("v0.1", "2024-02-21")),
-    ),
-    RepositoryReport(
-      "test-2",
-      198,
-      123,
-      Seq(Contribution("mrossi", 11), Contribution("averdi", 98)),
-      None,
-    ),
+  private val dummiesData = Map[Repository, (Seq[Contribution], Option[Release])](
+    Repository(0, "dse/test-1", 100, 10) -> (Seq(Contribution("mrossi", 56)), Some(Release("v0.1", "2024-02-21"))),
+    Repository(1, "dse/test-2", 123, 198) -> (Seq(Contribution("mrossi", 11), Contribution("averdi", 98)), None),
   )
 
-  "simple test" should "work" in {
-    var results: Set[RepositoryReport] = Set()
+  val gitHubService: GitHubService = mock[GitHubService]
+  val analyzer: Analyzer = Analyzer.of(gitHubService)
+
+  "Analyzer" should "return the correct results if given in input an existing organization" in {
+    var incrementalResults = Set[RepositoryReport]()
     Async.blocking:
+      configureSuccessfulService()
       val allResults = analyzer.analyze("dse") { report =>
-        results += report
+        incrementalResults += report
       }
-      println(allResults)
+      incrementalResults shouldBe expectedResults
       allResults.isRight shouldBe true
-      allResults.map(_ should contain theSameElementsAs expectedResults)
-      results.toSeq should contain theSameElementsAs expectedResults
+      allResults.foreach(_ should contain theSameElementsAs expectedResults)
   }
+
+  "Analyzer" should "return a failure in case the given organization doesn't exists" in {
+    var incrementalResults = Set[RepositoryReport]()
+    Async.blocking:
+      configureFailureService()
+      val allResults = analyzer.analyze("non-existing") { report =>
+        incrementalResults += report
+      }
+      incrementalResults shouldBe empty
+      allResults.isLeft shouldBe true
+  }
+
+  private def expectedResults: Set[RepositoryReport] = dummiesData.collect { case (repo, data) =>
+    RepositoryReport(repo.name, repo.issues, repo.stars, data._1, data._2)
+  }.toSet
+
+  private def configureSuccessfulService(): Unit =
+    when(gitHubService.repositoriesOf(_: String)(using _: Async)).expects("dse", *)
+      .returning(Right(dummiesData.keys.toSeq))
+    dummiesData.foreach { (repo, data) =>
+      when(gitHubService.contributorsOf(_: String, _: String)(using _: Async)).expects(repo.organization, repo.name, *)
+        .returning(Right(data._1))
+      when(gitHubService.lastReleaseOf(_: String, _: String)(using _: Async)).expects(repo.organization, repo.name, *)
+        .returning(data._2.toRight("404, not found"))
+    }
+
+  private def configureFailureService(): Unit =
+    when(gitHubService.repositoriesOf(_: String)(using _: Async)).expects("non-existing", *)
+      .returning(Left("404, not found"))
 }
