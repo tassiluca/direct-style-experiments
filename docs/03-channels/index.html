@@ -13,15 +13,15 @@ classDiagram class `SendableChannel[-T]` { &lt;&lt; trait &gt;&gt; &#43;sendSour
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/03-channels/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-02-22T11:01:27+01:00" />
+<meta property="article:modified_time" content="2024-02-27T16:17:02+01:00" />
 
 <title>03 Channels | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
 <link rel="icon" href="/PPS-22-direct-style-experiments/favicon.png" >
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/03-channels/">
-<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.52e9c97a2cdb2f96e1db1d9e68e4f7a24ffeb36d11f3e9913b0126d572bfff9f.css" integrity="sha256-UunJeizbL5bh2x2eaOT3ok/&#43;s20R8&#43;mROwEm1XK//58=" crossorigin="anonymous">
+<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.8b7763bbc30daa9cc9cbd3d86de971ec810e418df80eaa491030277c990276b4.css" integrity="sha256-i3dju8MNqpzJy9PYbelx7IEOQY34DqpJEDAnfJkCdrQ=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.ab4267e75236ada82371ce248ae32c029db3d55c83940108e85b57f0316758f7.js" integrity="sha256-q0Jn51I2ragjcc4kiuMsAp2z1VyDlAEI6FtX8DFnWPc=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.8dcc1ef6eb0cd1ac02f22adb58df889aa4e26f4bc5326005b494e05c65df4764.js" integrity="sha256-jcwe9usM0awC8irbWN&#43;ImqTib0vFMmAFtJTgXGXfR2Q=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -369,6 +369,16 @@ Thanks to the fact <code>Future</code>s are cancellable objects, whenever desire
 </li>
 </ul>
 <hr>
+<p>Points of difference between the gears and Kotlin Coroutines channels are the following:</p>
+<ul>
+<li>closing a channel in gears leads to all subsequent reads returning a <code>Left(Closed)</code> preventing the consumer from finishing reading all the values sent on the channel before its closing. This is not the case for Kotlin Coroutines where closing a channel indicates that no more values are coming, but doesn&rsquo;t prevent consuming already sent values. Moreover, in Kotlin is possible to use a regular for loop to receive elements from a channel:
+<ul>
+<li>[example code in kotlin]</li>
+<li>The same behavior can be achieved also in gears extending the framework with the concept of <code>Terminable</code> channel. After all, closing a channel in coroutines (or terminating it in gears) is a matter of sending a special token to the channel: the iteration stops as soon as this token is received</li>
+</ul>
+</li>
+</ul>
+<hr>
 <h2 id="conclusions">
   Conclusions
   <a class="anchor" href="#conclusions">#</a>
@@ -382,9 +392,9 @@ Thanks to the fact <code>Future</code>s are cancellable objects, whenever desire
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/58419fa40065e73a1c79eb0bf81a3a743104532b" title='Last modified by Luca Tassinari | February 22, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/ea8a516ffc0b71384cba8d060005cd7696b06d5a" title='Last modified by Luca Tassinari | February 27, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>February 22, 2024</span>
+      <span>February 27, 2024</span>
     </a>
   </div>
 
