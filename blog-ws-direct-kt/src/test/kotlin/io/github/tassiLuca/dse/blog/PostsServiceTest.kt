@@ -59,7 +59,7 @@ class PostsServiceTest : FunSpec() {
     )
 
     companion object {
-        private const val AUTHOR_ID = "ltassi"
+        private const val AUTHOR_ID = "mrossi"
         private const val AUTHOR_NAME = "Mario"
         private const val AUTHOR_SURNAME = "Rossi"
         private const val TITLE = "A hello world post"

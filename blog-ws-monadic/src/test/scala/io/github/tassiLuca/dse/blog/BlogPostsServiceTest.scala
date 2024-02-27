@@ -17,9 +17,7 @@ class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
 
   def newBlogPostsAppInstance(): BlogPostsApp & CheckFlag = new BlogPostsApp with CheckFlag:
     private var _completedChecks: Set[Check] = Set.empty
-
     override def completedChecks: Set[Check] = _completedChecks
-
     override val contentVerifier: ContentVerifier = (t, b) =>
       _completedChecks += Check.ContentVerified
       Right((t, b))
@@ -60,7 +58,7 @@ class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
     Await.result(creation2, timeout).title shouldBe postTitle2
   }
 
-  "BlogPostsService" should "fail on unauthorized author **BUT** verification check is not cancelled" in {
+  "BlogPostsService" should "fail on unauthorized author **BUT** verification check is **NOT** cancelled" in {
     val app = newBlogPostsAppInstance()
     val creation = app.service.create("unauthorized", postTitle, postBody)
     Await.ready(creation, timeout)

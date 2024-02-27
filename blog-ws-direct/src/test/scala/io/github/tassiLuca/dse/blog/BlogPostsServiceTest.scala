@@ -1,16 +1,15 @@
 package io.github.tassiLuca.dse.blog
 
-import io.github.tassiLuca.dse.blog.core
-import io.github.tassiLuca.dse.blog.core.{Check, CheckFlag}
 import gears.async.default.given
 import gears.async.{Async, Future}
+import io.github.tassiLuca.dse.blog.core.{Check, CheckFlag}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
 
 class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
 
-  val authorId = "ltassi"
+  val authorId = "mrossi"
   val postTitle = "A hello world post"
   val postBody = "Hello World Scala Gears!"
 
@@ -23,7 +22,7 @@ class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
     override val authorsVerifier: AuthorsVerifier = a =>
       require(a == authorId, "No author with the given id matches")
       _completedChecks += Check.AuthorVerified
-      Right(Author(a, "Luca", "Tassinari"))
+      Right(Author(a, "Mario", "Rossi"))
     override val service: PostsService = PostsService(contentVerifier, authorsVerifier)
 
   "BlogPostsService" should "create posts correctly if author and content is legit" in {
@@ -32,8 +31,10 @@ class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
       app.service.create(authorId, postTitle, postBody).isRight shouldBe true
       val post = app.service.get(postTitle)
       post.isRight shouldBe true
-      post.toOption.get.map(_.author) shouldBe app.authorsVerifier(authorId).toOption
-      post.toOption.get.map(_.body) shouldBe Some(postBody)
+      post.foreach { p =>
+        p.map(_.author) shouldBe app.authorsVerifier(authorId).toOption
+        p.map(_.body) shouldBe Some(postBody)
+      }
   }
 
   "Attempting to create two posts with same title" should "fail" in {
