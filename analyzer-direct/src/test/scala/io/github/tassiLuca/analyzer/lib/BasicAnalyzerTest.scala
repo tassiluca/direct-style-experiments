@@ -1,15 +1,15 @@
-package io.github.tassiLuca.analyzer.core
+package io.github.tassiLuca.analyzer.lib
 
 import eu.monniot.scala3mock.ScalaMocks.*
 import eu.monniot.scala3mock.scalatest.MockFactory
 import gears.async.Async
 import gears.async.default.given
 import io.github.tassiLuca.analyzer.commons.lib.{Contribution, Release, Repository, RepositoryReport}
-import io.github.tassiLuca.analyzer.lib.{Analyzer, GitHubService}
+import io.github.tassiLuca.analyzer.lib.{Analyzer, RepositoryService}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class AnalyzerTest extends AnyFlatSpec with Matchers with MockFactory {
+class BasicAnalyzerTest extends AnyFlatSpec with Matchers with MockFactory {
 
   private val dummiesData = Map[Repository, (Seq[Contribution], Option[Release])](
     Repository(0, "dse/test-1", 100, 10) -> (Seq(Contribution("mrossi", 56)), Some(Release("v0.1", "2024-02-21"))),
@@ -44,7 +44,7 @@ class AnalyzerTest extends AnyFlatSpec with Matchers with MockFactory {
   }.toSet
 
   private def successfulService(): Analyzer =
-    val gitHubService: GitHubService = mock[GitHubService]
+    val gitHubService: RepositoryService = mock[RepositoryService]
     when(gitHubService.repositoriesOf(_: String)(using _: Async)).expects("dse", *)
       .returning(Right(dummiesData.keys.toSeq))
     dummiesData.foreach { (repo, data) =>
@@ -53,11 +53,11 @@ class AnalyzerTest extends AnyFlatSpec with Matchers with MockFactory {
       when(gitHubService.lastReleaseOf(_: String, _: String)(using _: Async)).expects(repo.organization, repo.name, *)
         .returning(data._2.toRight("404, not found"))
     }
-    Analyzer.of(gitHubService)
+    Analyzer.basic(gitHubService)
 
   private def failingService(): Analyzer =
-    val gitHubService: GitHubService = mock[GitHubService]
+    val gitHubService: RepositoryService = mock[RepositoryService]
     when(gitHubService.repositoriesOf(_: String)(using _: Async)).expects("non-existing", *)
       .returning(Left("404, not found"))
-    Analyzer.of(gitHubService)
+    Analyzer.basic(gitHubService)
 }
