@@ -14,7 +14,7 @@ import kotlin.coroutines.CoroutineContext
 /** The analyzer application controller. */
 class AnalyzerAppController : AppController, CoroutineScope {
     private val view = AnalyzerGUI(this)
-    private val analyzer = Analyzer.ofGitHub(GitHubRepositoryProvider())
+    private val analyzer = Analyzer.ofGithubByFlows(GitHubRepositoryProvider())
     private var currentComputation: Job? = null
 
     init {

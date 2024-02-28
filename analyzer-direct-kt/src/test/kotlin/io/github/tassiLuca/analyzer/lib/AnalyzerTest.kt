@@ -18,7 +18,7 @@ class AnalyzerTest : FunSpec() {
     )
 
     init {
-        test("Analyzer should return the correct results if given in input an existing organization") {
+        test("Channel based analyzer should return the correct results if no errors occur") {
             var incrementalResults = emptySet<RepositoryReport>()
             runBlocking {
                 val service = successfulService()
@@ -31,7 +31,7 @@ class AnalyzerTest : FunSpec() {
             }
         }
 
-        test("Analyzer should return a failure if given in input a non-existing organization") {
+        test("Channel based analyzer should return a failure if given in input a non-existing organization") {
             var incrementalResults = emptySet<RepositoryReport>()
             runBlocking {
                 val service = failingService()
@@ -58,13 +58,13 @@ class AnalyzerTest : FunSpec() {
             `when`(gitHubProvider.lastReleaseOf(repo.organization, repo.name))
                 .thenReturn(Result.success(data.second))
         }
-        return Analyzer.ofGitHub(gitHubProvider)
+        return Analyzer.ofGitHubByChannels(gitHubProvider)
     }
 
     private suspend fun failingService(): Analyzer {
         val gitHubProvider = mock<GitHubRepositoryProvider>()
         `when`(gitHubProvider.repositoriesOf("dse"))
             .thenReturn(Result.failure(RuntimeException("404, not found")))
-        return Analyzer.ofGitHub(gitHubProvider)
+        return Analyzer.ofGitHubByChannels(gitHubProvider)
     }
 }
