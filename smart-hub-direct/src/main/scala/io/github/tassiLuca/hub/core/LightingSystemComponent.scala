@@ -21,4 +21,5 @@ trait LightingSystemComponent:
 
     private class LightingSystemImpl extends LightingSystem:
       override protected def react(e: Try[Seq[LuminosityEntry]])(using Async): Unit =
-        e.map(les => context.dashboard.luminosityUpdate(les))
+        val averageLuminosity = e.map { entries => entries.map(_.luminosity).sum / entries.size }.toOption
+        averageLuminosity.foreach(context.dashboard.luminosityUpdate(_))

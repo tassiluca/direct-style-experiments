@@ -2,7 +2,7 @@ package io.github.tassiLuca.hub.adapters.ui
 
 import io.github.tassiLuca.utils.ScalaSwingFacade.{*, given}
 
-import java.awt.{BorderLayout, Font, GridLayout}
+import java.awt.{Dimension, Font, GridLayout}
 import javax.swing.*
 import javax.swing.table.DefaultTableModel
 
@@ -11,20 +11,23 @@ class DashboardUI extends JFrame:
 
   setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
   setTitle("Smart hub dashboard")
-  setSize(915, 460)
+  setSize(950, 460)
   setLocationRelativeTo(null)
   setLayout(GridLayout(1, 2))
   val temperatureLabel: JLabel = JLabel("--")
   temperatureLabel.setFont(biggerFont)
-  val heaterLabel: JLabel = JLabel("--")
+  val heaterLabel: JLabel = JLabel("Off")
   heaterLabel.setFont(biggerFont)
-  val luminosityModel: DefaultListModel[String] = DefaultListModel[String]()
-  private val luminosityEntries = JList(luminosityModel)
+  val luminosityLabel: JLabel = JLabel("--")
+  luminosityLabel.setFont(biggerFont)
+  val scheduleModel: DefaultTableModel = DefaultTableModel(Array[AnyRef]("Day", "Timespan", "Target temperature"), 0)
+  private val scheduleTable = JScrollPane(JTable(scheduleModel))
+  scheduleTable.setPreferredSize(Dimension(475, 150))
   private val infos = createPanel(
-    JSeparator(),
+    createPanel(JLabel("Schedule"), scheduleTable),
     createPanel(JLabel("Current Temperature:"), temperatureLabel),
     createPanel(JLabel("Heater Status:"), heaterLabel),
-    createPanel(JLabel("Current Luminosity:"), luminosityEntries),
+    createPanel(JLabel("Current Luminosity:"), luminosityLabel),
   )
   infos.setLayout(BoxLayout(infos, BoxLayout.PAGE_AXIS))
   val alertsModel: DefaultTableModel = DefaultTableModel(Array[AnyRef]("Alert Messages"), 0)

@@ -6,6 +6,7 @@ import io.github.tassiLuca.hub.core.{
   SensorHealthCheckerComponent,
   TemperatureEntry,
   ThermostatComponent,
+  ThermostatHourlyScheduler,
   ThermostatScheduler,
 }
 import io.github.tassiLuca.rears.{Controller, bufferWithin}
@@ -15,7 +16,7 @@ import scala.language.postfixOps
 
 /** The thermostat manager. */
 trait ThermostatManager
-    extends ThermostatComponent
+    extends ThermostatComponent[ThermostatHourlyScheduler]
     with SensorHealthCheckerComponent[TemperatureEntry]
     with HeaterComponent
     with AlertSystemComponent

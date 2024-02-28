@@ -1,16 +1,21 @@
 package io.github.tassiLuca.hub.core
 
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import java.time.{DayOfWeek, LocalDate, LocalDateTime, LocalTime}
+import scala.compiletime.uninitialized
 
-class ThermostatSchedulerTest extends AnyFlatSpec with Matchers {
+class ThermostatSchedulerTest extends AnyFlatSpec with Matchers with BeforeAndAfterEach {
 
   private val targetTemperature = 19.5
-  private val scheduler = ThermostatScheduler.byHour(targetTemperature)
+  private var scheduler: ThermostatHourlyScheduler = uninitialized
   private val aMondayDay = LocalDate.of(2024, 2, 5)
   private val midMinutes = 30
+
+  override def beforeEach(): Unit =
+    scheduler = ThermostatScheduler.byHour(targetTemperature)
 
   "ThermostatScheduler" should s"be initialized with a target temperature of $targetTemperature" in {
     scheduler.currentTarget shouldBe targetTemperature
@@ -37,9 +42,8 @@ class ThermostatSchedulerTest extends AnyFlatSpec with Matchers {
     scheduler.update(DayOfWeek.MONDAY, start -> end, target)
     for i <- start until end do
       scheduler.targetFor(LocalDateTime.of(aMondayDay, LocalTime.of(i, midMinutes))) shouldBe target
-    schedule.foreach { e =>
-      if e._1._1 < start then
-        scheduler.targetFor(LocalDateTime.of(aMondayDay, LocalTime.of(e._1._1, midMinutes))) shouldBe e._2
+    schedule.foreach { case ((s, _), t) =>
+      if s < start then scheduler.targetFor(LocalDateTime.of(aMondayDay, LocalTime.of(s, midMinutes))) shouldBe t
     }
   }
 }

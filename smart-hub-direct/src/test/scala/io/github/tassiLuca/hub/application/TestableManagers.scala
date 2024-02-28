@@ -1,7 +1,7 @@
 package io.github.tassiLuca.hub.application
 
 import gears.async.Async
-import io.github.tassiLuca.hub.core.{LuminosityEntry, Temperature}
+import io.github.tassiLuca.hub.core.{Luminosity, Temperature}
 
 import scala.concurrent.duration.DurationInt
 
@@ -24,8 +24,9 @@ object TestableLightingManager extends LightingManager:
       dashboardMessages = dashboardMessages :+ Message.Alert
     override def temperatureUpdated(temperature: Temperature): Unit =
       dashboardMessages = dashboardMessages :+ Message.TemperatureUpdate
-    override def luminosityUpdate(luminosity: Seq[LuminosityEntry]): Unit =
+    override def luminosityUpdate(luminosity: Luminosity): Unit =
       dashboardMessages = dashboardMessages :+ Message.LuminosityUpdate
+    override def updateSchedule(schedule: Map[(String, String), String]): Unit = ()
 
   override val lamps: LampsController = new LampsController:
     override def off()(using Async): Unit =
@@ -52,8 +53,9 @@ object TestableThermostatManager extends ThermostatManager:
       dashboardMessages = dashboardMessages :+ Message.Alert
     override def temperatureUpdated(temperature: Temperature): Unit =
       dashboardMessages = dashboardMessages :+ Message.TemperatureUpdate
-    override def luminosityUpdate(luminosity: Seq[LuminosityEntry]): Unit =
+    override def luminosityUpdate(luminosity: Luminosity): Unit =
       dashboardMessages = dashboardMessages :+ Message.LuminosityUpdate
+    override def updateSchedule(schedule: Map[(String, String), String]): Unit = ()
 
   override val heater: Heater = new Heater:
     override def on()(using Async): Unit =

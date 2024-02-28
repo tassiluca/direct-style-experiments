@@ -7,7 +7,7 @@ import io.github.tassiLuca.rears.{Consumer, State}
 import scala.util.Try
 
 /** The component encapsulating the [[Thermostat]] entity. */
-trait ThermostatComponent:
+trait ThermostatComponent[T <: ThermostatScheduler]:
   context: HeaterComponent & DashboardServiceComponent =>
 
   /** The [[Thermostat]] instance. */
@@ -19,13 +19,13 @@ trait ThermostatComponent:
   trait Thermostat
       extends Consumer[Seq[TemperatureEntry], Option[Temperature]]
       with State[Seq[TemperatureEntry], Option[Temperature]]:
-    val scheduler: ThermostatScheduler
+    val scheduler: T
 
   object Thermostat:
     /** Creates a [[Thermostat]] with the given [[thermostatScheduler]]. */
-    def apply(scheduler: ThermostatScheduler): Thermostat = ThermostatImpl(scheduler)
+    def apply(scheduler: T): Thermostat = ThermostatImpl(scheduler)
 
-    private class ThermostatImpl(override val scheduler: ThermostatScheduler)
+    private class ThermostatImpl(override val scheduler: T)
         extends Thermostat
         with State[Seq[TemperatureEntry], Option[Temperature]](None):
 

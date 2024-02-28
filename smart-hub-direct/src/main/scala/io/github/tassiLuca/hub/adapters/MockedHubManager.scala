@@ -17,6 +17,8 @@ class MockedHubManager(using Async, AsyncOperations):
   private val lightingManager = new MockedLightingManager() with SwingDashboardService(ui)
 
   def run(): Unit =
+    println("Set dashboard schedule")
+    thermostatManager.dashboard.updateSchedule(thermostatManager.thermostat.scheduler.schedule.map((d, t) => (d._1.toString, d._2.toString()) -> t.toString))
     val channelBySensor = sensorsSource.publishingChannel.groupBy(_.getClass)
     Task {
       channelBySensor.read() match
