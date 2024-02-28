@@ -25,9 +25,26 @@ extension [T](r: ReadableChannel[T])(using Async)
     * --------2--------------4------6-------8--------10->
     * </pre>
     */
-  def filter(p: T => Boolean): ReadableChannel[T] = fromNew[T] { c =>
+  def filter(p: T => Boolean): ReadableChannel[T] = fromNew[T] { emitter =>
     val value = r.read().toOption.get
-    if p(value) then c.send(value)
+    if p(value) then emitter.send(value)
+  }
+
+  /** @return a new [[ReadableChannel]] whose values are transformed accordingly to the given function [[f]].
+    *
+    * Example:
+    * <pre>
+    * ----1---2-------3----4---5------6--------7-------->
+    *     |   |       |    |   |      |        |
+    * ----V---V-------V----V---V------V--------V---------
+    *                 map(x => x * x)
+    * ----|---|-------|----|---|------|--------|---------
+    *     V   V       V    V   V      V        V
+    * ----1---4-------9----16--25-----36-------49------->
+    * </pre>
+    */
+  def map[R](f: T => R): ReadableChannel[R] = fromNew[R] { emitter =>
+    emitter.send(f(r.read().toOption.get))
   }
 
   /** @return a new [[ReadableChannel]] whose elements are emitted only after
@@ -101,7 +118,7 @@ extension [T](r: ReadableChannel[T])(using Async)
     *     V   V V    V   V  V    V   V
     * |---------|-----------|------------T-----
     *   buffer(n = 3, timespan = 5 seconds)
-    * |---------|-----------|------------|---->
+    * |---------|-----------|------------|-----
     *           V           V            V
     * ------[1, 2, 3]---[4, 5, 6]------[7, 8]->
     * </pre>
@@ -132,7 +149,7 @@ extension [T](r: ReadableChannel[T])(using Async)
     *     |   | | |   |  |  |          |
     *     V   V V V   V  V  V          V
     * ----|--------T--|--------T-------|--------T---
-    *      buffer(timespan = 5 seconds)
+    *          buffer(timespan = 5 seconds)
     * -------------|-----------|----------------|---
     *              V           V                V
     * -------[1, 2, 3, 4]--[5, 6, 7]-----------[8]->

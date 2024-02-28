@@ -20,6 +20,15 @@ class PipelineTransformationsTest extends AnyFunSpec with Matchers {
     }
   }
 
+  describe("Mapping a channel") {
+    it("return a new channel whose values are transformed accordingly to the given function") {
+      Async.blocking:
+        val f: Int => Int = x => x * x
+        val mapped = producer.map(f)
+        for i <- 1 to 10 do mapped.read() shouldBe Right(f(i))
+    }
+  }
+
   describe("Debouncing a channel") {
     it("return a new channel whose first item is emitted immediately") {
       val span = 1.seconds
