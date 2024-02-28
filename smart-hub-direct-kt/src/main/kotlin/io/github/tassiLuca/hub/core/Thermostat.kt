@@ -22,9 +22,10 @@ class Thermostat(
     override suspend fun update() {
         if (state.isNotEmpty()) {
             val average = state.map { it.temperature }.average()
+            dashboardService.temperatureUpdated(average)
             if (average > targetTemperature + HYSTERESIS) {
                 dashboardService.offHeaterNotified()
-            } else if (average < targetTemperature - HYSTERESIS) {
+            } else if (average < targetTemperature) {
                 dashboardService.onHeaterNotified()
             }
             state = emptyList()

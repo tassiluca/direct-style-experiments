@@ -4,7 +4,7 @@ import gears.async.Async
 import io.github.tassiLuca.hub.core.ports.{AlertSystemComponent, DashboardServiceComponent}
 import io.github.tassiLuca.rears.{Consumer, State}
 
-import java.util.Date
+import java.time.LocalDateTime
 import scala.util.{Failure, Success, Try}
 
 /** The component encapsulating the [[SensorHealthChecker]] entity. */
@@ -28,8 +28,10 @@ trait SensorHealthCheckerComponent[E <: SensorEvent]:
         case Success(current) =>
           val noMoreActive = state.map(_.name).toSet -- current.map(_.name).toSet
           if noMoreActive.nonEmpty then
-            val alertMessage = s"[${Date()}] Detected ${noMoreActive.mkString(", ")} are no more active!"
-            context.alertSystem.notify(alertMessage)
-            context.dashboard.alertNotified(alertMessage)
+            sendAlert(s"[${LocalDateTime.now()}] Detected ${noMoreActive.mkString(", ")} no more active!")
           current
         case Failure(es) => context.alertSystem.notify(es.getMessage); Seq()
+
+      private def sendAlert(message: String)(using Async): Unit =
+        context.alertSystem.notify(message)
+        context.dashboard.alertNotified(message)

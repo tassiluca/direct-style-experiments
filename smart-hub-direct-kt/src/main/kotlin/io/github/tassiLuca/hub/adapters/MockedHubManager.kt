@@ -1,29 +1,41 @@
 package io.github.tassiLuca.hub.adapters
 
-import io.github.tassiLuca.hub.application.ThermostatHubManager
+import io.github.tassiLuca.hub.application.LightingManager
+import io.github.tassiLuca.hub.application.ThermostatManager
+import io.github.tassiLuca.hub.core.LuminosityEntry
 import io.github.tassiLuca.hub.core.TemperatureEntry
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
 
 /** A mocked hub manager. */
-class MockedHubManager(coroutineContext: CoroutineContext) {
+class MockedHubManager(override val coroutineContext: CoroutineContext) : CoroutineScope {
 
     /** The dashboard. */
-    val dashboard = SwingDashboard()
+    val dashboard = SwingDashboardService()
 
-    /** The thermostat hub. */
-    val thermostatHub = ThermostatHubManager(dashboard, coroutineContext)
+    /** The thermostat manager. */
+    val thermostatManager = ThermostatManager(dashboard, coroutineContext)
+
+    /** The lighting system manager. */
+    val lightingManager = LightingManager(dashboard, coroutineContext)
 
     /** The sensor source. */
-    val sensorSource = GraphicalTemperatureSource()
+    val sensorSource = GraphicalSource()
 
     /** Runs the mocked hub manager. */
-    suspend fun run() {
-        val temperatureFlow: Flow<TemperatureEntry> = sensorSource.sensorEvents
+    suspend fun run() = coroutineScope {
+        val temperatureFlow = sensorSource.sensorEvents
             .filter { it is TemperatureEntry }
             .map { it as TemperatureEntry }
-        thermostatHub.run(temperatureFlow)
+        val luminosityFlow = sensorSource.sensorEvents
+            .filter { it is LuminosityEntry }
+            .map { it as LuminosityEntry }
+        launch { thermostatManager.run(temperatureFlow) }
+        lightingManager.run(luminosityFlow)
     }
 }

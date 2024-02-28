@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation(libs.kotlinx.coroutines.swing)
+    implementation(project(":smart-hub-direct"))
 }
 
 application {

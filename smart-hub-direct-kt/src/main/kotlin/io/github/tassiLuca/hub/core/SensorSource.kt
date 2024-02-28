@@ -5,6 +5,9 @@ import kotlinx.coroutines.flow.SharedFlow
 /** A temperature data type, expressed in Celsius degrees. */
 typealias Temperature = Double
 
+/** A luminosity data type, expressed in lux. */
+typealias Luminosity = Double
+
 /** A source of sensor events. */
 interface SensorSource<out E : SensorEvent> {
     /** The flow of sensor events. */

@@ -1,12 +1,16 @@
 package io.github.tassiLuca.hub.core.ports
 
+import io.github.tassiLuca.hub.core.Luminosity
 import io.github.tassiLuca.hub.core.Temperature
 
 /** The dashboard service. */
 interface DashboardService {
 
-    /** Updates the temperature. */
+    /** Updates the temperature with [newTemperature]. */
     fun temperatureUpdated(newTemperature: Temperature)
+
+    /** Updates the luminosity with [newLuminosity]. */
+    fun luminosityUpdated(newLuminosity: Luminosity)
 
     /** Updates the luminosity. */
     fun onHeaterNotified()
@@ -14,6 +18,6 @@ interface DashboardService {
     /** Notifies heater has been turned off. */
     fun offHeaterNotified()
 
-    /** Notifies alert. */
-    fun alertNotified(msg: String)
+    /** Notifies an alert [message]. */
+    fun alertNotified(message: String)
 }

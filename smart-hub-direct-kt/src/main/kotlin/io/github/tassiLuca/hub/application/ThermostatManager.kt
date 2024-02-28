@@ -9,17 +9,22 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.seconds
 
 /** Manages the thermostat and the temperature sensors. */
-class ThermostatHubManager(dashboardService: DashboardService, coroutineContext: CoroutineContext) {
+class ThermostatManager(dashboardService: DashboardService, coroutineContext: CoroutineContext) {
 
     /** The thermostat. */
     val thermostat = Thermostat(TEMPERATURE_TARGET, SAMPLING_WINDOW, dashboardService, coroutineContext)
 
     /** The temperature sensors checker. */
-    val temperatureSensorsChecker = SensorHealthChecker<TemperatureEntry>()
+    val temperatureSensorsChecker = SensorHealthChecker<TemperatureEntry>(
+        SAMPLING_WINDOW,
+        coroutineContext,
+        dashboardService,
+    )
 
     /** Runs the thermostat and the temperature sensors. */
     suspend fun run(sensorSource: Flow<TemperatureEntry>) {
         thermostat.run()
+        temperatureSensorsChecker.run()
         sensorSource.collect {
             thermostat.react(it)
             temperatureSensorsChecker.react(it)
