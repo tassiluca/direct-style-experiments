@@ -27,8 +27,8 @@ internal class GitHubAnalyzerByChannels(private val provider: GitHubRepositoryPr
         repositories.map {
             launch {
                 val contributors = async { provider.contributorsOf(organizationName, it.name).getOrThrow() }
-                val release = async { provider.lastReleaseOf(organizationName, it.name).getOrThrow() }
-                channel.send(RepositoryReport(it.name, it.issues, it.stars, contributors.await(), release.await()))
+                val release = provider.lastReleaseOf(organizationName, it.name).getOrThrow()
+                channel.send(RepositoryReport(it.name, it.issues, it.stars, contributors.await(), release))
             }
         }
         return channel
