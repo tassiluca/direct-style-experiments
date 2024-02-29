@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Channels as a communication primitive # The fourth, yet not mentioned, abstraction of both Kotlin Coroutines and Scala Gears is the channel. Channels represent the primitive communication and coordination means to exchange Future results. They are, at least conceptually, very similar to a queue where it is possible to send (and receive) data &ndash; basically, exploiting the producer-consumer pattern.
-classDiagram class `SendableChannel[-T]` { &lt;&lt; trait &gt;&gt; &#43;sendSource(x: T) Async.Source[Either[Closed, Unit]] &#43;send(x: T)(using Async) Unit } class `ReadableChannel[&#43;T]` { &lt;&lt; trait &gt;&gt; &#43;readSource Async.">
+<meta name="description" content="Channels as a communication primitive # The fourth, yet not mentioned, abstraction of both Kotlin Coroutines and Scala Gears is the channel. Channels represent the primitive communication and coordination means to exchange Future (or coroutines in the case of Kotlink) results. They are, at least conceptually, very similar to a queue where it is possible to send (and receive) data &ndash; basically, exploiting the producer-consumer pattern.
+classDiagram class `SendableChannel[-T]` { &lt;&lt; trait &gt;&gt; &#43;sendSource(x: T) Async.">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
-<meta property="og:description" content="Channels as a communication primitive # The fourth, yet not mentioned, abstraction of both Kotlin Coroutines and Scala Gears is the channel. Channels represent the primitive communication and coordination means to exchange Future results. They are, at least conceptually, very similar to a queue where it is possible to send (and receive) data &ndash; basically, exploiting the producer-consumer pattern.
-classDiagram class `SendableChannel[-T]` { &lt;&lt; trait &gt;&gt; &#43;sendSource(x: T) Async.Source[Either[Closed, Unit]] &#43;send(x: T)(using Async) Unit } class `ReadableChannel[&#43;T]` { &lt;&lt; trait &gt;&gt; &#43;readSource Async." />
+<meta property="og:description" content="Channels as a communication primitive # The fourth, yet not mentioned, abstraction of both Kotlin Coroutines and Scala Gears is the channel. Channels represent the primitive communication and coordination means to exchange Future (or coroutines in the case of Kotlink) results. They are, at least conceptually, very similar to a queue where it is possible to send (and receive) data &ndash; basically, exploiting the producer-consumer pattern.
+classDiagram class `SendableChannel[-T]` { &lt;&lt; trait &gt;&gt; &#43;sendSource(x: T) Async." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/03-channels/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-02-27T16:17:02+01:00" />
+<meta property="article:modified_time" content="2024-02-29T08:09:08+01:00" />
 
 <title>03 Channels | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
@@ -21,7 +21,7 @@ classDiagram class `SendableChannel[-T]` { &lt;&lt; trait &gt;&gt; &#43;sendSour
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/03-channels/">
 <link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.8b7763bbc30daa9cc9cbd3d86de971ec810e418df80eaa491030277c990276b4.css" integrity="sha256-i3dju8MNqpzJy9PYbelx7IEOQY34DqpJEDAnfJkCdrQ=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.8dcc1ef6eb0cd1ac02f22adb58df889aa4e26f4bc5326005b494e05c65df4764.js" integrity="sha256-jcwe9usM0awC8irbWN&#43;ImqTib0vFMmAFtJTgXGXfR2Q=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.17b46f8e7679c9655aba34e6945f6335304e07cd326f428eeb7420705f2ed5e1.js" integrity="sha256-F7RvjnZ5yWVaujTmlF9jNTBOB80yb0KO63QgcF8u1eE=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -207,7 +207,7 @@ https://github.com/alex-shpak/hugo-book
   <a class="anchor" href="#channels-as-a-communication-primitive">#</a>
 </h1>
 <p>The fourth, yet not mentioned, abstraction of both Kotlin Coroutines and Scala Gears is the <strong>channel</strong>.
-Channels represent the primitive communication and coordination means to exchange <code>Future</code> results. They are, at least conceptually, very similar to a queue where it is possible to send (and receive) data &ndash; basically, exploiting the <em><strong>producer-consumer</strong></em> pattern.</p>
+Channels represent the <strong>primitive communication and coordination means</strong> to exchange <code>Future</code> (or coroutines in the case of Kotlink) results. They are, at least conceptually, very similar to a queue where it is possible to send (and receive) data &ndash; basically, exploiting the <em><strong>producer-consumer</strong></em> pattern.</p>
 
 
 <script src="/PPS-22-direct-style-experiments/mermaid.min.js"></script>
@@ -255,13 +255,23 @@ classDiagram
   `ReadableChannel[+T]` <|-- `Channel[T]`
 </p>
 
-<p>The channel is defined through three distinct interfaces: <code>SendableChannel[-T]</code>, <code>ReadableChannel[+T]</code> and <code>Channel[T]</code>, where the latter extends from both <code>SendableChannel</code> and <code>ReadableChannel</code>. Typically, a <code>Channel</code> is created and a <code>SendableChannel</code> and <code>ReadableChannel</code> instances are respectively provided to the producer and the consumer, restricting their access to it. The same design is present also in Kotlin Coroutines.</p>
-<p>Moreover, <code>Channel</code> inherits from <code>java.io.Closable</code>, making them closable objects: once closed, they raise <code>ChannelClosedException</code> when attempting to write to it and immediately return a <code>Failure(ChannelClosedException)</code> when attempting to read from it.</p>
-<p>Three types of channels exist:</p>
+<p>The channel is defined through three distinct interfaces: <code>SendableChannel[-T]</code>, <code>ReadableChannel[+T]</code> and <code>Channel[T]</code>, where the latter extends from both <code>SendableChannel</code> and <code>ReadableChannel</code>. Typically, a <code>Channel</code> is created and a <code>SendableChannel</code> and <code>ReadableChannel</code> instances are respectively provided to the producer and the consumer, restricting their access to it. The same, almost identical, design is present also in Kotlin Coroutines where <code>SendChannel</code> and <code>ReceiveChannel</code> takes respectively over the Gears <code>SendableChannel</code> and <code>ReadableChannel</code>.</p>
+<p>Moreover, <code>Channel</code> inherits from <code>java.io.Closable</code>, making them closable objects: once closed, they raise <code>ChannelClosedException</code> when attempting to write to them and immediately return a <code>Left(ChannelClosed)</code> when attempting to read from them, preventing the consumer from finishing reading all the values sent on the channel before its closing.
+This is not the case for Kotlin Coroutines where closing a channel indicates that no more values are coming, but doesn&rsquo;t prevent consuming already sent values. Moreover, in Kotlin is possible to use a regular for loop to receive elements from a channel (blocking the coroutine):</p>
 <ul>
-<li><strong>Synchronous Channels</strong>: links a read request with a send request within a <em>rendezvous</em>
+<li>[example code in kotlin]</li>
+<li>The same behavior can be achieved also in gears pimping the framework with the concept of <code>Terminable</code> channel. After all, closing a channel in coroutines is a matter of sending a special token to the channel: the iteration stops as soon as this token is received.
+<ul>
+<li>[code of pimping]</li>
+</ul>
+</li>
+</ul>
+<p>Three types of channels exists:</p>
+<ul>
+<li><strong>Synchronous Channels</strong>: links a <code>read</code> request with a <code>send</code> within a <em>rendezvous</em>
 <ul>
 <li><code>send</code> (<code>read</code>) suspend the process until a consumer <code>read</code> (<code>send</code>) the value;</li>
+<li>in Kotlin, they are called <strong>Rendezvous Channels</strong>.</li>
 </ul>
 </li>
 <li><strong>Buffered Channels</strong>: a version of a channel with an internal buffer of fixed size
@@ -273,11 +283,17 @@ classDiagram
 <li><strong>Unbounded Channels</strong>: a version of a channel with an unbounded buffer
 <ul>
 <li>if the programs run out of memory you can get an out-of-memory exception!</li>
+<li>in Kotlin, they are called <strong>Unlimited Channel</strong>.</li>
 </ul>
 </li>
 </ul>
+<p>Kotlin offers also a fourh type: the <strong>Comflated Channel</strong>, where every new element sent to it overwirtes the previously sent one, <em>never blocking</em>, so that the receiver gets always the latest element.</p>
+<p>Concerning channels behaviour two things are important to note:</p>
 <blockquote>
-<p>Multiple producers can send data to the channel, as well as multiple consumers can read them, <strong>but each element is handled only <em>once</em>, by <em>one</em> of them</strong>, i.e. consumers <strong>compete</strong> with each other for sent values. Once the element is handled, it is immediately removed from the channel.</p>
+<ol>
+<li>Multiple producers can send data to the channel, as well as multiple consumers can read them, <strong>but each element is handled only <em>once</em>, by <em>one</em> of them</strong>, i.e. consumers <strong>compete</strong> with each other for sent values.</li>
+<li>Once the element is handled, it is immediately removed from the channel.</li>
+</ol>
 </blockquote>
 <h2 id="github-organization-analyzer-example">
   GitHub organization analyzer example
@@ -370,14 +386,6 @@ Thanks to the fact <code>Future</code>s are cancellable objects, whenever desire
 </ul>
 <hr>
 <p>Points of difference between the gears and Kotlin Coroutines channels are the following:</p>
-<ul>
-<li>closing a channel in gears leads to all subsequent reads returning a <code>Left(Closed)</code> preventing the consumer from finishing reading all the values sent on the channel before its closing. This is not the case for Kotlin Coroutines where closing a channel indicates that no more values are coming, but doesn&rsquo;t prevent consuming already sent values. Moreover, in Kotlin is possible to use a regular for loop to receive elements from a channel:
-<ul>
-<li>[example code in kotlin]</li>
-<li>The same behavior can be achieved also in gears extending the framework with the concept of <code>Terminable</code> channel. After all, closing a channel in coroutines (or terminating it in gears) is a matter of sending a special token to the channel: the iteration stops as soon as this token is received</li>
-</ul>
-</li>
-</ul>
 <hr>
 <h2 id="conclusions">
   Conclusions
@@ -392,9 +400,9 @@ Thanks to the fact <code>Future</code>s are cancellable objects, whenever desire
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/ea8a516ffc0b71384cba8d060005cd7696b06d5a" title='Last modified by Luca Tassinari | February 27, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/1d85ecbfa6551916faf5a0619486e61ac985cdb3" title='Last modified by Luca Tassinari | February 29, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>February 27, 2024</span>
+      <span>February 29, 2024</span>
     </a>
   </div>
 
