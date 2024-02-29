@@ -2,7 +2,7 @@ package io.github.tassiLuca.analyzer.lib
 
 import gears.async.{Async, Future, Listener, ReadableChannel, UnboundedChannel}
 import io.github.tassiLuca.analyzer.commons.lib.{Contribution, Release, Repository}
-import io.github.tassiLuca.pimping.ChannelsPimping.{Terminable, Terminated}
+import io.github.tassiLuca.pimping.{TerminableChannel, Terminated}
 
 import scala.annotation.tailrec
 
@@ -20,7 +20,7 @@ private class GitHubRepositoryService extends RepositoryService:
 
   override def incrementalRepositoriesOf(
       organizationName: String,
-  )(using Async): ReadableChannel[Terminable[Either[String, Repository]]] =
+  )(using Async): TerminableChannel[Either[String, Repository]] =
     incrementalPaginatedRequest(uri"$baseUrl/orgs/$organizationName/repos")
 
   override def contributorsOf(
@@ -32,7 +32,7 @@ private class GitHubRepositoryService extends RepositoryService:
   override def incrementalContributorsOf(
       organizationName: String,
       repositoryName: String,
-  )(using Async): ReadableChannel[Terminable[Either[String, Contribution]]] =
+  )(using Async): TerminableChannel[Either[String, Contribution]] =
     incrementalPaginatedRequest(uri"$baseUrl/repos/$organizationName/$repositoryName/contributors")
   
   override def lastReleaseOf(organizationName: String, repositoryName: String)(using Async): Either[String, Release] =
@@ -54,11 +54,11 @@ private class GitHubRepositoryService extends RepositoryService:
 
   private def incrementalPaginatedRequest[T](
       endpoint: Uri,
-  )(using Reader[T], Async): ReadableChannel[Terminable[Either[String, T]]] =
-    val channel = UnboundedChannel[Terminable[Either[String, T]]]()
+  )(using Reader[T], Async): TerminableChannel[Either[String, T]] =
+    val channel = TerminableChannel.ofUnbounded[Either[String, T]]
     @tailrec
     def withPagination(next: Option[Uri]): Unit = next match
-      case None => ()
+      case None => channel.terminate()
       case Some(uri) =>
         val response = doRequest(uri)
         response.body.map(read[Seq[T]](_)).fold(
@@ -66,8 +66,8 @@ private class GitHubRepositoryService extends RepositoryService:
           results => results.foreach(r => channel.send(Right(r))),
         )
         withPagination(nextPage(response))
-    Future(withPagination(Some(endpoint))).onComplete(Listener((_, _) => channel.send(Terminated)))
-    channel.asReadable
+    Future(withPagination(Some(endpoint)))
+    channel
 
   private def doRequest(endpoint: Uri): Response[Either[String, String]] =
     SimpleHttpClient().send(request.get(endpoint))

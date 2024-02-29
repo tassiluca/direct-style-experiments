@@ -7,6 +7,7 @@ import io.github.tassiLuca.boundaries.either
 import io.github.tassiLuca.boundaries.either.?
 import io.github.tassiLuca.boundaries.EitherConversions.given
 import io.github.tassiLuca.pimping.ChannelsPimping.toTry
+import io.github.tassiLuca.pimping.TerminableChannelOps.foreach
 
 private class IncrementalAnalyzer(repositoryService: RepositoryService) extends Analyzer:
 
