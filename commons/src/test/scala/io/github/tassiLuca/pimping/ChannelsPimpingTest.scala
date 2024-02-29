@@ -2,7 +2,7 @@ package io.github.tassiLuca.pimping
 
 import gears.async.default.given
 import gears.async.TaskSchedule.Every
-import gears.async.{Async, AsyncOperations, Channel, Listener, SendableChannel, Task}
+import gears.async.{Async, AsyncOperations, Channel, Listener, SendableChannel, Task, UnboundedChannel}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import io.github.tassiLuca.pimping.TerminableChannelOps.foreach
@@ -17,7 +17,7 @@ class ChannelsPimpingTest extends AnyFunSpec with Matchers {
       Async.blocking:
         val channel = TerminableChannel.ofUnbounded[Item]
         channel.terminate()
-        channel.read() shouldBe Right(Terminated)
+        channel.read() shouldBe Left(Channel.Closed)
         channel.read() shouldBe Left(Channel.Closed)
     }
 
@@ -25,19 +25,9 @@ class ChannelsPimpingTest extends AnyFunSpec with Matchers {
       Async.blocking:
         var collectedItems = Seq[Item]()
         val channel = TerminableChannel.ofUnbounded[Item]
-        produceOn(channel).run.onComplete(Listener { (_, _) => channel.send(Terminated) })
+        produceOn(channel).run.onComplete(Listener { (_, _) => channel.terminate() })
         channel.foreach(res => collectedItems = collectedItems :+ res)
         collectedItems shouldBe Seq.range(0, itemsProduced)
-    }
-
-    it("Should again throw") {
-      Async.blocking:
-        val channel = TerminableChannel.ofUnbounded[Item]
-        produceOn(channel).run.onComplete(Listener { (_, _) => channel.send(Terminated) })
-        channel.foreach(res =>
-          println(s"test3 : $res")
-          println(res),
-        )
     }
   }
 

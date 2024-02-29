@@ -4,7 +4,7 @@ plugins {
 
 gitHooks {
     preCommit {
-        tasks("check")
+        tasks("test")
     }
     commitMsg {
         conventionalCommits()

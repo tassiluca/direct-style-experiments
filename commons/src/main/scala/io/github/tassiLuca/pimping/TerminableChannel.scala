@@ -1,6 +1,7 @@
 package io.github.tassiLuca.pimping
 
-import gears.async.{Async, BufferedChannel, Channel, SyncChannel, UnboundedChannel}
+import gears.async.Channel.Closed
+import gears.async.{Async, BufferedChannel, Channel, Future, Listener, SyncChannel, UnboundedChannel}
 
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
@@ -33,16 +34,14 @@ object TerminableChannel:
 
     override val readSource: Async.Source[Res[Terminable[T]]] =
       c.readSource.transformValuesWith {
-        case v @ Right(Terminated) =>
-          c.close()
-          v
+        case Right(Terminated) => c.close(); Left(Channel.Closed)
         case v @ _ => v
       }
 
     override def sendSource(x: Terminable[T]): Async.Source[Res[Unit]] = x match
       case Terminated =>
-        if synchronized(_terminated) then throw IllegalStateException("Channel already terminated!")
-        else synchronized { _terminated = true }
+        synchronized:
+          if _terminated then throw IllegalStateException("Channel already terminated!") else _terminated = true
         c.sendSource(x)
       case t => c.sendSource(t)
 
