@@ -1,7 +1,7 @@
 # Channels as a communication primitive
 
 The fourth, yet not mentioned, abstraction of both Kotlin Coroutines and Scala Gears is the **channel**.
-Channels represent the primitive communication and coordination means to exchange `Future` results. They are, at least conceptually, very similar to a queue where it is possible to send (and receive) data -- basically, exploiting the ***producer-consumer*** pattern.
+Channels represent the **primitive communication and coordination means** to exchange `Future` (or coroutines in the case of Kotlink) results. They are, at least conceptually, very similar to a queue where it is possible to send (and receive) data -- basically, exploiting the ***producer-consumer*** pattern.
 
 {{< mermaid >}}
 classDiagram
@@ -36,21 +36,32 @@ classDiagram
   `ReadableChannel[+T]` <|-- `Channel[T]`
 {{< /mermaid >}}
 
-The channel is defined through three distinct interfaces: `SendableChannel[-T]`, `ReadableChannel[+T]` and `Channel[T]`, where the latter extends from both `SendableChannel` and `ReadableChannel`. Typically, a `Channel` is created and a `SendableChannel` and `ReadableChannel` instances are respectively provided to the producer and the consumer, restricting their access to it. The same design is present also in Kotlin Coroutines.
+The channel is defined through three distinct interfaces: `SendableChannel[-T]`, `ReadableChannel[+T]` and `Channel[T]`, where the latter extends from both `SendableChannel` and `ReadableChannel`. Typically, a `Channel` is created and a `SendableChannel` and `ReadableChannel` instances are respectively provided to the producer and the consumer, restricting their access to it. The same, almost identical, design is present also in Kotlin Coroutines where `SendChannel` and `ReceiveChannel` takes respectively over the Gears `SendableChannel` and `ReadableChannel`.
 
-Moreover, `Channel` inherits from `java.io.Closable`, making them closable objects: once closed, they raise `ChannelClosedException` when attempting to write to it and immediately return a `Failure(ChannelClosedException)` when attempting to read from it.
+Moreover, `Channel` inherits from `java.io.Closable`, making them closable objects: once closed, they raise `ChannelClosedException` when attempting to write to them and immediately return a `Left(ChannelClosed)` when attempting to read from them, preventing the consumer from finishing reading all the values sent on the channel before its closing. 
+This is not the case for Kotlin Coroutines where closing a channel indicates that no more values are coming, but doesn't prevent consuming already sent values. Moreover, in Kotlin is possible to use a regular for loop to receive elements from a channel (blocking the coroutine):
+  - [example code in kotlin]
+  - The same behavior can be achieved also in gears pimping the framework with the concept of `Terminable` channel. After all, closing a channel in coroutines is a matter of sending a special token to the channel: the iteration stops as soon as this token is received.
+    - [code of pimping]
+    
+Three types of channels exists:
 
-Three types of channels exist:
-
-- **Synchronous Channels**: links a read request with a send request within a _rendezvous_
+- **Synchronous Channels**: links a `read` request with a `send` within a _rendezvous_
   - `send` (`read`) suspend the process until a consumer `read` (`send`) the value;
+  - in Kotlin, they are called **Rendezvous Channels**.
 - **Buffered Channels**: a version of a channel with an internal buffer of fixed size
   - `send` suspend the producer process if it is full; otherwise, it appends the value to the buffer, returning immediately;
   - `read` suspend if the channel is empty, waiting for a new value.
 - **Unbounded Channels**: a version of a channel with an unbounded buffer
   - if the programs run out of memory you can get an out-of-memory exception!
+  - in Kotlin, they are called **Unlimited Channel**.
+ 
+Kotlin offers also a fourh type: the **Comflated Channel**, where every new element sent to it overwirtes the previously sent one, *never blocking*, so that the receiver gets always the latest element.
 
-> Multiple producers can send data to the channel, as well as multiple consumers can read them, **but each element is handled only _once_, by _one_ of them**, i.e. consumers **compete** with each other for sent values. Once the element is handled, it is immediately removed from the channel.
+Concerning channels behaviour two things are important to note:
+
+> 1. Multiple producers can send data to the channel, as well as multiple consumers can read them, **but each element is handled only _once_, by _one_ of them**, i.e. consumers **compete** with each other for sent values.
+> 2. Once the element is handled, it is immediately removed from the channel.
 
 ## GitHub organization analyzer example
 
@@ -155,10 +166,6 @@ With respect to reactive programming, they are still quite less reach in terms o
 ---
 
 Points of difference between the gears and Kotlin Coroutines channels are the following:
-
-- closing a channel in gears leads to all subsequent reads returning a `Left(Closed)` preventing the consumer from finishing reading all the values sent on the channel before its closing. This is not the case for Kotlin Coroutines where closing a channel indicates that no more values are coming, but doesn't prevent consuming already sent values. Moreover, in Kotlin is possible to use a regular for loop to receive elements from a channel:
-  - [example code in kotlin]
-  - The same behavior can be achieved also in gears extending the framework with the concept of `Terminable` channel. After all, closing a channel in coroutines (or terminating it in gears) is a matter of sending a special token to the channel: the iteration stops as soon as this token is received
 
 ---
 
