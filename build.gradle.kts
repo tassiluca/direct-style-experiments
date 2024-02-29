@@ -34,7 +34,7 @@ allprojects {
             implementation(scala.stdlib)
             // Gears is a wip strawman library for async programming not available on Maven Central: it is
             // included as git submodule in this project and added as dependency via jars.
-            val gears = "gears_3-0.1.0-SNAPSHOT"
+            val gears = "gears_3"
             implementation(
                 files(
                     listOf(
