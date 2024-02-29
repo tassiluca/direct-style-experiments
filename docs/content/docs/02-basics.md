@@ -1,3 +1,7 @@
+---
+bookToc: false
+---
+
 # Basic asynchronous constructs
 
 ## The need for a new `Future` construct

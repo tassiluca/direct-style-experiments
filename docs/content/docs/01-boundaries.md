@@ -1,3 +1,7 @@
+---
+bookToc: false
+---
+
 # `boundary` & `break`
 
 `boundary` & `break` mechanism provides a cleaner alternative to non-local returns:

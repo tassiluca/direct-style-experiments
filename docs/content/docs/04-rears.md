@@ -1,3 +1,7 @@
+---
+bookToc: false
+---
+
 # An attempt to bring reactivity principles into gears
 
 So far, we've explored the basics of asynchronous abstraction mechanisms provided by the direct style of the Scala Gears and Kotlin Coroutines frameworks.
