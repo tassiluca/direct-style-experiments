@@ -11,7 +11,7 @@ object either:
     boundary(Right(body))
 
   /** Quickly break to the enclosing boundary with a [[Left]] filled with [[l]]. */
-  inline def left[L, R](l: L)(using Label[Left[L, Nothing]]): Either[L, R] = break(Left(l))
+  inline def left[L, R](l: L)(using Label[Left[L, Nothing]]): Nothing = break(Left(l))
 
   extension [L, R](e: Either[L, R])
     /** @return this [[Right]] value or break to the enclosing boundary with the [[Left]] value. */

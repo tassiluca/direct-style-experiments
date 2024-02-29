@@ -15,7 +15,7 @@ object Analyzer:
   def ofGitHub(): Analyzer = AnalyzerImpl()
 
   private class AnalyzerImpl extends Analyzer:
-    private val gitHubService = GitHubService()
+    private val gitHubService = RepositoryService()
 
     override def analyze(organizationName: String)(
         updateResult: RepositoryReport => Unit,

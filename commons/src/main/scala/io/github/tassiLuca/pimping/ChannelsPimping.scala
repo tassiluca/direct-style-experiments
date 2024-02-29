@@ -1,9 +1,12 @@
 package io.github.tassiLuca.pimping
 
-import gears.async.{Async, Channel, ReadableChannel, SendableChannel}
+import gears.async.{Async, Channel, ChannelClosedException, ReadableChannel, SendableChannel}
+import io.github.tassiLuca.boundaries.either.?
+import io.github.tassiLuca.boundaries.EitherConversions.given
 
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
+import scala.util.boundary.Label
 import scala.util.{Failure, Success, Try}
 
 object ChannelsPimping:
@@ -37,6 +40,6 @@ object ChannelsPimping:
       results
 
   extension [T](e: Either[Channel.Closed, T])
-    def tryable: Try[T] = e match
-      case Left(Channel.Closed) => Failure(IllegalStateException("Closed Channel!"))
+    def toTry(): Try[T] = e match
+      case Left(Channel.Closed) => Failure(ChannelClosedException())
       case Right(t) => Success[T](t)

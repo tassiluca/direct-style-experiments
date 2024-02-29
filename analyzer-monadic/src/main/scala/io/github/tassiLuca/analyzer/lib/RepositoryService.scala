@@ -4,15 +4,15 @@ import cats.data.EitherT
 import io.github.tassiLuca.analyzer.commons.lib.{Contribution, Release, Repository}
 import monix.eval.Task
 
-trait GitHubService:
+trait RepositoryService:
   def repositoriesOf(organizationName: String): EitherT[Task, String, Seq[Repository]]
   def contributorsOf(organizationName: String, repositoryName: String): EitherT[Task, String, Seq[Contribution]]
   def lastReleaseOf(organizationName: String, repositoryName: String): EitherT[Task, String, Release]
 
-object GitHubService:
-  def apply(): GitHubService = GitHubServiceImpl()
+object RepositoryService:
+  def apply(): RepositoryService = GitHubServiceImpl()
 
-  private class GitHubServiceImpl extends GitHubService:
+  private class GitHubServiceImpl extends RepositoryService:
     import sttp.client3.httpclient.monix.HttpClientMonixBackend
     import sttp.client3.{UriContext, basicRequest}
     import sttp.model.Uri

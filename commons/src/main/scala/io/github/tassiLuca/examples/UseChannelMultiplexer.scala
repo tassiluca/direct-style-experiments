@@ -1,8 +1,8 @@
-package io.github.tassiLuca
+package io.github.tassiLuca.examples
 
-import gears.async.default.given
 import gears.async.TaskSchedule.Every
-import gears.async.{Async, BufferedChannel, Channel, ChannelMultiplexer, Future, SendableChannel, Task}
+import gears.async.default.given
+import gears.async.*
 
 import java.time.LocalTime
 import scala.util.{Random, Try}

@@ -15,17 +15,13 @@ object AppController:
 
     view.run()
 
-    override def stopSession(): Unit = currentComputation.foreach(_.cancel())
-
     override def runSession(organizationName: String): Unit =
       var organizationReport: OrganizationReport = (Map(), Set())
       val f = Future:
         analyzer.analyze(organizationName) { report =>
-          organizationReport = (organizationReport._1.aggregatedTo(report), organizationReport._2 + report)
+          organizationReport = organizationReport.mergeWith(report)
           view.update(organizationReport)
         } match { case Left(e) => view.error(e); case _ => view.endComputation() }
       currentComputation = Some(f)
 
-    extension (m: Map[String, Long])
-      private def aggregatedTo(report: RepositoryReport): Map[String, Long] =
-        m ++ report.contributions.map(c => c.user -> (m.getOrElse(c.user, 0L) + c.contributions))
+    override def stopSession(): Unit = currentComputation.foreach(_.cancel())

@@ -3,10 +3,12 @@ package io.github.tassiLuca.analyzer.lib
 import gears.async.Future.Collector
 import gears.async.{Async, Future}
 import io.github.tassiLuca.analyzer.commons.lib.{Repository, RepositoryReport}
+import io.github.tassiLuca.boundaries.EitherConversions.given
 import io.github.tassiLuca.boundaries.either
 import io.github.tassiLuca.boundaries.either.?
-import io.github.tassiLuca.boundaries.EitherConversions.given
-import io.github.tassiLuca.pimping.ChannelsPimping.tryable
+import io.github.tassiLuca.pimping.ChannelsPimping.toTry
+
+import scala.util.boundary.Label
 
 private class BasicAnalyzer(repositoryService: RepositoryService) extends Analyzer:
 
@@ -15,7 +17,7 @@ private class BasicAnalyzer(repositoryService: RepositoryService) extends Analyz
   )(using Async): Either[String, Seq[RepositoryReport]] = either:
     val reposInfo = repositoryService.repositoriesOf(organizationName).?.map(_.performAnalysis)
     val collector = Collector[RepositoryReport](reposInfo.toList*)
-    for _ <- reposInfo.indices do updateResults(collector.results.read().tryable.?.awaitResult.?)
+    for _ <- reposInfo.indices do updateResults(collector.results.read().toTry().?.awaitResult.?)
     reposInfo.map(_.await)
 
   extension (r: Repository)

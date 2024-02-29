@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    api(project(":analyzer-commons"))
+    implementation(project(":analyzer-commons"))
     implementation(libs.okttp)
     implementation(libs.retrofit)
     implementation(libs.retrofit.serialization.converter)

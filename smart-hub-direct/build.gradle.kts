@@ -3,8 +3,7 @@ plugins {
 }
 
 dependencies {
-    api(project(":commons"))
-    api(project(":rears"))
+    implementation(project(":rears"))
 }
 
 application {

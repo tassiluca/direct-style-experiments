@@ -1,9 +1,9 @@
-package io.github.tassiLuca
+package io.github.tassiLuca.examples
 
-import gears.async.default.given
 import gears.async.AsyncOperations.sleep
 import gears.async.TaskSchedule.Every
-import gears.async.{Async, BufferedChannel, ReadableChannel, SendableChannel, Task, TaskSchedule}
+import gears.async.default.given
+import gears.async.*
 
 import java.time.LocalTime
 

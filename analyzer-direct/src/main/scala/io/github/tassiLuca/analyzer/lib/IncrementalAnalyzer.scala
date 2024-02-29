@@ -6,7 +6,7 @@ import io.github.tassiLuca.analyzer.commons.lib.{Repository, RepositoryReport}
 import io.github.tassiLuca.boundaries.either
 import io.github.tassiLuca.boundaries.either.?
 import io.github.tassiLuca.boundaries.EitherConversions.given
-import io.github.tassiLuca.pimping.ChannelsPimping.tryable
+import io.github.tassiLuca.pimping.ChannelsPimping.toTry
 
 private class IncrementalAnalyzer(repositoryService: RepositoryService) extends Analyzer:
 
@@ -22,7 +22,7 @@ private class IncrementalAnalyzer(repositoryService: RepositoryService) extends 
     }
     var allReports = Seq[RepositoryReport]()
     for _ <- 0 until collectedRepositories do
-      val report = collector.results.read().tryable.?.awaitResult.?
+      val report = collector.results.read().toTry().?.awaitResult.?
       updateResults(report)
       allReports = allReports :+ report
     allReports
