@@ -42,7 +42,7 @@ object ThermostatScheduler:
 
   private class ThermostatSchedulerImpl(private val initialTarget: Temperature) extends ThermostatHourlyScheduler:
 
-    private var _schedule: Schedule = DayOfWeek.values().map(d => (d, (0, 23)) -> initialTarget).toMap
+    private var _schedule: Schedule = DayOfWeek.values().map(d => (d, (0, 24)) -> initialTarget).toMap
 
     override def schedule: Schedule = _schedule
 
