@@ -2,7 +2,7 @@ package io.github.tassiLuca.analyzer.lib
 
 import gears.async.{Async, ReadableChannel}
 import io.github.tassiLuca.analyzer.commons.lib.{Contribution, Release, Repository}
-import io.github.tassiLuca.utils.ChannelsPimping.Terminable
+import io.github.tassiLuca.pimping.ChannelsPimping.Terminable
 
 /** A service exposing functions to retrieve data from a central hosting repository service. */
 trait RepositoryService:

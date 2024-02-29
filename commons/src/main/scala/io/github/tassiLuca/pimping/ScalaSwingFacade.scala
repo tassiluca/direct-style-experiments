@@ -1,4 +1,4 @@
-package io.github.tassiLuca.utils
+package io.github.tassiLuca.pimping
 
 import java.awt.{Component, FlowLayout, LayoutManager}
 import javax.swing.{JComponent, JFrame, JPanel, WindowConstants}

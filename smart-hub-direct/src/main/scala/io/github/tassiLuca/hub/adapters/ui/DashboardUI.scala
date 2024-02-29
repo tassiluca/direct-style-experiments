@@ -1,6 +1,7 @@
 package io.github.tassiLuca.hub.adapters.ui
 
-import io.github.tassiLuca.utils.ScalaSwingFacade.{*, given}
+import io.github.tassiLuca.pimping.ScalaSwingFacade.createPanel
+import io.github.tassiLuca.pimping.ScalaSwingFacade.given 
 
 import java.awt.{Dimension, Font, GridLayout}
 import javax.swing.*

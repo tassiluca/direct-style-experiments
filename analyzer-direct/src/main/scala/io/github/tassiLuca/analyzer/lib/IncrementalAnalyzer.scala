@@ -5,8 +5,8 @@ import gears.async.{Async, Future}
 import io.github.tassiLuca.analyzer.commons.lib.{Repository, RepositoryReport}
 import io.github.tassiLuca.boundaries.either
 import io.github.tassiLuca.boundaries.either.?
-import io.github.tassiLuca.utils.ChannelsPimping.tryable
 import io.github.tassiLuca.boundaries.EitherConversions.given
+import io.github.tassiLuca.pimping.ChannelsPimping.tryable
 
 private class IncrementalAnalyzer(repositoryService: RepositoryService) extends Analyzer:
 

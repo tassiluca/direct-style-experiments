@@ -1,13 +1,14 @@
 package io.github.tassiLuca.analyzer.commons.client.ui
 
 import io.github.tassiLuca.analyzer.commons.client.AppController
+import io.github.tassiLuca.pimping.ScalaSwingFacade.createPanel
+import io.github.tassiLuca.pimping.ScalaSwingFacade.given
 
 import java.awt.BorderLayout
 import javax.swing.*
 import javax.swing.table.DefaultTableModel
 
 class MainFrame(controller: AppController) extends JFrame:
-  import io.github.tassiLuca.utils.ScalaSwingFacade.{*, given}
 
   setTitle("GitHub Organization Analyzer")
   setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)

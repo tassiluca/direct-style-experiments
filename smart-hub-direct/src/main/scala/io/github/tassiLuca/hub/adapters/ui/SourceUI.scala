@@ -1,11 +1,13 @@
 package io.github.tassiLuca.hub.adapters.ui
 
+import io.github.tassiLuca.pimping.ScalaSwingFacade.createPanel
+import io.github.tassiLuca.pimping.ScalaSwingFacade.addWithRepaint
+import io.github.tassiLuca.pimping.ScalaSwingFacade.given
+
 import java.awt.{BorderLayout, Component, Dimension}
 import javax.swing.*
 
 class SourceUI(sourceName: String, publishHandler: (String, Double) => Unit) extends JFrame:
-
-  import io.github.tassiLuca.utils.ScalaSwingFacade.{*, given}
 
   private var sensors = 0
 

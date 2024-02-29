@@ -1,9 +1,9 @@
-package io.github.tassiLuca.utils
+package io.github.tassiLuca.pimping
 
 import gears.async.default.given
 import gears.async.TaskSchedule.Every
 import gears.async.{Async, Future, SendableChannel, Task, UnboundedChannel}
-import io.github.tassiLuca.utils.ChannelsPimping.{Terminable, Terminated}
+import io.github.tassiLuca.pimping.ChannelsPimping.Terminable
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
