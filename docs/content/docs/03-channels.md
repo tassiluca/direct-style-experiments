@@ -169,7 +169,10 @@ class MonadicAppController extends AppController:
 
 ### Scala Gears version
 
-The interfaces of the Direct Style with Gears differ from the monadic one by their return type, which is a simpler `Either` data type, and by the fact they are **suspendable** functions, hence they require an Async context to be executed.
+The interfaces of the Direct Style with Gears differ from the monadic one by their return type, which is a simpler `Either` data type, and by the fact they are **suspendable functions**, hence they require an Async context to be executed.
+This is the first important difference: the `analyze` method, differently from the monadic version, doesn't return immediately the control; instead, it suspends the execution of the client until the result is available (though offering the opportunity to react to each update).
+This obeys the principle of **explicit asynchrony**: if the client wants to perform this operation asynchronously, it has to opt in explicitly, either using a `Future` or any other asynchronous construct (depending on the library used).
+Moreover, this interface is library-agnostic, meaning that it doesn't depend on any specific asynchronous library.
 
 ```scala
 trait Analyzer:
@@ -362,7 +365,7 @@ override suspend fun analyze(
 
 ## Conclusions
 
-> - `Channel`s are the basic communication and synchronization primitive for exchanging data between `Future`s/`Coroutines`. 
+> - `Channel`s are the basic communication and synchronization primitive for exchanging data between `Future`s/`Coroutines`.
 >   - Scala Gears support for `Terminable` channels or a review of the closing mechanism should be considered.
-> - The `Flow` abstraction in Kotlin Coroutines is a powerful tool for handling cold streams of data, and it is a perfect fit for functions that need to return a stream of asynchronously computed values by request.
+> - The `Flow` abstraction in Kotlin Coroutines is a powerful tool for handling cold streams of data, and it is a perfect fit for functions that need to return a stream of asynchronously computed values **by request**.
 > 

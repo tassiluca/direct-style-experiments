@@ -309,7 +309,7 @@ trait PostsServiceComponent:
     def all()(using Async): Either[String, LazyList[Post]]
 ```
 
-As you can see, `Future`s are gone and the return type it's just the result of their intent (expressed with `Either` to return a meaningful message in case of failure). The fact they are _suspendable_ is expressed by means of the `Async` context, which is required to invoke those function.
+As you can see, `Future`s are gone and the return type it's just the result of their intent (expressed with `Either` to return a meaningful message in case of failure). The fact they are _suspendable_ is expressed by means of the `Async` context, which is required to invoke those functions.
 
 > Key inspiring principle (actually, "stolen" by Kotlin)
 >
@@ -326,9 +326,8 @@ The other important key feature of the library is the support to **structured co
     ```scala
     val f = Future {
       // this can be interrupted
-      uninterruptible {
+      uninterruptible:
         // this cannot be interrupted *immediately*
-      }
       // this can be interrupted
     }
     ```
@@ -395,5 +394,33 @@ w.r.t. kotlin coroutines:
 how suspension is implemented
 
 ---
+
+## Best practices
+
+Some of the best practices of Kotlin Coroutines that can be applied to Scala's direct style Gears as well:
+
+- **Do not use `Future`/`async` with an immediate `await`**: it makes no sense to define an asynchronous computation if we have to immediately wait for its result without doing anything else in the meantime:
+
+  ```scala
+  // DON'T
+  val f = Future:
+    // some suspending operation...
+    service.postByTitle("Direct style guidelines")
+  val post = f.await
+
+  // DO
+  val post = service.get("Direct style guidelines")
+  ```
+
+  In case a few async tasks need to be started the last one does not require to be run in a new `Future`/`async`, though can be beneficial for readability and maintainability reasons:
+
+  ```scala
+  Future:
+    val post = Future { service.postByTitle("Direct style guidelines") }
+    val users = Future { service.user() } // not necessary here, but useful for readability
+    showPost(post.await, users.await)
+  ```
+
+- **Suspending functions await completion of their children**
 
 ## Conclusions
