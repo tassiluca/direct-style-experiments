@@ -1,9 +1,10 @@
 package io.github.tassiLuca.pimping
 
 import gears.async.Channel.Closed
-import gears.async.{Async, BufferedChannel, Channel, Future, Listener, SyncChannel, UnboundedChannel}
+import gears.async.{Async, BufferedChannel, Channel, SyncChannel, UnboundedChannel, uninterruptible}
 
 import scala.annotation.tailrec
+import scala.language.postfixOps
 import scala.reflect.ClassTag
 
 /** A token to be sent to a channel to signal that it has been terminated. */
@@ -11,8 +12,12 @@ case object Terminated
 
 type Terminated = Terminated.type
 
+/** A union type of [[T]] and [[Terminated]]. */
 type Terminable[T] = T | Terminated
 
+/** A [[Channel]] that can be terminated, signalling no more items will be sent,
+  * still allowing to consumer to read pending values.
+  */
 trait TerminableChannel[T] extends Channel[Terminable[T]]:
   def terminate()(using Async): Unit
 
@@ -47,7 +52,8 @@ object TerminableChannel:
 
     override def close(): Unit = c.close()
 
-    override def terminate()(using Async): Unit = c.send(Terminated)
+    override def terminate()(using Async): Unit = uninterruptible:
+      c.send(Terminated)
 
 object TerminableChannelOps:
 

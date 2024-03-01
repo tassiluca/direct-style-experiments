@@ -6,8 +6,9 @@ import gears.async.TaskSchedule.{Every, RepeatUntilFailure}
 import gears.async.default.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import io.github.tassiLuca.pimping.ChannelsPimping.toTry
 
-import scala.util.Random
+import scala.util.{Failure, Random}
 
 class ChannelsContextTest extends AnyFunSpec with Matchers {
 
@@ -17,7 +18,7 @@ class ChannelsContextTest extends AnyFunSpec with Matchers {
   describe("Consumer") {
     it("read no item if the producer is run in another context") {
       var i = 0
-      val channel = BufferedChannel[Int](itemsProduced)
+      val channel = BufferedChannel[Item](itemsProduced)
       Async.blocking:
         channel.consume {
           case Left(_) => ()
@@ -26,6 +27,17 @@ class ChannelsContextTest extends AnyFunSpec with Matchers {
       Async.blocking:
         produceOn(channel).run.await
       i shouldBe 0
+    }
+
+    it("receive a Cancellation exception if a channel is used as a container of futures produced in other process") {
+      Async.blocking:
+        val channel = UnboundedChannel[Future[Item]]()
+        Future:
+          for _ <- 0 to itemsProduced do channel.send(Future { AsyncOperations.sleep(5_000); 0 })
+        for _ <- 0 to itemsProduced do
+          val result = channel.read().toTry().flatMap(_.awaitResult)
+          result.isFailure shouldBe true
+          intercept[CancellationException](result.get)
     }
   }
 

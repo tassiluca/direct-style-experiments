@@ -25,7 +25,7 @@ class ChannelsPimpingTest extends AnyFunSpec with Matchers {
       Async.blocking:
         var collectedItems = Seq[Item]()
         val channel = TerminableChannel.ofUnbounded[Item]
-        produceOn(channel).run.onComplete(Listener { (_, _) => channel.terminate() })
+        produceOn(channel).run.onComplete(Listener((_, _) => channel.send(Terminated)))
         channel.foreach(res => collectedItems = collectedItems :+ res)
         collectedItems shouldBe Seq.range(0, itemsProduced)
     }
