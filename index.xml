@@ -33,14 +33,14 @@
       <link>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/04-rears/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/04-rears/</guid>
-      <description>An attempt to bring reactivity principles into gears # So far, we&amp;rsquo;ve explored the basics of asynchronous abstraction mechanisms provided by the direct style of the Scala Gears and Kotlin Coroutines frameworks.&#xA;The goal of this last example is to investigate, using a simple example, whether these two frameworks offer sufficient idiomatic abstractions to deal with reactive-like systems.&#xA;Smart Hub System example # Idea: in an IoT context, a multitude of sensors of different types, each replicated to ensure accuracy, transmit their measurements to a central hub, which in turn needs to react, in real-time, forwarding to the appropriate controller the data, possibly running some kind of transformation, enabling controllers to make decisions based on their respective logic.</description>
+      <description>On the reactivity # So far, we&amp;rsquo;ve explored the basics of asynchronous abstraction mechanisms provided by the direct style of the Scala Gears and Kotlin Coroutines frameworks. The goal of this last example is to investigate, using a simple example, whether these two frameworks offer sufficient idiomatic abstractions to deal with event-based reactive systems.&#xA;Smart Hub example # Idea: in an IoT context, a multitude of sensors of different types, each replicated to ensure accuracy, transmit their measurements to a central hub, which in turn needs to react, in real-time, forwarding to the appropriate controller the data, possibly performing some kind of transformation.</description>
     </item>
     <item>
       <title></title>
       <link>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/05-conclusions/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/05-conclusions/</guid>
-      <description> Going further and conclusions # </description>
+      <description>Going further and conclusions # Recap # Channels are the basic communication primitive for exchanging data between Futures/Coroutines and they are primarily used to model data sources that are intrinsically hot, i.e. that exist without application&amp;rsquo;s request from them: incoming network connections, event streams, etc&amp;hellip; Flows are control structures, containing executable code. When we call the collect method we invoke the code inside the flow, like executing function&amp;rsquo;s code by calling it.</description>
     </item>
   </channel>
 </rss>

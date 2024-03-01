@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content=" Going further and conclusions # ">
+<meta name="description" content="Going further and conclusions # Recap # Channels are the basic communication primitive for exchanging data between Futures/Coroutines and they are primarily used to model data sources that are intrinsically hot, i.e. that exist without application&rsquo;s request from them: incoming network connections, event streams, etc&hellip; Flows are control structures, containing executable code. When we call the collect method we invoke the code inside the flow, like executing function&rsquo;s code by calling it.">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
-<meta property="og:description" content=" Going further and conclusions # " />
+<meta property="og:description" content="Going further and conclusions # Recap # Channels are the basic communication primitive for exchanging data between Futures/Coroutines and they are primarily used to model data sources that are intrinsically hot, i.e. that exist without application&rsquo;s request from them: incoming network connections, event streams, etc&hellip; Flows are control structures, containing executable code. When we call the collect method we invoke the code inside the flow, like executing function&rsquo;s code by calling it." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/05-conclusions/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-02-29T17:32:36+01:00" />
+<meta property="article:modified_time" content="2024-03-02T00:32:44+01:00" />
 
 <title>05 Conclusions | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
@@ -19,7 +19,7 @@
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/05-conclusions/">
 <link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.8b7763bbc30daa9cc9cbd3d86de971ec810e418df80eaa491030277c990276b4.css" integrity="sha256-i3dju8MNqpzJy9PYbelx7IEOQY34DqpJEDAnfJkCdrQ=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.4bc61e6195a0429ff26b3138ef7c229d75957572080ba17944c31fb4ba8b6adb.js" integrity="sha256-S8YeYZWgQp/yazE473winXWVdXIIC6F5RMMftLqLats=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.aa1702a5fef24c7590e55738cf4697bd9f940a0088f5bd15e4534e96a88b6afa.js" integrity="sha256-qhcCpf7yTHWQ5Vc4z0aXvZ&#43;UCgCI9b0V5FNOlqiLavo=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -183,7 +183,14 @@ https://github.com/alex-shpak/hugo-book
   Going further and conclusions
   <a class="anchor" href="#going-further-and-conclusions">#</a>
 </h1>
-<p><img src="/static/analyzer-e2e.png" alt="expected result" /></p>
+<h2 id="recap">
+  Recap
+  <a class="anchor" href="#recap">#</a>
+</h2>
+<ul>
+<li><code>Channel</code>s are the basic communication primitive for exchanging data between <code>Future</code>s/<code>Coroutines</code> and they are primarily used to model data sources that are <em>intrinsically hot</em>, i.e. <strong>that exist without application&rsquo;s request from them</strong>: incoming network connections, event streams, etc&hellip;</li>
+<li><code>Flow</code>s are control structures, containing executable code. When we call the <code>collect</code> method we invoke the code inside the flow, like executing function&rsquo;s code by calling it.</li>
+</ul>
 </article>
  
       
@@ -193,9 +200,9 @@ https://github.com/alex-shpak/hugo-book
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/fc00e499f04523e4b9168eaec03792225edfe010" title='Last modified by Luca Tassinari | February 29, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/4e8ac99d8ae7175c0758425b18558169842eb67d" title='Last modified by Luca Tassinari | March 1, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>February 29, 2024</span>
+      <span>March 1, 2024</span>
     </a>
   </div>
 

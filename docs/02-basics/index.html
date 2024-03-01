@@ -15,7 +15,7 @@ Example: a blog posts service # Idea: develop a very simple (mocked) service whi
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/02-basics/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-02-29T17:32:36+01:00" />
+<meta property="article:modified_time" content="2024-03-02T00:32:44+01:00" />
 
 <title>02 Basics | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
@@ -23,7 +23,7 @@ Example: a blog posts service # Idea: develop a very simple (mocked) service whi
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/02-basics/">
 <link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.8b7763bbc30daa9cc9cbd3d86de971ec810e418df80eaa491030277c990276b4.css" integrity="sha256-i3dju8MNqpzJy9PYbelx7IEOQY34DqpJEDAnfJkCdrQ=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.4bc61e6195a0429ff26b3138ef7c229d75957572080ba17944c31fb4ba8b6adb.js" integrity="sha256-S8YeYZWgQp/yazE473winXWVdXIIC6F5RMMftLqLats=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.aa1702a5fef24c7590e55738cf4697bd9f940a0088f5bd15e4534e96a88b6afa.js" integrity="sha256-qhcCpf7yTHWQ5Vc4z0aXvZ&#43;UCgCI9b0V5FNOlqiLavo=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -509,7 +509,7 @@ classDiagram
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Gets all the stored blog posts in a lazy manner or a string explaining the reason of the failure. */</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> all<span style="color:#04a5e5;font-weight:bold">()(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">LazyList</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]]</span>
-</span></span></code></pre></div><p>As you can see, <code>Future</code>s are gone and the return type it&rsquo;s just the result of their intent (expressed with <code>Either</code> to return a meaningful message in case of failure). The fact they are <em>suspendable</em> is expressed by means of the <code>Async</code> context, which is required to invoke those function.</p>
+</span></span></code></pre></div><p>As you can see, <code>Future</code>s are gone and the return type it&rsquo;s just the result of their intent (expressed with <code>Either</code> to return a meaningful message in case of failure). The fact they are <em>suspendable</em> is expressed by means of the <code>Async</code> context, which is required to invoke those functions.</p>
 <blockquote>
 <p>Key inspiring principle (actually, &ldquo;stolen&rdquo; by Kotlin)</p>
 <p><em><strong>❝Concurrency is hard! Concurrency has to be explicit!❞</strong></em></p>
@@ -527,10 +527,9 @@ classDiagram
 <p>to avoid the immediate cancellation, deferring the cancellation after some block is possible using <code>uninterruptible</code> function:</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">val</span> f <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Future</span> <span style="color:#04a5e5;font-weight:bold">{</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">// this can be interrupted
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>  uninterruptible <span style="color:#04a5e5;font-weight:bold">{</span>
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>  uninterruptible<span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">// this cannot be interrupted *immediately*
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>  <span style="color:#04a5e5;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">// this can be interrupted
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>  <span style="color:#9ca0b0;font-style:italic">// this can be interrupted
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span><span style="color:#04a5e5;font-weight:bold">}</span>
 </span></span></code></pre></div></li>
 </ul>
@@ -615,6 +614,32 @@ classDiagram
 </ul>
 <p>how suspension is implemented</p>
 <hr>
+<h2 id="best-practices">
+  Best practices
+  <a class="anchor" href="#best-practices">#</a>
+</h2>
+<p>Some of the best practices of Kotlin Coroutines that can be applied to Scala&rsquo;s direct style Gears as well:</p>
+<ul>
+<li>
+<p><strong>Do not use <code>Future</code>/<code>async</code> with an immediate <code>await</code></strong>: it makes no sense to define an asynchronous computation if we have to immediately wait for its result without doing anything else in the meantime:</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">// DON&#39;T
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span><span style="color:#8839ef">val</span> f <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Future</span><span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">// some suspending operation...
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>  service<span style="color:#04a5e5;font-weight:bold">.</span>postByTitle<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#40a02b">&#34;Direct style guidelines&#34;</span><span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">val</span> post <span style="color:#8839ef">=</span> f<span style="color:#04a5e5;font-weight:bold">.</span>await
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">// DO
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span><span style="color:#8839ef">val</span> post <span style="color:#8839ef">=</span> service<span style="color:#04a5e5;font-weight:bold">.</span>get<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#40a02b">&#34;Direct style guidelines&#34;</span><span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span></code></pre></div><p>In case a few async tasks need to be started the last one does not require to be run in a new <code>Future</code>/<code>async</code>, though can be beneficial for readability and maintainability reasons:</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#df8e1d">Future</span><span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">val</span> <span style="color:#d20f39">post</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#df8e1d">Future</span> <span style="color:#04a5e5;font-weight:bold">{</span> service<span style="color:#04a5e5;font-weight:bold">.</span>postByTitle<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#40a02b">&#34;Direct style guidelines&#34;</span><span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#04a5e5;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">val</span> users <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Future</span> <span style="color:#04a5e5;font-weight:bold">{</span> service<span style="color:#04a5e5;font-weight:bold">.</span>user<span style="color:#04a5e5;font-weight:bold">()</span> <span style="color:#04a5e5;font-weight:bold">}</span> <span style="color:#9ca0b0;font-style:italic">// not necessary here, but useful for readability
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>  showPost<span style="color:#04a5e5;font-weight:bold">(</span>post<span style="color:#04a5e5;font-weight:bold">.</span>await<span style="color:#04a5e5;font-weight:bold">,</span> users<span style="color:#04a5e5;font-weight:bold">.</span>await<span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Suspending functions await completion of their children</strong></p>
+</li>
+</ul>
 <h2 id="conclusions">
   Conclusions
   <a class="anchor" href="#conclusions">#</a>
@@ -628,9 +653,9 @@ classDiagram
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/fc00e499f04523e4b9168eaec03792225edfe010" title='Last modified by Luca Tassinari | February 29, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/4e8ac99d8ae7175c0758425b18558169842eb67d" title='Last modified by Luca Tassinari | March 1, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>February 29, 2024</span>
+      <span>March 1, 2024</span>
     </a>
   </div>
 

@@ -13,7 +13,7 @@ classDiagram class `SendableChannel[-T]` { &lt;&lt; trait &gt;&gt; &#43;sendSour
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/03-channels/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-02-29T17:32:36+01:00" />
+<meta property="article:modified_time" content="2024-03-02T00:32:44+01:00" />
 
 <title>03 Channels | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
@@ -21,7 +21,7 @@ classDiagram class `SendableChannel[-T]` { &lt;&lt; trait &gt;&gt; &#43;sendSour
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/03-channels/">
 <link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.8b7763bbc30daa9cc9cbd3d86de971ec810e418df80eaa491030277c990276b4.css" integrity="sha256-i3dju8MNqpzJy9PYbelx7IEOQY34DqpJEDAnfJkCdrQ=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.4bc61e6195a0429ff26b3138ef7c229d75957572080ba17944c31fb4ba8b6adb.js" integrity="sha256-S8YeYZWgQp/yazE473winXWVdXIIC6F5RMMftLqLats=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.aa1702a5fef24c7590e55738cf4697bd9f940a0088f5bd15e4534e96a88b6afa.js" integrity="sha256-qhcCpf7yTHWQ5Vc4z0aXvZ&#43;UCgCI9b0V5FNOlqiLavo=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -234,7 +234,7 @@ classDiagram
   `ReadableChannel[+T]` <|-- `Channel[T]`
 </p>
 
-<p>The channel is defined through three distinct interfaces: <code>SendableChannel[-T]</code>, <code>ReadableChannel[+T]</code> and <code>Channel[T]</code>, where the latter extends from both <code>SendableChannel</code> and <code>ReadableChannel</code>. Typically, a <code>Channel</code> is created and a <code>SendableChannel</code> and <code>ReadableChannel</code> instances are respectively provided to the producer and the consumer, restricting their access to it. The same, almost identical, design is present also in Kotlin Coroutines where <code>SendChannel</code> and <code>ReceiveChannel</code> take respectively over the Gears <code>SendableChannel</code> and <code>ReadableChannel</code>.</p>
+<p>The channel is defined through three distinct interfaces: <code>SendableChannel[-T]</code>, <code>ReadableChannel[+T]</code> and <code>Channel[T]</code>, where the latter extends from both <code>SendableChannel</code> and <code>ReadableChannel</code>. Typically, a <code>Channel</code> is created and a <code>SendableChannel</code> and <code>ReadableChannel</code> instances are respectively provided to the producer and the consumer, restricting their access to it. The same, almost identical, design is present also in Kotlin Coroutines where <code>SendChannel</code> and <code>ReceiveChannel</code> take over, respectively, the Gears <code>SendableChannel</code> and <code>ReadableChannel</code>.</p>
 <p>Moreover, <code>Channel</code> inherits from <code>java.io.Closable</code>, making them closable objects: once closed, they raise <code>ChannelClosedException</code> when attempting to write to them and immediately return a <code>Left(Closed)</code> when attempting to read from them, preventing the consumer from finishing reading all the values sent on the channel before its closing.
 This is not the case for Kotlin Coroutines where closing a channel indicates that no more values are coming, but doesn&rsquo;t prevent consuming already sent values. Moreover, in Kotlin is possible to use a regular for loop to receive elements from a channel (blocking the coroutine):</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#8839ef">val</span> <span style="color:#fe640b">channel</span> = Channel&lt;Int&gt;()
@@ -244,9 +244,9 @@ This is not the case for Kotlin Coroutines where closing a channel indicates tha
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>}
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">for</span> (y <span style="color:#8839ef">in</span> channel) println(y) <span style="color:#9ca0b0;font-style:italic">// blocks until channel is closed
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>println(<span style="color:#40a02b">&#34;Done!&#34;</span>)
-</span></span></code></pre></div><p>A similar behavior can be achieved also in Gears pimping the framework with the concept of <code>Terminable</code> channel. After all, closing a channel in coroutines is a matter of sending a special token to it: the iteration stops as soon as this token is received.</p>
+</span></span></code></pre></div><p>A similar behavior can be achieved also in Gears pimping the framework with the concept of <code>Terminable</code> channel. After all, closing a channel in coroutines is a matter of sending a special token to it, allowing stop the iteration as soon as this token is received.</p>
 <p><code>TBD</code></p>
-<p>Three types of channels exists:</p>
+<p>Three types of channels exist:</p>
 <ul>
 <li><strong>Synchronous Channels</strong>: links a <code>read</code> request with a <code>send</code> within a <em>rendezvous</em>
 <ul>
@@ -295,7 +295,7 @@ As usual, it has been implemented using monadic <code>Future</code>s, as well as
   <a class="anchor" href="#future-monadic-version">#</a>
 </h3>
 <p>The entry point of the library is the <code>Analyzer</code> interface which takes in input the organization name and a function through which is possible to react to results while they are computed.</p>
-<p>Since we want to achieve cancellation, the monadic version leverages Monix <code>Task</code>s which is returned by the <code>analyze</code> method wrapped in an <code>EitherT</code> monad transformer to allow handling errors functionally.</p>
+<p>Since we want to achieve cancellation, the monadic version leverages Monix <code>Task</code>, which is returned by the <code>analyze</code> method wrapped in an <code>EitherT</code> monad transformer to allow handling errors functionally.</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">Analyzer</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#d20f39">def</span> <span style="color:#d20f39">analyze</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#d20f39">organizationName:</span> <span style="color:#d20f39">String</span><span style="color:#04a5e5;font-weight:bold">)(</span>
 </span></span><span style="display:flex;"><span>      <span style="color:#d20f39">updateResult:</span> <span style="color:#d20f39">RepositoryReport</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span> <span style="color:#d20f39">Unit</span><span style="color:#04a5e5;font-weight:bold">,</span>
@@ -352,7 +352,10 @@ Whenever desired, the current computation can be stopped by canceling the Monix 
   Scala Gears version
   <a class="anchor" href="#scala-gears-version">#</a>
 </h3>
-<p>The interfaces of the Direct Style with Gears differ from the monadic one by their return type, which is a simpler <code>Either</code> data type, and by the fact they are <strong>suspendable</strong> functions, hence they require an Async context to be executed.</p>
+<p>The interfaces of the Direct Style with Gears differ from the monadic one by their return type, which is a simpler <code>Either</code> data type, and by the fact they are <strong>suspendable functions</strong>, hence they require an Async context to be executed.
+This is the first important difference: the <code>analyze</code> method, differently from the monadic version, doesn&rsquo;t return immediately the control; instead, it suspends the execution of the client until the result is available (though offering the opportunity to react to each update).
+This obeys the principle of <strong>explicit asynchrony</strong>: if the client wants to perform this operation asynchronously, it has to opt in explicitly, either using a <code>Future</code> or any other asynchronous construct (depending on the library used).
+Moreover, this interface is library-agnostic, meaning that it doesn&rsquo;t depend on any specific asynchronous library.</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">Analyzer</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#d20f39">def</span> <span style="color:#d20f39">analyze</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#d20f39">organizationName:</span> <span style="color:#d20f39">String</span><span style="color:#04a5e5;font-weight:bold">)(</span>
 </span></span><span style="display:flex;"><span>      <span style="color:#d20f39">updateResults:</span> <span style="color:#d20f39">RepositoryReport</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span> <span style="color:#d20f39">Unit</span><span style="color:#04a5e5;font-weight:bold">,</span>
@@ -406,13 +409,120 @@ It would be desirable, instead, to start performing the analysis as soon as one 
 </span></span><span style="display:flex;"><span>  <span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">ReadableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Terminable</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">Contribution</span><span style="color:#04a5e5;font-weight:bold">]]]</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">// ...
-</span></span></span></code></pre></div><hr>
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<h2 id="conclusions">
+</span></span></span></code></pre></div><p>Then, the implementation of the <code>analyze</code> method becomes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">override</span> <span style="color:#8839ef">def</span> analyze<span style="color:#04a5e5;font-weight:bold">(</span>organizationName<span style="color:#8839ef">:</span> <span style="color:#d20f39">String</span><span style="color:#04a5e5;font-weight:bold">)(</span>
+</span></span><span style="display:flex;"><span>    updateResults<span style="color:#8839ef">:</span> <span style="color:#d20f39">RepositoryReport</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span> <span style="color:#df8e1d">Unit</span><span style="color:#04a5e5;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">Seq</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">RepositoryReport</span><span style="color:#04a5e5;font-weight:bold">]]</span> <span style="color:#8839ef">=</span> either<span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">val</span> <span style="color:#d20f39">reposInfo</span> <span style="color:#04a5e5;font-weight:bold">=</span> repositoryService<span style="color:#04a5e5;font-weight:bold">.</span>incrementalRepositoriesOf<span style="color:#04a5e5;font-weight:bold">(</span>organizationName<span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">val</span> collector <span style="color:#8839ef">=</span> <span style="color:#df8e1d">MutableCollector</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">RepositoryReport</span><span style="color:#04a5e5;font-weight:bold">]()</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">var</span> collectedRepositories <span style="color:#8839ef">=</span> <span style="color:#fe640b">0</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">// suspend until all are retrieved
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>  reposInfo<span style="color:#04a5e5;font-weight:bold">.</span>foreach <span style="color:#04a5e5;font-weight:bold">{</span> repository <span style="color:#8839ef">=&gt;</span>
+</span></span><span style="display:flex;"><span>    collector <span style="color:#04a5e5;font-weight:bold">+=</span> repository<span style="color:#04a5e5;font-weight:bold">.?.</span>performAnalysis
+</span></span><span style="display:flex;"><span>    collectedRepositories <span style="color:#8839ef">=</span> collectedRepositories <span style="color:#04a5e5;font-weight:bold">+</span> <span style="color:#fe640b">1</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#04a5e5;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#fe640b">0</span> until collectedRepositories<span style="color:#04a5e5;font-weight:bold">).</span>map <span style="color:#04a5e5;font-weight:bold">{</span> <span style="color:#8839ef">_</span> <span style="color:#8839ef">=&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">val</span> report <span style="color:#8839ef">=</span> collector<span style="color:#04a5e5;font-weight:bold">.</span>results<span style="color:#04a5e5;font-weight:bold">.</span>read<span style="color:#04a5e5;font-weight:bold">().</span>toTry<span style="color:#04a5e5;font-weight:bold">().?.</span>awaitResult<span style="color:#04a5e5;font-weight:bold">.?</span>
+</span></span><span style="display:flex;"><span>    updateResults<span style="color:#04a5e5;font-weight:bold">(</span>report<span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>    report
+</span></span><span style="display:flex;"><span>  <span style="color:#04a5e5;font-weight:bold">}</span>
+</span></span></code></pre></div><p>Note in this implementation the <code>foreach</code> method has been used to iterate over all the returned <code>TerminableChannel</code> as soon as they are retrieved by the service and start the analysis in a corresponding <code>Future</code>. These are gathered in a <code>MutableCollector</code> (a mutable version of the previous <code>Collector</code>) and their results are read from the channel as they come.</p>
+<p>Despite the improvement, this is not yet the best solution: as soon as the repositories are retrieved the corresponding analysis is started, but the update of the results is performed only when all the repositories have been analyzed.</p>
+<h3 id="kotlin-coroutines-version">
+  Kotlin Coroutines version
+  <a class="anchor" href="#kotlin-coroutines-version">#</a>
+</h3>
+<p>The analyzer interface reflects the Scala one: a <code>Result</code> in place of <code>Either</code> is used, and the suspendable function <code>udateResults</code> is marked with the <code>suspend</code> keyword in place of the <code>using Async</code> context.</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#8839ef">interface</span> <span style="color:#df8e1d">Analyzer</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">suspend</span> <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">analyze</span>(
+</span></span><span style="display:flex;"><span>        organizationName: String,
+</span></span><span style="display:flex;"><span>        updateResults: <span style="color:#8839ef">suspend</span> (RepositoryReport) <span style="color:#04a5e5;font-weight:bold">-&gt;</span> Unit = { _ <span style="color:#04a5e5;font-weight:bold">-&gt;</span> },
+</span></span><span style="display:flex;"><span>    ): Result&lt;Set&lt;RepositoryReport&gt;&gt;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Its channel-based implementation, despite syntactic differences, is also very similar to that of Scala Gears, at least conceptually:</p>
+<ol>
+<li>get all the repositories;</li>
+<li>for each of them, an analysis is started to retrieve the contributors and the last release;
+<ul>
+<li>each analysis is started in a separate coroutine whose results are sent to a channel;</li>
+<li>as usual, the contributors and the last release are retrieved concurrently, using the <code>async</code> coroutine builder;</li>
+</ul>
+</li>
+<li>results are aggregated as they come from the channel.</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#8839ef">override</span> <span style="color:#8839ef">suspend</span> <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">analyze</span>(
+</span></span><span style="display:flex;"><span>    organizationName: String,
+</span></span><span style="display:flex;"><span>    updateResults: <span style="color:#8839ef">suspend</span> (RepositoryReport) <span style="color:#04a5e5;font-weight:bold">-&gt;</span> Unit,
+</span></span><span style="display:flex;"><span>): Result&lt;Set&lt;RepositoryReport&gt;&gt; = coroutineScope {
+</span></span><span style="display:flex;"><span>    runCatching {
+</span></span><span style="display:flex;"><span>        <span style="color:#8839ef">val</span> <span style="color:#fe640b">repositories</span> = provider.repositoriesOf(organizationName).getOrThrow() <span style="color:#9ca0b0;font-style:italic">// 1
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>        <span style="color:#8839ef">val</span> <span style="color:#fe640b">resultsChannel</span> = analyzeAll(organizationName, repositories) <span style="color:#9ca0b0;font-style:italic">// 2
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>        collectResults(resultsChannel, repositories.size, updateResults) <span style="color:#9ca0b0;font-style:italic">// 3
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#8839ef">private</span> <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">CoroutineScope</span>.analyzeAll(organizationName: String, repositories: List&lt;Repository&gt;) =
+</span></span><span style="display:flex;"><span>    Channel&lt;RepositoryReport&gt;().also {
+</span></span><span style="display:flex;"><span>        repositories.map { r <span style="color:#04a5e5;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>            launch { <span style="color:#9ca0b0;font-style:italic">// a new coroutine for each repository is started
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>                <span style="color:#8839ef">val</span> <span style="color:#fe640b">contributors</span> = async { provider.contributorsOf(organizationName, r.name).getOrThrow() }
+</span></span><span style="display:flex;"><span>                <span style="color:#8839ef">val</span> <span style="color:#fe640b">release</span> = provider.lastReleaseOf(organizationName, r.name).getOrThrow()
+</span></span><span style="display:flex;"><span>                <span style="color:#8839ef">it</span>.send(RepositoryReport(r.name, r.issues, r.stars, contributors.await(), release))
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#8839ef">private</span> <span style="color:#8839ef">suspend</span> <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">collectResults</span>(
+</span></span><span style="display:flex;"><span>    resultsChannel: Channel&lt;RepositoryReport&gt;,
+</span></span><span style="display:flex;"><span>    expectedResults: Int,
+</span></span><span style="display:flex;"><span>    updateResults: <span style="color:#8839ef">suspend</span> (RepositoryReport) <span style="color:#04a5e5;font-weight:bold">-&gt;</span> Unit,
+</span></span><span style="display:flex;"><span>) = mutableSetOf&lt;RepositoryReport&gt;().apply {
+</span></span><span style="display:flex;"><span>    repeat(expectedResults) {
+</span></span><span style="display:flex;"><span>        <span style="color:#8839ef">val</span> <span style="color:#fe640b">report</span> = resultsChannel.receive()
+</span></span><span style="display:flex;"><span>        add(report)
+</span></span><span style="display:flex;"><span>        updateResults(report)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    resultsChannel.close()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Where, instead, Kotlin Coroutines shine is the implementation of the <code>RepositoryService</code> for supporting incremental retrieval of repositories and contributors.</p>
+<p>Indeed, Kotlin has a built-in support for cold streams, called <strong><code>Flow</code></strong>. They are very similar (actually they have been inspired to) cold observable in reactive programming, and <strong>they are the perfect fit for functions that need to return a stream of asynchronously computed values</strong>.</p>
+<p>The <code>RepositoryService</code> has been here extended with new methods, <code>flowing***</code>, returning a <code>Flow</code> of results:</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#8839ef">class</span> <span style="color:#df8e1d">GitHubRepositoryProvider</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">flowingRepositoriesOf</span>(organizationName: String): Flow&lt;List&lt;Repository&gt;&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">flowingContributorsOf</span>(organizationName: String, repositoryName: String): Flow&lt;List&lt;Contribution&gt;&gt;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>As already mentioned, the <code>Flow</code> is a <strong>cold stream</strong>, meaning that it is <strong>not</strong> started until it is <strong><code>collect</code>ed</strong>. Once the <code>collect</code> is called a new cold stream is created and data starts to &ldquo;flow&rdquo;.</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#8839ef">override</span> <span style="color:#8839ef">suspend</span> <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">analyze</span>(
+</span></span><span style="display:flex;"><span>    organizationName: String,
+</span></span><span style="display:flex;"><span>    updateResults: <span style="color:#8839ef">suspend</span> (RepositoryReport) <span style="color:#04a5e5;font-weight:bold">-&gt;</span> Unit,
+</span></span><span style="display:flex;"><span>): Result&lt;Set&lt;RepositoryReport&gt;&gt; = coroutineScope {
+</span></span><span style="display:flex;"><span>    runCatching {
+</span></span><span style="display:flex;"><span>        <span style="color:#8839ef">val</span> <span style="color:#fe640b">reports</span> = provider.flowingRepositoriesOf(organizationName) <span style="color:#9ca0b0;font-style:italic">// 1
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>            .flatMapConcat { analyzeAll(<span style="color:#8839ef">it</span>) } <span style="color:#9ca0b0;font-style:italic">// 2
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>            .flowOn(<span style="color:#df8e1d">Dispatchers</span>.Default) <span style="color:#9ca0b0;font-style:italic">// 3
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>        <span style="color:#8839ef">var</span> <span style="color:#fe640b">allReports</span> = emptySet&lt;RepositoryReport&gt;() 
+</span></span><span style="display:flex;"><span>        <span style="color:#9ca0b0;font-style:italic">// until here just &#34;configuration&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>        reports.collect {
+</span></span><span style="display:flex;"><span>            updateResults(<span style="color:#8839ef">it</span>)
+</span></span><span style="display:flex;"><span>            allReports = allReports + <span style="color:#8839ef">it</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        allReports
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="conclusions">
   Conclusions
   <a class="anchor" href="#conclusions">#</a>
 </h2>
+<blockquote>
+<ul>
+<li><code>Channel</code>s are the basic communication and synchronization primitive for exchanging data between <code>Future</code>s/<code>Coroutines</code>.
+<ul>
+<li>Scala Gears support for <code>Terminable</code> channels or a review of the closing mechanism should be considered.</li>
+</ul>
+</li>
+<li>The <code>Flow</code> abstraction in Kotlin Coroutines is a powerful tool for handling cold streams of data, and it is a perfect fit for functions that need to return a stream of asynchronously computed values <strong>by request</strong>.</li>
+</ul>
+</blockquote>
 </article>
  
       
@@ -422,9 +532,9 @@ It would be desirable, instead, to start performing the analysis as soon as one 
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/fc00e499f04523e4b9168eaec03792225edfe010" title='Last modified by Luca Tassinari | February 29, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/4e8ac99d8ae7175c0758425b18558169842eb67d" title='Last modified by Luca Tassinari | March 1, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>February 29, 2024</span>
+      <span>March 1, 2024</span>
     </a>
   </div>
 
