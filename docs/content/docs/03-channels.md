@@ -40,7 +40,7 @@ classDiagram
   `ReadableChannel[+T]` <|-- `Channel[T]`
 {{< /mermaid >}}
 
-The channel is defined through three distinct interfaces: `SendableChannel[-T]`, `ReadableChannel[+T]` and `Channel[T]`, where the latter extends from both `SendableChannel` and `ReadableChannel`. Typically, a `Channel` is created and a `SendableChannel` and `ReadableChannel` instances are respectively provided to the producer and the consumer, restricting their access to it. The same, almost identical, design is present also in Kotlin Coroutines where `SendChannel` and `ReceiveChannel` take respectively over the Gears `SendableChannel` and `ReadableChannel`.
+The channel is defined through three distinct interfaces: `SendableChannel[-T]`, `ReadableChannel[+T]` and `Channel[T]`, where the latter extends from both `SendableChannel` and `ReadableChannel`. Typically, a `Channel` is created and a `SendableChannel` and `ReadableChannel` instances are respectively provided to the producer and the consumer, restricting their access to it. The same, almost identical, design is present also in Kotlin Coroutines where `SendChannel` and `ReceiveChannel` take over, respectively, the Gears `SendableChannel` and `ReadableChannel`.
 
 Moreover, `Channel` inherits from `java.io.Closable`, making them closable objects: once closed, they raise `ChannelClosedException` when attempting to write to them and immediately return a `Left(Closed)` when attempting to read from them, preventing the consumer from finishing reading all the values sent on the channel before its closing.
 This is not the case for Kotlin Coroutines where closing a channel indicates that no more values are coming, but doesn't prevent consuming already sent values. Moreover, in Kotlin is possible to use a regular for loop to receive elements from a channel (blocking the coroutine):
@@ -55,11 +55,11 @@ for (y in channel) println(y) // blocks until channel is closed
 println("Done!")
 ```
 
-A similar behavior can be achieved also in Gears pimping the framework with the concept of `Terminable` channel. After all, closing a channel in coroutines is a matter of sending a special token to it: the iteration stops as soon as this token is received.
+A similar behavior can be achieved also in Gears pimping the framework with the concept of `Terminable` channel. After all, closing a channel in coroutines is a matter of sending a special token to it, allowing stop the iteration as soon as this token is received.
 
 `TBD`
 
-Three types of channels exists:
+Three types of channels exist:
 
 - **Synchronous Channels**: links a `read` request with a `send` within a _rendezvous_
   - `send` (`read`) suspend the process until a consumer `read` (`send`) the value;
@@ -99,7 +99,7 @@ As usual, it has been implemented using monadic `Future`s, as well as using Scal
 
 The entry point of the library is the `Analyzer` interface which takes in input the organization name and a function through which is possible to react to results while they are computed.
 
-Since we want to achieve cancellation, the monadic version leverages Monix `Task`s which is returned by the `analyze` method wrapped in an `EitherT` monad transformer to allow handling errors functionally.
+Since we want to achieve cancellation, the monadic version leverages Monix `Task`, which is returned by the `analyze` method wrapped in an `EitherT` monad transformer to allow handling errors functionally.
 
 ```scala
 trait Analyzer:
@@ -236,59 +236,133 @@ trait RepositoryService:
 
 ```
 
-
-
----
-<!--
-Client-side the code is quite identical to the corresponding monadic version:
+Then, the implementation of the `analyze` method becomes:
 
 ```scala
-class DirectAppController(using Async) extends AppController:
-  private val view = AnalyzerView.gui(this)
-  private val analyzer = Analyzer.incremental(RepositoryService.ofGitHub())
-  private var currentComputation: Option[Future[Unit]] = None
-
-  view.run()
-
-  override def runSession(organizationName: String): Unit =
-    var organizationReport: OrganizationReport = (Map(), Set())
-    val f = Future:
-      analyzer.analyze(organizationName) { report =>
-        organizationReport = organizationReport.mergeWith(report)
-        view.update(organizationReport)
-      } match { case Left(e) => view.error(e); case _ => view.endComputation() }
-    currentComputation = Some(f)
-
-  override def stopSession(): Unit = currentComputation.foreach(_.cancel())
+override def analyze(organizationName: String)(
+    updateResults: RepositoryReport => Unit,
+)(using Async): Either[String, Seq[RepositoryReport]] = either:
+  val reposInfo = repositoryService.incrementalRepositoriesOf(organizationName)
+  val collector = MutableCollector[RepositoryReport]()
+  var collectedRepositories = 0
+  // suspend until all are retrieved
+  reposInfo.foreach { repository =>
+    collector += repository.?.performAnalysis
+    collectedRepositories = collectedRepositories + 1
+  }
+  (0 until collectedRepositories).map { _ =>
+    val report = collector.results.read().toTry().?.awaitResult.?
+    updateResults(report)
+    report
+  }
 ```
 
-The Kotlin version with Coroutines is pretty identical to the Gears one.
+Note in this implementation the `foreach` method has been used to iterate over all the returned `TerminableChannel` as soon as they are retrieved by the service and start the analysis in a corresponding `Future`. These are gathered in a `MutableCollector` (a mutable version of the previous `Collector`) and their results are read from the channel as they come.
 
-### GitHub service
+Despite the improvement, this is not yet the best solution: as soon as the repositories are retrieved the corresponding analysis is started, but the update of the results is performed only when all the repositories have been analyzed.
 
-One point of difference between the two frameworks is, however, how the `GitHubService` can be implemented, regarding the case where, not just a single, but a multitude of values, are expected.
+### Kotlin Coroutines version
 
-Indeed, the GitHub API, like many ReSTful APIs, implements _pagination_: if the response includes many results, they are paginated, returning a subset of them; it is the responsibility of the client to request more data (pages).
+The analyzer interface reflects the Scala one: a `Result` in place of `Either` is used, and the suspendable function `udateResults` is marked with the `suspend` keyword in place of the `using Async` context.
 
-This can lead to performance issues if the service is implemented to return the whole results in one shot. It would be desirable, instead, to start performing the analysis as soon as one page is obtained from the API.
+```kotlin
+interface Analyzer {
+    suspend fun analyze(
+        organizationName: String,
+        updateResults: suspend (RepositoryReport) -> Unit = { _ -> },
+    ): Result<Set<RepositoryReport>>
+}
+```
 
-Kotlin Coroutines offers, for this purpose, the abstraction of **Flow**s, which are conceptually very similar to **cold `Observable`s** in reactive programming.
+Its channel-based implementation, despite syntactic differences, is also very similar to that of Scala Gears, at least conceptually:
 
-With respect to reactive programming, they are still quite less reach in terms of operators.
+1. get all the repositories;
+2. for each of them, an analysis is started to retrieve the contributors and the last release;
+    * each analysis is started in a separate coroutine whose results are sent to a channel;
+    * as usual, the contributors and the last release are retrieved concurrently, using the `async` coroutine builder;
+3. results are aggregated as they come from the channel.
 
----
+```kotlin
+override suspend fun analyze(
+    organizationName: String,
+    updateResults: suspend (RepositoryReport) -> Unit,
+): Result<Set<RepositoryReport>> = coroutineScope {
+    runCatching {
+        val repositories = provider.repositoriesOf(organizationName).getOrThrow() // 1
+        val resultsChannel = analyzeAll(organizationName, repositories) // 2
+        collectResults(resultsChannel, repositories.size, updateResults) // 3
+    }
+}
+```
 
-- Channels in Kotlin (w.r.t. gears)
-  - fairness (also in Gears?)
-  - pipeline (not supported in Gears)
-  - better closable
+```kotlin
+private fun CoroutineScope.analyzeAll(organizationName: String, repositories: List<Repository>) =
+    Channel<RepositoryReport>().also {
+        repositories.map { r ->
+            launch { // a new coroutine for each repository is started
+                val contributors = async { provider.contributorsOf(organizationName, r.name).getOrThrow() }
+                val release = provider.lastReleaseOf(organizationName, r.name).getOrThrow()
+                it.send(RepositoryReport(r.name, r.issues, r.stars, contributors.await(), release))
+            }
+        }
+    }
+```
 
----
+```kotlin
+private suspend fun collectResults(
+    resultsChannel: Channel<RepositoryReport>,
+    expectedResults: Int,
+    updateResults: suspend (RepositoryReport) -> Unit,
+) = mutableSetOf<RepositoryReport>().apply {
+    repeat(expectedResults) {
+        val report = resultsChannel.receive()
+        add(report)
+        updateResults(report)
+    }
+    resultsChannel.close()
+}
+```
 
-Points of difference between the gears and Kotlin Coroutines channels are the following:
+Where, instead, Kotlin Coroutines shine is the implementation of the `RepositoryService` for supporting incremental retrieval of repositories and contributors.
 
----
+Indeed, Kotlin has a built-in support for cold streams, called **`Flow`**. They are very similar (actually they have been inspired to) cold observable in reactive programming, and **they are the perfect fit for functions that need to return a stream of asynchronously computed values**.
 
--->
+The `RepositoryService` has been here extended with new methods, `flowing***`, returning a `Flow` of results:
+
+```kotlin
+class GitHubRepositoryProvider {
+
+  fun flowingRepositoriesOf(organizationName: String): Flow<List<Repository>>
+
+  fun flowingContributorsOf(organizationName: String, repositoryName: String): Flow<List<Contribution>>
+}
+```
+
+As already mentioned, the `Flow` is a **cold stream**, meaning that it is **not** started until it is **`collect`ed**. Once the `collect` is called a new cold stream is created and data starts to "flow".
+
+```kotlin
+override suspend fun analyze(
+    organizationName: String,
+    updateResults: suspend (RepositoryReport) -> Unit,
+): Result<Set<RepositoryReport>> = coroutineScope {
+    runCatching {
+        val reports = provider.flowingRepositoriesOf(organizationName) // 1
+            .flatMapConcat { analyzeAll(it) } // 2
+            .flowOn(Dispatchers.Default) // 3
+        var allReports = emptySet<RepositoryReport>() 
+        // until here just "configuration"
+        reports.collect {
+            updateResults(it)
+            allReports = allReports + it
+        }
+        allReports
+    }
+}
+```
 
 ## Conclusions
+
+> - `Channel`s are the basic communication and synchronization primitive for exchanging data between `Future`s/`Coroutines`. 
+>   - Scala Gears support for `Terminable` channels or a review of the closing mechanism should be considered.
+> - The `Flow` abstraction in Kotlin Coroutines is a powerful tool for handling cold streams of data, and it is a perfect fit for functions that need to return a stream of asynchronously computed values by request.
+> 
