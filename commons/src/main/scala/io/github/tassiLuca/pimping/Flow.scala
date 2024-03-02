@@ -3,11 +3,14 @@ package io.github.tassiLuca.pimping
 import gears.async.{Async, AsyncOperations, Task}
 import io.github.tassiLuca.pimping.TerminableChannelOps.foreach
 
+import java.util.concurrent.Semaphore
+import java.util.concurrent.locks.ReentrantLock
 import scala.compiletime.uninitialized
 import scala.reflect.ClassTag
+import scala.util.{Failure, Success, Try}
 
 trait Flow[+T]:
-  def collect(collector: FlowCollector[T])(using Async, AsyncOperations): Unit
+  def collect(collector: Try[T] => Unit)(using Async, AsyncOperations): Unit
 
 trait FlowCollector[-T]:
   def emit(value: T)(using Async): Unit
@@ -15,35 +18,24 @@ trait FlowCollector[-T]:
 object Flow:
   inline def apply[T: ClassTag](inline body: FlowCollector[T] ?=> Unit)(using Async): Flow[T] =
     val flow = FlowImpl[T]()
-    val collector = new FlowCollector[T]:
-      override def emit(value: T)(using Async): Unit = flow.channel.send(value)
-    flow.task = Task(body(using collector))
+    flow.task = Task:
+      val channel = flow.channel
+      flow.sync.release()
+      val collector: FlowCollector[T] = new FlowCollector[T]:
+        override def emit(value: T)(using Async): Unit = channel.send(Success(value))
+      try body(using collector)
+      catch case e: Exception => channel.send(Failure(e))
     flow
 
   class FlowImpl[T: ClassTag] extends Flow[T]:
     private[Flow] var task: Task[Unit] = uninitialized
+    private[Flow] var channel: TerminableChannel[Try[T]] = uninitialized
+    private[Flow] val sync = Semaphore(0)
 
-    private[Flow] val channel: TerminableChannel[T] = TerminableChannel.ofUnbounded[T]
-
-    override def collect(collector: FlowCollector[T])(using Async, AsyncOperations): Unit =
-      task.run.onComplete(() => channel.terminate())
-      channel.foreach(t => collector.emit(t)) // blocking!
-
-object UseFlows:
-  import gears.async.default.given
-
-  def simple()(using Async): Flow[Int] = Flow {
-    println("Flow started")
-    for i <- 0 to 10 do
-      AsyncOperations.sleep(1_000)
-      summon[FlowCollector[Int]].emit(i)
-  }
-
-  @main def main(): Unit = Async.blocking:
-    println("Calling simple function...")
-    val flow = simple()
-    AsyncOperations.sleep(5_000)
-    println("OK!")
-    val collector = new FlowCollector[Int]:
-      override def emit(value: Int)(using Async): Unit = println(value)
-    flow.collect(collector)
+    override def collect(collector: Try[T] => Unit)(using Async, AsyncOperations): Unit =
+      val myChannel = TerminableChannel.ofUnbounded[Try[T]]
+      synchronized:
+        channel = myChannel
+        task.run.onComplete(() => myChannel.terminate())
+        sync.acquire()
+      myChannel.foreach(t => collector(t)) // blocking!
