@@ -10,7 +10,7 @@ extension [T](e: Either[Channel.Closed, T])
     case Left(Channel.Closed) => Failure(ChannelClosedException())
     case Right(t) => Success[T](t)
 
-given listenerConversion[T]: Conversion[() => Unit, Listener[T]] = f => Listener((_, _) => f())
+given listenerConversion[T, U]: Conversion[() => U, Listener[T]] = f => Listener((_, _) => f())
 
 given listenerDataConversion[T]: Conversion[T => Unit, Listener[T]] = f => Listener((t, _) => f(t))
 

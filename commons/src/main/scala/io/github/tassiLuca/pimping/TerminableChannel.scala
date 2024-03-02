@@ -6,6 +6,7 @@ import gears.async.{Async, BufferedChannel, Channel, SyncChannel, UnboundedChann
 import scala.annotation.tailrec
 import scala.language.postfixOps
 import scala.reflect.ClassTag
+import scala.util.Try
 
 /** A token to be sent to a channel to signal that it has been terminated. */
 case object Terminated
@@ -19,7 +20,7 @@ type Terminable[T] = T | Terminated
   * still allowing to consumer to read pending values.
   */
 trait TerminableChannel[T] extends Channel[Terminable[T]]:
-  def terminate()(using Async): Unit
+  def terminate()(using Async): Try[Unit] // Try cause could throw java.util.NoSuchElementException in gears...
 
 object TerminableChannel:
 
@@ -52,8 +53,9 @@ object TerminableChannel:
 
     override def close(): Unit = c.close()
 
-    override def terminate()(using Async): Unit = uninterruptible:
-      c.send(Terminated)
+    override def terminate()(using Async): Try[Unit] = Try:
+      uninterruptible:
+        c.send(Terminated)
 
 object TerminableChannelOps:
 
