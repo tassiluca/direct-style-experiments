@@ -6,9 +6,9 @@ import gears.async.TaskSchedule.{Every, RepeatUntilFailure}
 import gears.async.default.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import io.github.tassiLuca.pimping.ChannelsPimping.toTry
+import io.github.tassiLuca.pimping.toTry
 
-import scala.util.{Failure, Random}
+import scala.util.{Failure, Random, Try}
 
 class ChannelsContextTest extends AnyFunSpec with Matchers {
 
@@ -38,6 +38,34 @@ class ChannelsContextTest extends AnyFunSpec with Matchers {
           val result = channel.read().toTry().flatMap(_.awaitResult)
           result.isFailure shouldBe true
           intercept[CancellationException](result.get)
+    }
+
+    it("but should work putting the send inside a future") {
+      Async.blocking:
+        val channel = UnboundedChannel[Future[Item]]()
+        for _ <- 0 to itemsProduced do
+          Future { AsyncOperations.sleep(5_000); 0 }
+            .onComplete(Listener((_, f) => channel.send(f.asInstanceOf[Future[Item]])))
+        for _ <- 0 to itemsProduced do
+          val result = channel.read().toTry().flatMap(_.awaitResult)
+          println(result)
+          result.isSuccess shouldBe true
+          result.get shouldBe 0
+    }
+
+    it("instead of future, their results") {
+      Async.blocking:
+        val channel = UnboundedChannel[Try[Item]]()
+        Future:
+          var fs: Seq[Future[Item]] = Seq()
+          for _ <- 0 to itemsProduced do
+            val f = Future { AsyncOperations.sleep(5_000); 100 }
+            fs = fs :+ f
+            f.onComplete(Listener((r, _) => channel.send(r)))
+          fs.awaitAll
+        for _ <- 0 to itemsProduced do
+          val result = channel.read()
+          println(result)
     }
   }
 

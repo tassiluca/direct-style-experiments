@@ -1,6 +1,7 @@
 package io.github.tassiLuca.analyzer.commons.client
 
 import io.github.tassiLuca.analyzer.commons.client.ui.MainFrame
+import io.github.tassiLuca.pimping.ScalaSwingFacade.display
 
 import javax.swing.SwingUtilities
 
@@ -8,8 +9,7 @@ class AnalyzerGUI(controller: AppController) extends AnalyzerView:
   private val gui: MainFrame = MainFrame(controller)
 
   override def run(): Unit =
-    gui.pack()
-    gui.setVisible(true)
+    gui.display()
     Thread.sleep(Long.MaxValue)
 
   override def update(result: OrganizationReport): Unit = SwingUtilities.invokeLater(() =>

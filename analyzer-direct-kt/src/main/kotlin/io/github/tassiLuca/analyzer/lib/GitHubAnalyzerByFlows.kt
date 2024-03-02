@@ -14,7 +14,6 @@ import kotlinx.coroutines.launch
 internal class GitHubAnalyzerByFlows(private val provider: GitHubRepositoryProvider) : Analyzer {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    @SuppressWarnings("InjectDispatcher")
     override suspend fun analyze(
         organizationName: String,
         updateResults: suspend (RepositoryReport) -> Unit,
@@ -32,7 +31,6 @@ internal class GitHubAnalyzerByFlows(private val provider: GitHubRepositoryProvi
         }
     }
 
-    @SuppressWarnings("InjectDispatcher")
     private fun analyzeAll(repositories: List<Repository>): Flow<RepositoryReport> = channelFlow {
         repositories.forEach { repository ->
             launch {

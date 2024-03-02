@@ -4,14 +4,17 @@ import io.github.tassiLuca.analyzer.commons.client.AppController
 import io.github.tassiLuca.pimping.ScalaSwingFacade.createPanel
 import io.github.tassiLuca.pimping.ScalaSwingFacade.given
 
-import java.awt.BorderLayout
+import java.awt.{BorderLayout, Dimension}
 import javax.swing.*
 import javax.swing.table.DefaultTableModel
 
 class MainFrame(controller: AppController) extends JFrame:
 
+  private val width = 950
+  private val height = 520
+
   setTitle("GitHub Organization Analyzer")
-  setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
+  setPreferredSize(Dimension(width, height))
   private val inputField = JTextField(20)
   private val runButton = JButton("GO!")
   private val cancelButton = JButton("Cancel")

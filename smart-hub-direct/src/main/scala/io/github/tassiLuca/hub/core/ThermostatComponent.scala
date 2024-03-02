@@ -1,6 +1,6 @@
 package io.github.tassiLuca.hub.core
 
-import gears.async.Async
+import gears.async.{Async, Future}
 import io.github.tassiLuca.hub.core.ports.{DashboardServiceComponent, HeaterComponent}
 import io.github.tassiLuca.rears.{Consumer, State}
 
@@ -39,14 +39,14 @@ trait ThermostatComponent[T <: ThermostatScheduler]:
 
       extension (t: Temperature)
         private def evaluate()(using Async): Unit =
-          context.dashboard.temperatureUpdated(t)
           val target = scheduler.currentTarget
           if t > target + hysteresis then offHeater() else if t < target then onHeater()
+          context.dashboard.temperatureUpdated(t)
 
-        private def offHeater()(using Async): Unit =
+        private def offHeater()(using Async): Unit = Future:
           context.heater.off()
           context.dashboard.offHeaterNotified()
 
-        private def onHeater()(using Async): Unit =
+        private def onHeater()(using Async): Unit = Future:
           context.heater.on()
           context.dashboard.onHeaterNotified()

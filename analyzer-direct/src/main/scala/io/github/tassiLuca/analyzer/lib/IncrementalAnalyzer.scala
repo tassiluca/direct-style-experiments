@@ -1,13 +1,17 @@
 package io.github.tassiLuca.analyzer.lib
 
 import gears.async.Future.MutableCollector
-import gears.async.{Async, Future}
+import gears.async.{Async, Future, Listener, Task}
 import io.github.tassiLuca.analyzer.commons.lib.{Repository, RepositoryReport}
 import io.github.tassiLuca.boundaries.either
 import io.github.tassiLuca.boundaries.either.?
 import io.github.tassiLuca.boundaries.EitherConversions.given
-import io.github.tassiLuca.pimping.ChannelsPimping.toTry
+import io.github.tassiLuca.pimping.toTry
+import io.github.tassiLuca.pimping.listenerConversion
+import io.github.tassiLuca.pimping.TerminableChannel
 import io.github.tassiLuca.pimping.TerminableChannelOps.foreach
+
+import scala.util.Try
 
 private class IncrementalAnalyzer(repositoryService: RepositoryService) extends Analyzer:
 
@@ -15,18 +19,25 @@ private class IncrementalAnalyzer(repositoryService: RepositoryService) extends 
       updateResults: RepositoryReport => Unit,
   )(using Async): Either[String, Seq[RepositoryReport]] = either:
     val reposInfo = repositoryService.incrementalRepositoriesOf(organizationName)
-    val collector = MutableCollector[RepositoryReport]()
-    var collectedRepositories = 0
-    reposInfo.foreach { repository =>
-      collector += repository.?.performAnalysis
-      collectedRepositories = collectedRepositories + 1
-    }
-    var allReports = Seq[RepositoryReport]()
-    for _ <- 0 until collectedRepositories do
-      val report = collector.results.read().toTry().?.awaitResult.?
-      updateResults(report)
-      allReports = allReports :+ report
-    allReports
+    val collector = TerminableChannel.ofUnbounded[Try[RepositoryReport]]
+    val f1 = Future:
+      var fs = Seq[Future[RepositoryReport]]()
+      reposInfo.foreach { repository =>
+        val f = repository.?.performAnalysis
+        f.onComplete(Listener((r, _) => collector.send(r)))
+        fs = fs :+ f
+      }
+      fs.awaitAllOrCancel
+    f1.onComplete(() => collector.terminate())
+    val f2 = Future:
+      var allReports = Seq[RepositoryReport]()
+      collector.foreach(f =>
+        val report = f.?
+        updateResults(report)
+        allReports = allReports :+ report,
+      )
+      allReports
+    f1.zip(f2).await._2
 
   extension (r: Repository)
     private def performAnalysis(using Async): Future[RepositoryReport] = Future:

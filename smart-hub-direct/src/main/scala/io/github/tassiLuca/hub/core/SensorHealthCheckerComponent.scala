@@ -1,10 +1,11 @@
 package io.github.tassiLuca.hub.core
 
-import gears.async.Async
+import gears.async.{Async, Future}
 import io.github.tassiLuca.hub.core.ports.{AlertSystemComponent, DashboardServiceComponent}
 import io.github.tassiLuca.rears.{Consumer, State}
 
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import scala.util.{Failure, Success, Try}
 
 /** The component encapsulating the [[SensorHealthChecker]] entity. */
@@ -27,11 +28,15 @@ trait SensorHealthCheckerComponent[E <: SensorEvent]:
       override protected def react(e: Try[Seq[E]])(using Async): Seq[E] = e match
         case Success(current) =>
           val noMoreActive = state.map(_.name).toSet -- current.map(_.name).toSet
-          if noMoreActive.nonEmpty then
-            sendAlert(s"[${LocalDateTime.now()}] Detected ${noMoreActive.mkString(", ")} no more active!")
+          if noMoreActive.nonEmpty then sendAlert(s"[$currentTime] ${noMoreActive.mkString(", ")} no more active!")
           current
-        case Failure(es) => context.alertSystem.notify(es.getMessage); Seq()
+        case Failure(es) => sendAlert(es.getMessage); Seq()
 
-      private def sendAlert(message: String)(using Async): Unit =
+      private def sendAlert(message: String)(using Async): Unit = Future:
         context.alertSystem.notify(message)
         context.dashboard.alertNotified(message)
+
+      private def currentTime: String =
+        val currentTime = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        currentTime.format(formatter)

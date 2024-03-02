@@ -19,33 +19,27 @@ internal class GitHubAnalyzerByChannels(private val provider: GitHubRepositoryPr
         }
     }
 
-    private fun CoroutineScope.analyzeAll(
-        organizationName: String,
-        repositories: List<Repository>,
-    ): Channel<RepositoryReport> {
-        val channel = Channel<RepositoryReport>()
-        repositories.map {
-            launch {
-                val contributors = async { provider.contributorsOf(organizationName, it.name).getOrThrow() }
-                val release = provider.lastReleaseOf(organizationName, it.name).getOrThrow()
-                channel.send(RepositoryReport(it.name, it.issues, it.stars, contributors.await(), release))
+    private fun CoroutineScope.analyzeAll(organizationName: String, repositories: List<Repository>) =
+        Channel<RepositoryReport>().also {
+            repositories.map { r ->
+                launch {
+                    val contributors = async { provider.contributorsOf(organizationName, r.name).getOrThrow() }
+                    val release = provider.lastReleaseOf(organizationName, r.name).getOrThrow()
+                    it.send(RepositoryReport(r.name, r.issues, r.stars, contributors.await(), release))
+                }
             }
         }
-        return channel
-    }
 
     private suspend fun collectResults(
         resultsChannel: Channel<RepositoryReport>,
         expectedResults: Int,
         updateResults: suspend (RepositoryReport) -> Unit,
-    ): Set<RepositoryReport> {
-        var allReports = emptySet<RepositoryReport>()
+    ) = mutableSetOf<RepositoryReport>().apply {
         repeat(expectedResults) {
             val report = resultsChannel.receive()
-            allReports = allReports + report
+            add(report)
             updateResults(report)
         }
         resultsChannel.close()
-        return allReports
     }
 }
