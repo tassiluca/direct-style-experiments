@@ -13,15 +13,15 @@ Smart Hub example # Idea: in an IoT context, a multitude of sensors of different
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/04-rears/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-03-02T00:32:44+01:00" />
+<meta property="article:modified_time" content="2024-03-03T17:08:43+01:00" />
 
 <title>04 Rears | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
 <link rel="icon" href="/PPS-22-direct-style-experiments/favicon.png" >
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/04-rears/">
-<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.8b7763bbc30daa9cc9cbd3d86de971ec810e418df80eaa491030277c990276b4.css" integrity="sha256-i3dju8MNqpzJy9PYbelx7IEOQY34DqpJEDAnfJkCdrQ=" crossorigin="anonymous">
+<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.3079c33e46bf5b308bdbfa938bf6043ba270f82b73e2ada92c1da0aacca6df5c.css" integrity="sha256-MHnDPka/WzCL2/qTi/YEO6Jw&#43;Ctz4q2pLB2gqsym31w=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.aa1702a5fef24c7590e55738cf4697bd9f940a0088f5bd15e4534e96a88b6afa.js" integrity="sha256-qhcCpf7yTHWQ5Vc4z0aXvZ&#43;UCgCI9b0V5FNOlqiLavo=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.0d888a7c5858c9e15841faf2a955ff561fb23faeb8c84c172a4128c0e967cc1d.js" integrity="sha256-DYiKfFhYyeFYQfryqVX/Vh&#43;yP664yEwXKkEowOlnzB0=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -244,16 +244,67 @@ classDiagram
 <blockquote class="book-hint warning">
   <p><strong>Warning</strong>: when <code>Task</code>s are scheduled with <code>RepeatUntil*</code>:</p>
 <ul>
-<li>if the body of a <code>Task</code> <strong>does not</strong> perform any suspending operations the <code>Async.blocking</code> blocks the current thread until the task is completed (either successfully or not);</li>
+<li>if the body of a <code>Task</code> <strong>does not</strong> perform any suspending operations the <code>Async.blocking</code> <strong>blocks</strong> the current thread <strong>until the task is completed</strong> (either successfully or not);</li>
 <li>if the body of a <code>Task</code> <strong>does</strong> perform suspending operations then the <code>Async.blocking</code> <strong>does not wait for the task to complete</strong> and its context is left as soon as reaches its end.
 <ul>
-<li>If we want to wait for the task completion, we need to use explicitly <code>Async.await</code> (or <code>awaitResult</code>)</li>
-<li><strong>Cons</strong>: depending on the content of the block, the behavior is different! This is <em>error-prone</em> and very difficult to debug with high-order functions:</li>
+<li>If we want to wait for the task completion, it&rsquo;s the client&rsquo;s responsibility to explicitly <code>Async.await</code> (or <code>awaitResult</code>)</li>
+<li><strong>Cons</strong>: depending on the content of the block, the behavior is different! This is <em>error-prone</em>!</li>
 </ul>
 </li>
 </ul>
 </blockquote>
 
+<blockquote class="book-hint warning">
+  <strong>Warning</strong>: with high-order functions if we deal with repeated <code>Tasks</code>, in some cases an <code>Async ?=&gt;</code> label is required to not suspend the whole block, even if a suspending operation is performed: the code below <em>behaves differently</em> if the <code>Async ?=&gt;</code> label is present or not. Note: this may be an unintended effect of the library, yet to be investigated.
+</blockquote>
+
+<div class="book-columns flex flex-wrap">
+
+  <div class="flex-even markdown-inner">
+    <p>In this case despite we suspend to wait for the timer tick, the <code>Async.blocking</code> blocks until the <code>Task</code> is completed.</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">.</span>blocking<span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">val</span> <span style="color:#d20f39">timer</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#df8e1d">Timer</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#fe640b">2.</span>seconds<span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#df8e1d">Future</span><span style="color:#04a5e5;font-weight:bold">(</span>timer<span style="color:#04a5e5;font-weight:bold">.</span>run<span style="color:#04a5e5;font-weight:bold">())</span>
+</span></span><span style="display:flex;"><span>  produce <span style="color:#04a5e5;font-weight:bold">{</span> <span style="color:#8839ef">_</span> <span style="color:#8839ef">=&gt;</span>
+</span></span><span style="display:flex;"><span>    timer<span style="color:#04a5e5;font-weight:bold">.</span>src<span style="color:#04a5e5;font-weight:bold">.</span>awaitResult <span style="color:#9ca0b0;font-style:italic">// SUSPENDING OPERATION!
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>    <span style="color:#9ca0b0;font-style:italic">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>  <span style="color:#04a5e5;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">def</span> produce<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>
+</span></span><span style="display:flex;"><span>  action<span style="color:#8839ef">:</span> <span style="color:#d20f39">SendableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=&gt;</span> <span style="color:#df8e1d">Try</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Unit</span><span style="color:#04a5e5;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">ReadableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">val</span> channel <span style="color:#8839ef">=</span> <span style="color:#df8e1d">UnboundedChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]()</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#df8e1d">Task</span> <span style="color:#04a5e5;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    action<span style="color:#04a5e5;font-weight:bold">(</span>channel<span style="color:#04a5e5;font-weight:bold">.</span>asSendable<span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#04a5e5;font-weight:bold">}.</span>schedule<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">RepeatUntilFailure</span><span style="color:#04a5e5;font-weight:bold">()).</span>run
+</span></span><span style="display:flex;"><span>  channel<span style="color:#04a5e5;font-weight:bold">.</span>asReadable
+</span></span></code></pre></div>
+  </div>
+
+  <div class="flex-even markdown-inner">
+    <p>With the <code>Async ?=&gt;</code> label, the <code>Async.blocking</code> does not wait for the <code>Task</code> to complete!</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">.</span>blocking<span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">val</span> <span style="color:#d20f39">timer</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#df8e1d">Timer</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#fe640b">2.</span>seconds<span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#df8e1d">Future</span><span style="color:#04a5e5;font-weight:bold">(</span>timer<span style="color:#04a5e5;font-weight:bold">.</span>run<span style="color:#04a5e5;font-weight:bold">())</span>
+</span></span><span style="display:flex;"><span>  produceWithLabel <span style="color:#04a5e5;font-weight:bold">{</span> <span style="color:#8839ef">_</span> <span style="color:#8839ef">=&gt;</span>
+</span></span><span style="display:flex;"><span>    timer<span style="color:#04a5e5;font-weight:bold">.</span>src<span style="color:#04a5e5;font-weight:bold">.</span>awaitResult <span style="color:#9ca0b0;font-style:italic">// SUSPENDING OPERATION!
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>    <span style="color:#9ca0b0;font-style:italic">// ....
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>  <span style="color:#04a5e5;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">def</span> produceWithLabel<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>
+</span></span><span style="display:flex;"><span>  action<span style="color:#8839ef">:</span> <span style="color:#d20f39">Async</span> <span style="color:#d20f39">?=&gt;</span> <span style="color:#d20f39">SendableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=&gt;</span> <span style="color:#df8e1d">Try</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Unit</span><span style="color:#04a5e5;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">ReadableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">val</span> channel <span style="color:#8839ef">=</span> <span style="color:#df8e1d">UnboundedChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]()</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#df8e1d">Task</span> <span style="color:#04a5e5;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    action<span style="color:#04a5e5;font-weight:bold">(</span>channel<span style="color:#04a5e5;font-weight:bold">.</span>asSendable<span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#04a5e5;font-weight:bold">}.</span>schedule<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">RepeatUntilFailure</span><span style="color:#04a5e5;font-weight:bold">()).</span>run
+</span></span><span style="display:flex;"><span>  channel<span style="color:#04a5e5;font-weight:bold">.</span>asReadable
+</span></span></code></pre></div>
+  </div>
+
+</div>
+
+<p>[<a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/TasksTest.scala#L27">See the tests for more details.</a>]</p>
 <ul>
 <li>To avoid the <em>work-stealing behavior</em> of channel consumers, a <code>ChannelMultiplexer</code> can be used. It is essentially a container of <code>Readable</code> and <code>Sendable</code> channels, which can be added and removed at runtime. Internally, it is implemented with a thread that continuously races the set of publishers and once it reads a value, it forwards it to each subscriber channel.
 <ul>
@@ -296,7 +347,8 @@ classDiagram
 <li>A <code>Producer</code> is a runnable entity, programmed with a <code>Task</code>, producing items on a channel. It exposes the <code>publishingChannel</code> method, which returns a <code>ReadableChannel</code> through which interested consumers can read produced items.</li>
 <li>A <code>Consumer</code> is a runnable entity devoted to consuming data from a channel, exposed by the <code>listeningChannel</code> method which returns a <code>SendableChannel</code> to send items to.
 <ul>
-<li>It can be made stateful by mixing it with the <code>State</code> trait, allowing it to keep track of its state, which is updated with the result of the reaction.</li>
+<li>It can be made stateful by mixing it with the <code>State</code> trait, allowing it to keep track of its state, which is updated every time with the result of the <code>react</code>ion (i.e. its return type).</li>
+<li><strong>Warning</strong>: like in an event-loop, the <code>react</code>ion logic should not perform long-lasting blocking operation, otherwise, the whole system will not react to new events.</li>
 </ul>
 </li>
 </ul>
@@ -314,8 +366,7 @@ classDiagram
 </span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** A consumer, i.e. a runnable entity devoted to consume data from a channel. */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">Consumer</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span>, <span style="color:#d20f39">S</span><span style="color:#04a5e5;font-weight:bold">]</span><span style="color:#df8e1d">:</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** The [[SendableChannel]] to send items to, where consumers 
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">    * listen for new items. */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** The [[SendableChannel]] to send items to, where the consumer listen for new items. */</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">val</span> listeningChannel<span style="color:#8839ef">:</span> <span style="color:#d20f39">SendableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Try</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span><span style="color:#04a5e5;font-weight:bold">]]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">UnboundedChannel</span><span style="color:#04a5e5;font-weight:bold">()</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** @return a runnable [[Task]]. */</span>
@@ -326,9 +377,9 @@ classDiagram
 </span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** The suspendable reaction triggered upon a new read of an item succeeds. */</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">protected</span> <span style="color:#8839ef">def</span> react<span style="color:#04a5e5;font-weight:bold">(</span>e<span style="color:#8839ef">:</span> <span style="color:#d20f39">Try</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span><span style="color:#04a5e5;font-weight:bold">])(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">S</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** A mixin to make consumer stateful. 
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * Its state is updated with the result of the [[react]]ion.
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * Initially its state is set to [[initialValue]]. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** A mixin to make consumer stateful. Its state is updated with the result
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * of the [[react]]ion. Initially its state is set to [[initialValue]].
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">State</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span>, <span style="color:#d20f39">S</span><span style="color:#04a5e5;font-weight:bold">](</span>initialValue<span style="color:#8839ef">:</span> <span style="color:#d20f39">S</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#d20f39">consumer:</span> <span style="color:#d20f39">Consumer</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span>, <span style="color:#d20f39">S</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=&gt;</span>
 </span></span><span style="display:flex;"><span>
@@ -372,8 +423,8 @@ classDiagram
 </span></span><span style="display:flex;"><span>      consumer<span style="color:#04a5e5;font-weight:bold">.</span>listeningChannel<span style="color:#04a5e5;font-weight:bold">.</span>send<span style="color:#04a5e5;font-weight:bold">(</span>transformedChannel<span style="color:#04a5e5;font-weight:bold">.</span>read<span style="color:#04a5e5;font-weight:bold">().</span>tryable<span style="color:#04a5e5;font-weight:bold">)</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#04a5e5;font-weight:bold">}.</span>schedule<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">RepeatUntilFailure</span><span style="color:#04a5e5;font-weight:bold">())</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** Creates a runnable [[Task]] forwarding the items read from the [[publisherChannel]] 
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">    * to all consumers&#39; channels, after having it transformed with the given [[transformation]].
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** Creates a runnable [[Task]] forwarding the items read from the [[publisherChannel]] to 
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">    * all consumers&#39; channels, after having it transformed with the given [[transformation]].
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">    */</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">def</span> oneToMany<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span>, <span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">](</span>
 </span></span><span style="display:flex;"><span>      publisherChannel<span style="color:#8839ef">:</span> <span style="color:#d20f39">ReadableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">],</span>
@@ -387,105 +438,124 @@ classDiagram
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>    <span style="color:#9ca0b0;font-style:italic">// executed needs to block to continue publishing publisher&#39;s events 
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>    <span style="color:#9ca0b0;font-style:italic">// towards the consumer by means of the multiplexer.
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>    multiplexer<span style="color:#04a5e5;font-weight:bold">.</span>run<span style="color:#04a5e5;font-weight:bold">()</span>
-</span></span></code></pre></div><p>The following <code>PipelineTransformation</code>s have been implemented (inspired by Rx):</p>
-<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** @return a new [[ReadableChannel]] whose elements passes the 
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * given predicate [[p]].
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * Example:
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * &lt;pre&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * ----1---2-------3----4---5--6----7---8---9---10---&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *     |   |       |    |   |  |    |   |   |   |
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * ----V---V-------V----V---V--V----V---V---V---V-----
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *                 filter(_ % 2 == 0)
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * --------|--------------|------|-------|---------|--
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *         V              V      V       V         V
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * --------2--------------4------6-------8--------10-&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * &lt;/pre&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  */</span>
+</span></span></code></pre></div><p>The following <code>PipelineTransformation</code>s have been implemented (inspired by Rx). <a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/rears/src/test/scala/io/github/tassiLuca/rears/PipelineTransformationsTest.scala">Tests in <code>rears</code> submodule</a> provide the necessary examples to understand their behavior.</p>
+<h4 id="filter">
+  Filter
+  <a class="anchor" href="#filter">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** @return a new [[ReadableChannel]] whose elements passes the given predicate [[p]].  */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">def</span> filter<span style="color:#04a5e5;font-weight:bold">(</span>p<span style="color:#8839ef">:</span> <span style="color:#d20f39">T</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span> <span style="color:#df8e1d">Boolean</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">ReadableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span>
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** @return a new [[ReadableChannel]] whose elements are emitted only after
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *         the given [[timespan]] has elapsed since the last emission.
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * Example:
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * &lt;pre&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * ----1---2-------3----4---5--6-----7---8---9---10--&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *     |   |       |    |   |  |     |   |   |   |
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *     V   V       V    V   V  V     V   V   V   V
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * T----------T----------T----------T----------T------
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *                 debounce(1 second)
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * ---------------------------------------------------
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *        |         |         |      |             |
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *        V         V         V      V             V
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * -------1---------3---------5------7------------10-&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * &lt;/pre&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  */</span>
+</span></span></code></pre></div><p>Example:</p>
+<pre tabindex="0"><code>----1---2-------3----4---5--6----7---8---9---10---&gt;
+    |   |       |    |   |  |    |   |   |   |
+----V---V-------V----V---V--V----V---V---V---V-----
+                filter(_ % 2 == 0)
+--------|--------------|------|-------|---------|--
+        V              V      V       V         V
+--------2--------------4------6-------8--------10-&gt;
+</code></pre><h4 id="map">
+  Map
+  <a class="anchor" href="#map">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** @return a new [[ReadableChannel]] whose values are transformed accordingly to the given function [[f]]. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">def</span> map<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">](</span>f<span style="color:#8839ef">:</span> <span style="color:#d20f39">T</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span> R<span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">ReadableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">]</span>
+</span></span></code></pre></div><p>Example:</p>
+<pre tabindex="0"><code>----1---2-------3----4---5------6--------7--------&gt;
+    |   |       |    |   |      |        |
+----V---V-------V----V---V------V--------V---------
+                map(x =&gt; x * x)
+----|---|-------|----|---|------|--------|---------
+    V   V       V    V   V      V        V
+----1---4-------9----16--25-----36-------49-------&gt;
+</code></pre><h4 id="debounce">
+  Debounce
+  <a class="anchor" href="#debounce">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** @return a new [[ReadableChannel]] whose elements are emitted only after
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *         the given [[timespan]] has elapsed since the last emission. */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">def</span> debounce<span style="color:#04a5e5;font-weight:bold">(</span>timespan<span style="color:#8839ef">:</span> <span style="color:#d20f39">Duration</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">ReadableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span>
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** Groups the items emitted by a [[ReadableChannel]] according to the given [[keySelector]].
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * @return key-value pairs, where the keys are the set of results obtained 
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *         from applying the [[keySelector]] coupled to a new [[ReadableChannel]] 
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *         where only items belonging to that grouping are emitted.
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * Example:
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * &lt;pre&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * ----1---2-3--4---5--6---&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *     |   | |  |   |  |
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *     V   V V  V   V  V
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * -------------------------
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *    groupBy(_ % 2 == 0)
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * -------------------------
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *      \     \
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * ----false--true------------&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *        1     2
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *         \     \
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *          \     4
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *           3     \
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *            \     \
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *             5     6
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * &lt;/pre&gt;
+</span></span></code></pre></div><p>Example:</p>
+<pre tabindex="0"><code>----1---2-------3----4---5--6-----7---8---9---10--&gt;
+    |   |       |    |   |  |     |   |   |   |
+    V   V       V    V   V  V     V   V   V   V
+T----------T----------T----------T----------T------
+                debounce(1 second)
+---------------------------------------------------
+       |         |         |      |             |
+       V         V         V      V             V
+-------1---------3---------5------7------------10-&gt;
+</code></pre><h4 id="groupby">
+  GroupBy
+  <a class="anchor" href="#groupby">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** Groups the items emitted by a [[ReadableChannel]] according to the given [[keySelector]].
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * @return key-value pairs, where the keys are the set of results obtained from applying the
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *         [[keySelector]] coupled to a new [[ReadableChannel]] where only items belonging to
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *         that grouping are emitted.
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">def</span> groupBy<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">K</span><span style="color:#04a5e5;font-weight:bold">](</span>keySelector<span style="color:#8839ef">:</span> <span style="color:#d20f39">T</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span> K<span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">ReadableChannel</span><span style="color:#04a5e5;font-weight:bold">[(</span><span style="color:#d20f39">K</span>, <span style="color:#d20f39">ReadableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">])]</span>
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** @return a new [[ReadableChannel]] whose elements are buffered in a [[List]] 
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *         of size [[n]]. If [[timespan]] duration is elapsed since last read
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *         the list is emitted with collected elements until that moment.
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * Example:
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * &lt;pre&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * ----1---2-3----4---5--6----7---8-------&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *     |   | |    |   |  |    |   |
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *     V   V V    V   V  V    V   V
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * ----------------------------------------
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *   buffer(n = 3, timespan = 5 seconds)
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * ----------------------------------T-----
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *         |           |             |
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *         V           V             V
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * ----[1, 2, 3]---[4, 5, 6]------[7, 8]--&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * &lt;/pre&gt;
+</span></span></code></pre></div><p>Example:</p>
+<pre tabindex="0"><code>----1---2-3--4---5--6---&gt;
+    |   | |  |   |  |
+    V   V V  V   V  V
+-------------------------
+       groupBy(_ % 2)
+-------------------------
+     \     \
+----false--true------------&gt;
+       1     2
+        \     \
+         \     4
+          3     \
+           \     \
+            5     6
+</code></pre><h4 id="buffer">
+  Buffer
+  <a class="anchor" href="#buffer">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** @return a new [[ReadableChannel]] whose elements are buffered in a [[List]] of size [[n]].
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *         If [[timespan]] duration is elapsed since last read the list is emitted
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *         with collected elements until that moment (default: 5 seconds).
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">def</span> buffer<span style="color:#04a5e5;font-weight:bold">(</span>n<span style="color:#8839ef">:</span> <span style="color:#d20f39">Int</span><span style="color:#04a5e5;font-weight:bold">,</span> timespan<span style="color:#8839ef">:</span> <span style="color:#d20f39">Duration</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#fe640b">5</span> seconds<span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">ReadableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">List</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]]</span>
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** @return a new [[ReadableChannel]] whose elements are buffered in a [[List]] 
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *         of items if emitted within [[timespan]] duration after the first one.
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * Example:
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * &lt;pre&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * ----1---2-3-4---5--6--7----------8-----------&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *     |   | | |   |  |  |          |
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *     V   V V V   V  V  V          V
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * ----|--------T--|--------T-------|--------T---
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *      buffer(timespan = 5 seconds)
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * -------------|-----------|----------------|---
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *              V           V                V
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * -------[1, 2, 3, 4]--[5, 6, 7]-----------[8]-&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * &lt;/pre&gt;  .
+</span></span></code></pre></div><p>Example:</p>
+<pre tabindex="0"><code>----1---2-3----4---5--6----7---8--------&gt;
+    |   | |    |   |  |    |   |
+    V   V V    V   V  V    V   V
+|---------|-----------|------------T-----
+   buffer(n = 3, timespan = 5 seconds)
+|---------|-----------|------------|-----
+          V           V            V
+------[1, 2, 3]---[4, 5, 6]------[7, 8]-&gt;
+</code></pre><h4 id="bufferwithin">
+  BufferWithin
+  <a class="anchor" href="#bufferwithin">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** @return a new [[ReadableChannel]] whose elements are buffered in a [[List]] of items
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  *         if emitted within [[timespan]] duration after the first one (default: 5 seconds).
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">def</span> bufferWithin<span style="color:#04a5e5;font-weight:bold">(</span>timespan<span style="color:#8839ef">:</span> <span style="color:#d20f39">Duration</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#fe640b">5</span> seconds<span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">ReadableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">List</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]]</span>
-</span></span></code></pre></div><p>Going back to the example here is presented a schema summarizing the flows of data and the transformations to apply to them. This is just a simple example used to test the proposed abstractions.</p>
-<p><img src="../../res/img/rears.svg" alt="system design of the example" /></p>
+</span></span></code></pre></div><p>Example:</p>
+<pre tabindex="0"><code>----1---2-3-4---5--6--7----------8-----------&gt;
+    |   | | |   |  |  |          |
+    V   V V V   V  V  V          V
+----|--------T--|--------T-------|--------T---
+         buffer(timespan = 5 seconds)
+-------------|-----------|----------------|---
+             V           V                V
+-------[1, 2, 3, 4]--[5, 6, 7]-----------[8]-&gt;
+</code></pre><p>Going back to the example here is presented a schema summarizing the flows of data and the transformations to apply to them. This is just a simple example used to test the proposed abstractions.</p>
+<figure class="center"><img src="../../res/img/rears.svg"
+         alt="System design of the example" width="90%"/>
+</figure>
+
+<p>[<a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/smart-hub-direct/src/main/scala/io/github/tassiLuca/hub">Sources are available in <code>smart-hub-direct</code> submodule</a>].</p>
 <ul>
 <li>
 <p>For simplicity, two types of sensors are considered: <code>TemperatureSensor</code> and <code>LuminositySensor</code>;</p>
 </li>
 <li>
-<p>sensors send data to the smart hub <code>SensorSource</code> (e.g. via MQTT)</p>
+<p>sensors send data to the smart hub <code>SensorSource</code> (e.g., in a real case scenario, via MQTT)</p>
 <ul>
 <li>
 <p><code>SensorSource</code> is a <code>Producer[SensorEvent]</code>, publishing received data on its <code>publishingChannel</code>:</p>
@@ -503,7 +573,7 @@ classDiagram
 <p>three main controllers:</p>
 <ul>
 <li>
-<p><code>SensorHealthChecker</code> is a stateful consumer of generic <code>SensorEvent</code>s that checks the health of the sensors, sending alerts in case of malfunctioning. Here the state is necessary to determine the health of the sensors, based on the last detection:</p>
+<p><code>SensorHealthChecker</code> is a stateful consumer of generic <code>SensorEvent</code>s that checks the health of the sensors, sending alerts in case of malfunctioning. Here the state is necessary to determine the health of the sensors, based on the last detection.</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** A [[state]]ful consumer of [[SensorEvent]] detecting possible 
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * malfunctioning and keeping track of last known active sensing units.
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  */</span>
@@ -511,25 +581,25 @@ classDiagram
 </span></span></code></pre></div></li>
 <li>
 <p>The <code>Thermostat</code> is a stateful consumer of temperature entries, taking care of controlling the heating system. The fact the thermostat keeps track of the last average detection could be useful to a ReSTful API, for example.</p>
-<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** A [[state]]ful consumer of [[TemperatureEntry]]s in charge 
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * of controlling the heater and keeping track of the last 
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * detection average temperature.
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** A [[state]]ful consumer of [[TemperatureEntry]]s in charge of controlling
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * the heater and keeping track of the last detected average temperature.
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">Thermostat</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">extends</span> <span style="color:#df8e1d">Consumer</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Seq</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">TemperatureEntry</span><span style="color:#04a5e5;font-weight:bold">]</span>, <span style="color:#d20f39">Option</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Temperature</span><span style="color:#04a5e5;font-weight:bold">]]</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">with</span> <span style="color:#df8e1d">State</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Seq</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">TemperatureEntry</span><span style="color:#04a5e5;font-weight:bold">]</span>, <span style="color:#d20f39">Option</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Temperature</span><span style="color:#04a5e5;font-weight:bold">]]</span><span style="color:#8839ef">:</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">val</span> <span style="color:#d20f39">scheduler:</span> <span style="color:#d20f39">ThermostatScheduler</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">val</span> <span style="color:#d20f39">scheduler:</span> <span style="color:#d20f39">T</span>
 </span></span></code></pre></div></li>
 <li>
-<p><code>LightingSystem</code> is a basic consumer of luminosity entries, taking care of controlling the lighting system;</p>
-<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">LightingSystem</span> <span style="color:#8839ef">extends</span> <span style="color:#df8e1d">Consumer</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Seq</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">LuminosityEntry</span><span style="color:#04a5e5;font-weight:bold">]</span>, <span style="color:#d20f39">Unit</span><span style="color:#04a5e5;font-weight:bold">]</span>
+<p><code>LightingSystem</code> is a basic consumer (non-stateful) of luminosity entries, taking care of controlling the lighting system.</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** A consumer of [[LuminosityEntry]], in charge of controlling the lighting system. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">LightingSystem</span> <span style="color:#8839ef">extends</span> <span style="color:#df8e1d">Consumer</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Seq</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">LuminosityEntry</span><span style="color:#04a5e5;font-weight:bold">]</span>, <span style="color:#d20f39">Unit</span><span style="color:#04a5e5;font-weight:bold">]</span>
 </span></span></code></pre></div></li>
 </ul>
 <p>Each of these controllers reacts to the data received based on their logic and their actual state to accomplish a specific task.
 For example:</p>
 <ul>
 <li>
-<p>the sensor checker sends alerts whether, compared with the previous survey, it did not receive data from some sensor:</p>
+<p>the sensor checker sends alerts whether, compared with the previous detection, it did not receive data from some sensors:</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">override</span> <span style="color:#8839ef">protected</span> <span style="color:#8839ef">def</span> react<span style="color:#04a5e5;font-weight:bold">(</span>e<span style="color:#8839ef">:</span> <span style="color:#d20f39">Try</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Seq</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span><span style="color:#04a5e5;font-weight:bold">]])(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Seq</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> e <span style="color:#8839ef">match</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Success</span><span style="color:#04a5e5;font-weight:bold">(</span>current<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">val</span> noMoreActive <span style="color:#8839ef">=</span> state<span style="color:#04a5e5;font-weight:bold">.</span>map<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#8839ef">_</span><span style="color:#04a5e5;font-weight:bold">.</span>name<span style="color:#04a5e5;font-weight:bold">).</span>toSet <span style="color:#04a5e5;font-weight:bold">--</span> current<span style="color:#04a5e5;font-weight:bold">.</span>map<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#8839ef">_</span><span style="color:#04a5e5;font-weight:bold">.</span>name<span style="color:#04a5e5;font-weight:bold">).</span>toSet
@@ -574,7 +644,6 @@ For example:</p>
 </span></span><span style="display:flex;"><span>  <span style="color:#04a5e5;font-weight:bold">).</span>run
 </span></span></code></pre></div></li>
 </ul>
-<p>[<a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/smart-hub-direct/src/main/scala/io/github/tassiLuca/hub">Sources are available here</a>].</p>
 <p>To produce a testable version of this example, a simulated source of sensor data has been created, backed to a GUI, through which the user can simulate the behavior of the sensors.
 The example is runnable via:</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./gradlew smart-hub-direct:run
@@ -598,11 +667,56 @@ Despite their names including <code>flow</code>, which we&rsquo;ve seen are cold
 </li>
 <li><code>StateFlow</code> is an extension of the <code>SharedFlow</code>: it is a hot flow that maintains a single value representing a state, holding one value at a time. It operates as a conflated flow, meaning that when a new value is emitted, it replaces the previous value and is immediately sent to new collectors
 <ul>
-<li>this type of flow is beneficial for maintaining a single source of truth for a state and automatically updating all collectors with the latest state.</li>
+<li>this type of flow is beneficial for maintaining a single source of truth for a state and automatically updating all collectors with the latest state (for example in ViewModels in Android applications)</li>
 </ul>
 </li>
 </ul>
-<h2 id="conclusions">
+<p>In our example, <code>SharedFlow</code> is used to model the flow of sensor data:</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#8839ef">interface</span> <span style="color:#df8e1d">SensorSource</span>&lt;<span style="color:#8839ef">out</span> E : SensorEvent&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** The flow of sensor events. */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">val</span> <span style="color:#fe640b">sensorEvents</span>: SharedFlow&lt;E&gt;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Like all flows, they have all the kinds of operators presented in the previous example. Despite this, they do not support, at the moment, all the operators that Rx offers, like <code>debounce</code>, <code>groupBy</code>, etc&hellip; (even if some PR are open to adding them in the framework).</p>
+<p>For this reason, the consumer of events has been implemented manually, using a loop that, every <code>samplingWindow</code> time, reacts to the data received, updating the state of the system.
+By the way, if this solution appears to be less elegant, since <code>Flow</code>s are, de facto, the porting of Rx&rsquo;s <code>Observable's</code> into the Coroutines world, <a href="https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-rx2/">libraries exists to convert them to <code>Observable</code> and vice versa</a>.
+This could offer (in some cases and where necessary) a way to use the full power of Rx operator, if needed.</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** A consumer of sensor events. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">interface</span> <span style="color:#df8e1d">SensorSourceConsumer</span>&lt;<span style="color:#8839ef">in</span> E : SensorEvent, <span style="color:#8839ef">out</span> S&gt; {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** The current state of the source consumer. */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">val</span> <span style="color:#fe640b">state</span>: S
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Reacts to a sensor event. */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">suspend</span> <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">react</span>(e: E)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** A scheduled consumer of sensor events. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">interface</span> <span style="color:#df8e1d">ScheduledConsumer</span>&lt;<span style="color:#8839ef">in</span> E : SensorEvent, <span style="color:#8839ef">out</span> S&gt; : SensorSourceConsumer&lt;E, S&gt;, CoroutineScope {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** The interval period. */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">val</span> <span style="color:#fe640b">samplingWindow</span>: Duration
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** The update logic of the consumer. */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">suspend</span> <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">update</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Runs the consumer scheduler. */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">run</span>() = launch {
+</span></span><span style="display:flex;"><span>        <span style="color:#8839ef">while</span> (<span style="color:#8839ef">true</span>) {
+</span></span><span style="display:flex;"><span>            update()
+</span></span><span style="display:flex;"><span>            delay(samplingWindow)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The managers just take care of collecting the data and forwarding it to the appropriate consumer. For example, the <code>ThermostatManager</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#8839ef">suspend</span> <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">run</span>(sensorSource: Flow&lt;TemperatureEntry&gt;) {
+</span></span><span style="display:flex;"><span>    thermostat.run()
+</span></span><span style="display:flex;"><span>    temperatureSensorsChecker.run()
+</span></span><span style="display:flex;"><span>    sensorSource.collect {
+</span></span><span style="display:flex;"><span>        thermostat.react(<span style="color:#8839ef">it</span>)
+</span></span><span style="display:flex;"><span>        temperatureSensorsChecker.react(<span style="color:#8839ef">it</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="conclusions">
   Conclusions
   <a class="anchor" href="#conclusions">#</a>
 </h2>
@@ -615,9 +729,9 @@ Despite their names including <code>flow</code>, which we&rsquo;ve seen are cold
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/4e8ac99d8ae7175c0758425b18558169842eb67d" title='Last modified by Luca Tassinari | March 1, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/64e4647beed9310bc26e1c7cf1d76558455dcd0f" title='Last modified by Luca Tassinari | March 3, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>March 1, 2024</span>
+      <span>March 3, 2024</span>
     </a>
   </div>
 

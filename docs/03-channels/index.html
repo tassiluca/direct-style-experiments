@@ -13,15 +13,15 @@ classDiagram class `SendableChannel[-T]` { &lt;&lt; trait &gt;&gt; &#43;sendSour
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/03-channels/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-03-02T00:32:44+01:00" />
+<meta property="article:modified_time" content="2024-03-03T17:08:43+01:00" />
 
 <title>03 Channels | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
 <link rel="icon" href="/PPS-22-direct-style-experiments/favicon.png" >
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/03-channels/">
-<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.8b7763bbc30daa9cc9cbd3d86de971ec810e418df80eaa491030277c990276b4.css" integrity="sha256-i3dju8MNqpzJy9PYbelx7IEOQY34DqpJEDAnfJkCdrQ=" crossorigin="anonymous">
+<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.3079c33e46bf5b308bdbfa938bf6043ba270f82b73e2ada92c1da0aacca6df5c.css" integrity="sha256-MHnDPka/WzCL2/qTi/YEO6Jw&#43;Ctz4q2pLB2gqsym31w=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.aa1702a5fef24c7590e55738cf4697bd9f940a0088f5bd15e4534e96a88b6afa.js" integrity="sha256-qhcCpf7yTHWQ5Vc4z0aXvZ&#43;UCgCI9b0V5FNOlqiLavo=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.0d888a7c5858c9e15841faf2a955ff561fb23faeb8c84c172a4128c0e967cc1d.js" integrity="sha256-DYiKfFhYyeFYQfryqVX/Vh&#43;yP664yEwXKkEowOlnzB0=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -187,6 +187,10 @@ https://github.com/alex-shpak/hugo-book
 </h1>
 <p>The fourth, yet not mentioned, abstraction of both Kotlin Coroutines and Scala Gears is the <strong>channel</strong>.
 Channels represent the <strong>primitive communication and coordination means</strong> to exchange <code>Future</code> (or coroutines in the case of Kotlin) results. They are, at least conceptually, very similar to a queue where it is possible to send (and receive) data &ndash; basically, exploiting the <em><strong>producer-consumer</strong></em> pattern.</p>
+<figure class="center"><img src="../../res/img/channel.svg"
+         alt="Channel"/>
+</figure>
+
 
 
 <script src="/PPS-22-direct-style-experiments/mermaid.min.js"></script>
@@ -235,8 +239,11 @@ classDiagram
 </p>
 
 <p>The channel is defined through three distinct interfaces: <code>SendableChannel[-T]</code>, <code>ReadableChannel[+T]</code> and <code>Channel[T]</code>, where the latter extends from both <code>SendableChannel</code> and <code>ReadableChannel</code>. Typically, a <code>Channel</code> is created and a <code>SendableChannel</code> and <code>ReadableChannel</code> instances are respectively provided to the producer and the consumer, restricting their access to it. The same, almost identical, design is present also in Kotlin Coroutines where <code>SendChannel</code> and <code>ReceiveChannel</code> take over, respectively, the Gears <code>SendableChannel</code> and <code>ReadableChannel</code>.</p>
-<p>Moreover, <code>Channel</code> inherits from <code>java.io.Closable</code>, making them closable objects: once closed, they raise <code>ChannelClosedException</code> when attempting to write to them and immediately return a <code>Left(Closed)</code> when attempting to read from them, preventing the consumer from finishing reading all the values sent on the channel before its closing.
-This is not the case for Kotlin Coroutines where closing a channel indicates that no more values are coming, but doesn&rsquo;t prevent consuming already sent values. Moreover, in Kotlin is possible to use a regular for loop to receive elements from a channel (blocking the coroutine):</p>
+<blockquote class="book-hint warning">
+  <code>Channel</code> inherits from <code>java.io.Closable</code>, making them closable objects: once closed, they raise <code>ChannelClosedException</code> when attempting to write to them and immediately return a <code>Left(Closed)</code> when attempting to read from them, preventing the consumer from finishing reading all the values sent on the channel before its closing.
+This is not the case for Kotlin Coroutines where closing a channel indicates that no more values are coming, but doesn&rsquo;t prevent consuming already sent values. Moreover, in Kotlin is possible to use a regular for loop to receive elements from a channel (blocking the coroutine):
+</blockquote>
+
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#8839ef">val</span> <span style="color:#fe640b">channel</span> = Channel&lt;Int&gt;()
 </span></span><span style="display:flex;"><span>launch {
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">for</span> (x <span style="color:#8839ef">in</span> <span style="color:#fe640b">1.</span>.<span style="color:#fe640b">5</span>) channel.send(x * x)
@@ -244,47 +251,148 @@ This is not the case for Kotlin Coroutines where closing a channel indicates tha
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>}
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">for</span> (y <span style="color:#8839ef">in</span> channel) println(y) <span style="color:#9ca0b0;font-style:italic">// blocks until channel is closed
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>println(<span style="color:#40a02b">&#34;Done!&#34;</span>)
-</span></span></code></pre></div><p>A similar behavior can be achieved also in Gears pimping the framework with the concept of <code>Terminable</code> channel. After all, closing a channel in coroutines is a matter of sending a special token to it, allowing stop the iteration as soon as this token is received.</p>
-<p><code>TBD</code></p>
-<p>Three types of channels exist:</p>
+</span></span></code></pre></div><blockquote class="book-hint info">
+  Similar behavior can be achieved also in Gears extending the framework with the concept of <strong><code>Terminable</code></strong> channel. After all, closing a channel in coroutines is a matter of sending a special token to it, allowing stop the iteration as soon as this token is received.
+</blockquote>
+
+<p>[<a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/main/scala/io/github/tassiLuca/pimping/TerminableChannel.scala">The full implementation can be found in <code>commons</code> submodule</a>.]</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** A token to be sent to a channel to signal that it has been terminated. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">case</span> <span style="color:#8839ef">object</span> <span style="color:#df8e1d">Terminated</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">type</span> <span style="color:#d20f39">Terminated</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#df8e1d">Terminated</span><span style="color:#04a5e5;font-weight:bold">.</span><span style="color:#8839ef">type</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#d20f39">/**</span> <span style="color:#d20f39">A</span> <span style="color:#d20f39">union</span> <span style="color:#8839ef">type</span> <span style="color:#d20f39">of</span> <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]]</span> and <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">Terminated</span><span style="color:#04a5e5;font-weight:bold">]].</span> <span style="color:#04a5e5;font-weight:bold">*/</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">type</span> <span style="color:#d20f39">Terminable</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> T <span style="color:#04a5e5;font-weight:bold">|</span> <span style="color:#df8e1d">Terminated</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** Exception being raised by [[TerminableChannel.send()]] on terminated [[TerminableChannel]]. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">class</span> <span style="color:#df8e1d">ChannelTerminatedException</span> <span style="color:#8839ef">extends</span> <span style="color:#df8e1d">Exception</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** A [[Channel]] that can be terminated, signalling no more items will be sent,
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * still allowing to consumer to read pending values.
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * Trying to `send` values after its termination arise a [[ChannelTerminatedException]].
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * When one consumer reads the [[Terminated]] token, the channel is closed. Any subsequent
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * read will return `Left(Channel.Closed`.
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#df8e1d">extends</span> <span style="color:#df8e1d">Channel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Terminable</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]]</span><span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">def</span> <span style="color:#d20f39">terminate</span><span style="color:#04a5e5;font-weight:bold">()(</span><span style="color:#d20f39">using</span> <span style="color:#d20f39">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#d20f39">:</span> <span style="color:#d20f39">Unit</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">object</span> <span style="color:#df8e1d">TerminableChannel</span><span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">/**</span> <span style="color:#d20f39">Creates</span> <span style="color:#d20f39">a</span> <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">]]</span> backed to <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">SyncChannel</span><span style="color:#04a5e5;font-weight:bold">]].</span> <span style="color:#04a5e5;font-weight:bold">*/</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">def</span> ofSync<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T:</span> <span style="color:#d20f39">ClassTag</span><span style="color:#04a5e5;font-weight:bold">]</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">TerminableChannelImpl</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">SyncChannel</span><span style="color:#04a5e5;font-weight:bold">())</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** Creates a [[TerminableChannel]] backed to [[BufferedChannel]]. */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">def</span> ofBuffered<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T:</span> <span style="color:#d20f39">ClassTag</span><span style="color:#04a5e5;font-weight:bold">]</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">TerminableChannelImpl</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">BufferedChannel</span><span style="color:#04a5e5;font-weight:bold">())</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** Creates a [[TerminableChannel]] backed to an [[UnboundedChannel]]. */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">def</span> ofUnbounded<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T:</span> <span style="color:#d20f39">ClassTag</span><span style="color:#04a5e5;font-weight:bold">]</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">TerminableChannelImpl</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">UnboundedChannel</span><span style="color:#04a5e5;font-weight:bold">())</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">private</span> <span style="color:#8839ef">class</span> <span style="color:#df8e1d">TerminableChannelImpl</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T:</span> <span style="color:#d20f39">ClassTag</span><span style="color:#04a5e5;font-weight:bold">](</span>c<span style="color:#8839ef">:</span> <span style="color:#d20f39">Channel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Terminable</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]])</span> <span style="color:#8839ef">extends</span> <span style="color:#df8e1d">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span><span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#d20f39">opaque</span> <span style="color:#8839ef">type</span> <span style="color:#d20f39">Res</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Channel.Closed</span>, <span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">private</span> <span style="color:#8839ef">var</span> <span style="color:#df8e1d">_terminated</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Boolean</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#fe640b">false</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">override</span> <span style="color:#8839ef">val</span> readSource<span style="color:#8839ef">:</span> <span style="color:#d20f39">Async.Source</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Res</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Terminable</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]]]</span> <span style="color:#8839ef">=</span>
+</span></span><span style="display:flex;"><span>      c<span style="color:#04a5e5;font-weight:bold">.</span>readSource<span style="color:#04a5e5;font-weight:bold">.</span>transformValuesWith <span style="color:#04a5e5;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Right</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Terminated</span><span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> c<span style="color:#04a5e5;font-weight:bold">.</span>close<span style="color:#04a5e5;font-weight:bold">();</span> <span style="color:#df8e1d">Left</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Channel</span><span style="color:#04a5e5;font-weight:bold">.</span><span style="color:#df8e1d">Closed</span><span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#8839ef">case</span> v <span style="color:#8839ef">@</span> <span style="color:#8839ef">_</span> <span style="color:#8839ef">=&gt;</span> v
+</span></span><span style="display:flex;"><span>      <span style="color:#04a5e5;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">override</span> <span style="color:#8839ef">def</span> sendSource<span style="color:#04a5e5;font-weight:bold">(</span>x<span style="color:#8839ef">:</span> <span style="color:#d20f39">Terminable</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">])</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Async.Source</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Res</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Unit</span><span style="color:#04a5e5;font-weight:bold">]]</span> <span style="color:#8839ef">=</span>
+</span></span><span style="display:flex;"><span>      synchronized<span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#d20f39">if</span> <span style="color:#8839ef">_</span><span style="color:#d20f39">terminated</span> <span style="color:#d20f39">then</span> <span style="color:#d20f39">throw</span> <span style="color:#d20f39">ChannelTerminatedException</span><span style="color:#04a5e5;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#d20f39">else</span> <span style="color:#d20f39">if</span> <span style="color:#d20f39">x</span> <span style="color:#04a5e5;font-weight:bold">=</span><span style="color:#8839ef">=</span> <span style="color:#df8e1d">Terminated</span> then <span style="color:#df8e1d">_terminated</span> <span style="color:#8839ef">=</span> <span style="color:#fe640b">true</span>
+</span></span><span style="display:flex;"><span>      c<span style="color:#04a5e5;font-weight:bold">.</span>sendSource<span style="color:#04a5e5;font-weight:bold">(</span>x<span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">override</span> <span style="color:#8839ef">def</span> close<span style="color:#04a5e5;font-weight:bold">()</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Unit</span> <span style="color:#04a5e5;font-weight:bold">=</span> c<span style="color:#04a5e5;font-weight:bold">.</span>close<span style="color:#04a5e5;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">override</span> <span style="color:#8839ef">def</span> terminate<span style="color:#04a5e5;font-weight:bold">()(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Unit</span> <span style="color:#04a5e5;font-weight:bold">=</span> uninterruptible<span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#d20f39">try</span> <span style="color:#d20f39">send</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#d20f39">Terminated</span><span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#9ca0b0;font-style:italic">// It happens only at the close of the channel due to the call (inside Gears 
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>      <span style="color:#9ca0b0;font-style:italic">// library) of a CellBuf.dequeue(channels.scala:239) which is empty!
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>      <span style="color:#8839ef">catch</span> <span style="color:#8839ef">case</span> e<span style="color:#8839ef">:</span> <span style="color:#d20f39">NoSuchElementException</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span> e<span style="color:#04a5e5;font-weight:bold">.</span>printStackTrace<span style="color:#04a5e5;font-weight:bold">()</span>
+</span></span></code></pre></div><p>Now, also in Scala with Gears is possible to write:</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">val</span> channel <span style="color:#8839ef">=</span> <span style="color:#df8e1d">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">.</span>ofUnbounded<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Int</span><span style="color:#04a5e5;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#df8e1d">Future</span><span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#d20f39">0</span> <span style="color:#d20f39">until</span> <span style="color:#d20f39">10</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#d20f39">.foreach</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#d20f39">x</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span> <span style="color:#d20f39">channel.send</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#d20f39">x</span><span style="color:#04a5e5;font-weight:bold">))</span>
+</span></span><span style="display:flex;"><span>  channel<span style="color:#04a5e5;font-weight:bold">.</span>terminate<span style="color:#04a5e5;font-weight:bold">()</span> <span style="color:#9ca0b0;font-style:italic">// we&#39;re done sending
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>channel<span style="color:#04a5e5;font-weight:bold">.</span>foreach<span style="color:#04a5e5;font-weight:bold">(</span>println<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#8839ef">_</span><span style="color:#04a5e5;font-weight:bold">))</span> <span style="color:#9ca0b0;font-style:italic">// blocks until channel is closed
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>println<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#40a02b">&#34;Done!&#34;</span><span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span></code></pre></div><p>[<a href="">Other tests can be found in <code>TerminableChannelTest</code></a>.]</p>
+<p>On top of this new abstraction is possible to implement, for example, the <code>foreach</code> and <code>toSeq</code> methods, which can be useful to wait for all the items sent over the channel.</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">object</span> <span style="color:#df8e1d">TerminableChannelOps</span><span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">extension</span> <span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T:</span> <span style="color:#d20f39">ClassTag</span><span style="color:#04a5e5;font-weight:bold">](</span>c<span style="color:#8839ef">:</span> <span style="color:#d20f39">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">])</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Blocking consume channel items, executing the given function [[f]] for each element. */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1e66f5;font-weight:bold">@tailrec</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> foreach<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">U</span><span style="color:#04a5e5;font-weight:bold">](</span>f<span style="color:#8839ef">:</span> <span style="color:#d20f39">T</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span> U<span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Unit</span> <span style="color:#04a5e5;font-weight:bold">=</span> c<span style="color:#04a5e5;font-weight:bold">.</span>read<span style="color:#04a5e5;font-weight:bold">()</span> <span style="color:#8839ef">match</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Left</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Channel</span><span style="color:#04a5e5;font-weight:bold">.</span><span style="color:#df8e1d">Closed</span><span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> <span style="color:#04a5e5;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Right</span><span style="color:#04a5e5;font-weight:bold">(</span>value<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span>
+</span></span><span style="display:flex;"><span>        value <span style="color:#8839ef">match</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Terminated</span> <span style="color:#8839ef">=&gt;</span> <span style="color:#04a5e5;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#8839ef">case</span> v<span style="color:#8839ef">:</span> <span style="color:#d20f39">T</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span> f<span style="color:#04a5e5;font-weight:bold">(</span>v<span style="color:#04a5e5;font-weight:bold">);</span> foreach<span style="color:#04a5e5;font-weight:bold">(</span>f<span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** @return a [[Seq]] containing channel items, after having them read.
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">      * This is a blocking operation! */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> toSeq<span style="color:#04a5e5;font-weight:bold">(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Seq</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#8839ef">var</span> results <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Seq</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]()</span>
+</span></span><span style="display:flex;"><span>      c<span style="color:#04a5e5;font-weight:bold">.</span>foreach<span style="color:#04a5e5;font-weight:bold">(</span>t <span style="color:#8839ef">=&gt;</span> results <span style="color:#8839ef">=</span> results <span style="color:#8839ef">:</span><span style="color:#d20f39">+</span> <span style="color:#d20f39">t</span><span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>      results
+</span></span></code></pre></div><p>Three types of channels exist:</p>
 <ul>
 <li><strong>Synchronous Channels</strong>: links a <code>read</code> request with a <code>send</code> within a <em>rendezvous</em>
+<figure><img src="../../res/img/sync-channel.svg"
+           alt="synchronous channel"/>
+  </figure>
+
 <ul>
 <li><code>send</code> (<code>read</code>) suspend the process until a consumer <code>read</code> (<code>send</code>) the value;</li>
 <li>in Kotlin they are called <strong>Rendezvous Channels</strong>.</li>
 </ul>
 </li>
 <li><strong>Buffered Channels</strong>: a version of a channel with an internal buffer of fixed size
+<figure><img src="../../res/img/buffered-channel.svg"
+           alt="buffered channel"/>
+  </figure>
+
 <ul>
 <li><code>send</code> suspend the producer process if it is full; otherwise, it appends the value to the buffer, returning immediately;</li>
 <li><code>read</code> suspend if the channel is empty, waiting for a new value.</li>
 </ul>
 </li>
 <li><strong>Unbounded Channels</strong>: a version of a channel with an unbounded buffer
+<figure><img src="../../res/img/unbounded-channel.svg"
+           alt="unbounded channel"/>
+  </figure>
+
 <ul>
 <li>if the programs run out of memory you can get an out-of-memory exception!</li>
 <li>in Kotlin they are called <strong>Unlimited Channel</strong>.</li>
 </ul>
 </li>
 </ul>
-<p>Kotlin offers also a fourth type: the <strong>Conflated Channel</strong>, where every new element sent to it overwirtes the previously sent one, <em>never blocking</em>, so that the receiver gets always the latest element.</p>
+<p>Kotlin offers also a fourth type: the <strong>Conflated Channel</strong>, where every new element sent to it overwrites the previously sent one, <em>never blocking</em>, so that the receiver gets always the latest element.</p>
 <p>Concerning channel behavior, it is important to note that:</p>
-<blockquote>
-<ol>
+<blockquote class="book-hint info">
+  <ol>
 <li>Multiple producers can send data to the channel, as well as multiple consumers can read them, <strong>but each element is handled only <em>once</em>, by <em>one</em> of them</strong>, i.e. consumers <strong>compete</strong> with each other for sent values;</li>
-<li>Once the element is handled, it is immediately removed from the channel;</li>
-<li>Fairness: <code>TBD</code></li>
+<li>Once the element is handled, it is immediately removed from the channel;
+<ul>
+<li>Channels are fair: <code>send</code> and <code>read</code> operations to channels are fair w.r.t. the order of their invocations from multiple threads (they are served in first-in first-out order).</li>
+</ul>
+</li>
 </ol>
+
 </blockquote>
+
 <h2 id="analyzer-example">
   Analyzer example
   <a class="anchor" href="#analyzer-example">#</a>
 </h2>
 <p>To show channels in action an example has been prepared:</p>
-<blockquote class="book-hint info">
-  <strong>Idea</strong>: we want to realize a little asynchronous library allowing clients to collect the common statistics about repositories (issues, stars, last release) and contributors of a given GitHub organization.
+<blockquote>
+<p><strong>Idea</strong>: we want to realize a little asynchronous library allowing clients to collect the common statistics about repositories (issues, stars, last release) and contributors of a given GitHub organization.</p>
 </blockquote>
-
 <p>The final result is a GUI application that, given an organization name, starts the analysis of all its repositories,
 listing their information along with all their contributors as soon as they are computed. Moreover, the application allows the user to cancel the current computation at any point in time.</p>
 <p><img src="../../res/img/analyzer-e2e.png" alt="expected result" /></p>
@@ -375,7 +483,7 @@ Moreover, this interface is library-agnostic, meaning that it doesn&rsquo;t depe
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>      <span style="color:#04a5e5;font-weight:bold">.</span>map<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#8839ef">_</span><span style="color:#04a5e5;font-weight:bold">.</span>performAnalysis<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#9ca0b0;font-style:italic">// 2
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>    <span style="color:#8839ef">val</span> collector <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Collector</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">RepositoryReport</span><span style="color:#04a5e5;font-weight:bold">](</span>reposInfo<span style="color:#04a5e5;font-weight:bold">.</span>toList<span style="color:#04a5e5;font-weight:bold">*)</span> <span style="color:#9ca0b0;font-style:italic">// 3
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>    <span style="color:#8839ef">for</span> <span style="color:#8839ef">_</span> <span style="color:#8839ef">&lt;-</span> reposInfo<span style="color:#04a5e5;font-weight:bold">.</span>indices <span style="color:#8839ef">do</span> 
-</span></span><span style="display:flex;"><span>      updateResults<span style="color:#04a5e5;font-weight:bold">(</span>collector<span style="color:#04a5e5;font-weight:bold">.</span>results<span style="color:#04a5e5;font-weight:bold">.</span>read<span style="color:#04a5e5;font-weight:bold">().</span>toTry<span style="color:#04a5e5;font-weight:bold">().?.</span>awaitResult<span style="color:#04a5e5;font-weight:bold">.?)</span> <span style="color:#9ca0b0;font-style:italic">// 4
+</span></span><span style="display:flex;"><span>      updateResults<span style="color:#04a5e5;font-weight:bold">(</span>collector<span style="color:#04a5e5;font-weight:bold">.</span>results<span style="color:#04a5e5;font-weight:bold">.</span>read<span style="color:#04a5e5;font-weight:bold">().?.</span>awaitResult<span style="color:#04a5e5;font-weight:bold">.?)</span> <span style="color:#9ca0b0;font-style:italic">// 4
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>    reposInfo<span style="color:#04a5e5;font-weight:bold">.</span>map<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#8839ef">_</span><span style="color:#04a5e5;font-weight:bold">.</span>await<span style="color:#04a5e5;font-weight:bold">)</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  extension <span style="color:#04a5e5;font-weight:bold">(</span>r<span style="color:#8839ef">:</span> <span style="color:#d20f39">Repository</span><span style="color:#04a5e5;font-weight:bold">)</span>
@@ -422,7 +530,7 @@ It would be desirable, instead, to start performing the analysis as soon as one 
 </span></span><span style="display:flex;"><span>    collectedRepositories <span style="color:#8839ef">=</span> collectedRepositories <span style="color:#04a5e5;font-weight:bold">+</span> <span style="color:#fe640b">1</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#04a5e5;font-weight:bold">}</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#fe640b">0</span> until collectedRepositories<span style="color:#04a5e5;font-weight:bold">).</span>map <span style="color:#04a5e5;font-weight:bold">{</span> <span style="color:#8839ef">_</span> <span style="color:#8839ef">=&gt;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">val</span> report <span style="color:#8839ef">=</span> collector<span style="color:#04a5e5;font-weight:bold">.</span>results<span style="color:#04a5e5;font-weight:bold">.</span>read<span style="color:#04a5e5;font-weight:bold">().</span>toTry<span style="color:#04a5e5;font-weight:bold">().?.</span>awaitResult<span style="color:#04a5e5;font-weight:bold">.?</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">val</span> report <span style="color:#8839ef">=</span> collector<span style="color:#04a5e5;font-weight:bold">.</span>results<span style="color:#04a5e5;font-weight:bold">.</span>read<span style="color:#04a5e5;font-weight:bold">().?.</span>awaitResult<span style="color:#04a5e5;font-weight:bold">.?</span>
 </span></span><span style="display:flex;"><span>    updateResults<span style="color:#04a5e5;font-weight:bold">(</span>report<span style="color:#04a5e5;font-weight:bold">)</span>
 </span></span><span style="display:flex;"><span>    report
 </span></span><span style="display:flex;"><span>  <span style="color:#04a5e5;font-weight:bold">}</span>
@@ -484,6 +592,42 @@ It would be desirable, instead, to start performing the analysis as soon as one 
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>Where, instead, Kotlin Coroutines shine is the implementation of the <code>RepositoryService</code> for supporting incremental retrieval of repositories and contributors.</p>
 <p>Indeed, Kotlin has a built-in support for cold streams, called <strong><code>Flow</code></strong>. They are very similar (actually they have been inspired to) cold observable in reactive programming, and <strong>they are the perfect fit for functions that need to return a stream of asynchronously computed values</strong>.</p>
+<p>They offer several useful operators for transforming and combining them functionally. An overview of the most common operators is provided in the following section.</p>
+<div class="book-columns flex flex-wrap">
+
+  <div class="flex-even markdown-inner">
+    <p><em>Intermediate flow operators</em>:</p>
+<ul>
+<li><code>filter</code>/<code>filterNot</code> to filter out unwanted values;</li>
+<li><code>map</code> to transform the values;</li>
+<li><code>transform</code> to implement more complex transformations (possibly involving suspending operations);</li>
+<li><code>take</code> and its variant (e.g. <code>takeWhile</code>) to limit the number of values emitted;</li>
+<li><code>onEach</code> to perform side-effects for each value emitted;</li>
+</ul>
+  </div>
+
+  <div class="flex-even markdown-inner">
+    <p><em>Terminal flow operators</em>:</p>
+<ul>
+<li>conversions to various collection types, like <code>toList</code>, <code>toSet</code>;</li>
+<li><code>first</code>, <code>last</code>, <code>single</code> to retrieve the first, last or single value emitted;</li>
+<li><code>reduce</code> to perform some kind of operation over all items, reducing them to a single one;</li>
+<li><code>fold</code> to perform some kind of operation over all items, starting from an initial value, accumulating a result;</li>
+</ul>
+  </div>
+
+  <div class="flex-even markdown-inner">
+    <p><em>Flows combining operators</em>:</p>
+<ul>
+<li><code>merge</code> to combine multiple flows into a single one, emitting values from all of them;</li>
+<li><code>zip</code></li>
+<li><code>combine</code></li>
+<li><code>flatMapConcat</code> / <code>flatMapMerge</code> to transform each value into a flow and then concatenate/merge them;</li>
+</ul>
+  </div>
+
+</div>
+
 <p>The <code>RepositoryService</code> has been here extended with new methods, <code>flowing***</code>, returning a <code>Flow</code> of results:</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#8839ef">class</span> <span style="color:#df8e1d">GitHubRepositoryProvider</span> {
 </span></span><span style="display:flex;"><span>
@@ -532,9 +676,9 @@ It would be desirable, instead, to start performing the analysis as soon as one 
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/4e8ac99d8ae7175c0758425b18558169842eb67d" title='Last modified by Luca Tassinari | March 1, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/64e4647beed9310bc26e1c7cf1d76558455dcd0f" title='Last modified by Luca Tassinari | March 3, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>March 1, 2024</span>
+      <span>March 3, 2024</span>
     </a>
   </div>
 
