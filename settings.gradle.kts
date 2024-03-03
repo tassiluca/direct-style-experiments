@@ -9,7 +9,7 @@ gitHooks {
     commitMsg {
         conventionalCommits()
     }
-    createHooks()
+    createHooks(overwriteExisting = true)
 }
 
 rootProject.name = "direct-style-experiments"
