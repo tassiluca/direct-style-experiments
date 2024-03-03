@@ -27,7 +27,7 @@ class FlowTest extends AnyFunSpec with Matchers:
         emitted shouldBe Seq.range(0, items).map(Success(_))
     }
 
-    it("Calling collect multiple times should emit the same values") {
+    it("calling collect multiple times should emit the same values") {
       var emitted1: Seq[Try[Item]] = Seq()
       var emitted2: Seq[Try[Item]] = Seq()
       Async.blocking:
@@ -38,7 +38,7 @@ class FlowTest extends AnyFunSpec with Matchers:
         emitted2 shouldBe Seq.range(0, items).map(Success(_))
     }
 
-    it("If collected concurrently by multiple Futures should emit the same values") {
+    it("if collected concurrently by multiple Futures should emit the same values as well") {
       Async.blocking:
         var emitted1: Seq[Try[Item]] = Seq()
         var emitted2: Seq[Try[Item]] = Seq()
@@ -52,13 +52,23 @@ class FlowTest extends AnyFunSpec with Matchers:
         emitted2 shouldBe Seq.range(0, items).map(Success(_))
     }
 
-    it("what happens when failing?") {
+    it("when throwing an exception inside the `body` should emit a failure and stop flowing") {
       Async.blocking:
-        var error: Try[Item] = null
-        val flow = failingFlow
-        flow.collect { value => error = value }
-        error.isFailure shouldBe true
-        intercept[IllegalStateException](error.get)
+        var emitted: Seq[Try[Item]] = Seq()
+        failingFlow.collect { value => emitted = emitted :+ value }
+        emitted.size shouldBe 1
+        emitted.head.isFailure shouldBe true
+        intercept[IllegalStateException](emitted.head.get)
+    }
+
+    it("should work as well with futures") {
+      Async.blocking:
+        var fs = Seq[Future[Int]]()
+        simpleFlow.collect { v =>
+          fs = fs :+ Future { AsyncOperations.sleep(2_000); v.getOrElse(-1) }
+        }
+        fs.awaitAll
+        fs.map(_.await) shouldBe Seq.range(0, items)
     }
   }
 
@@ -67,3 +77,4 @@ class FlowTest extends AnyFunSpec with Matchers:
 
   def failingFlow(using Async): Flow[Item] = Flow:
     throw IllegalStateException("Something went wrong...")
+    summon[FlowCollector[Item]].emit(10)
