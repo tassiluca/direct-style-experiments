@@ -18,7 +18,7 @@ To show these weaknesses in practice, a simple example of the core of a web serv
 
 {{< hint info >}}
 
-**Idea**: develop a very simple (mocked) service which allows to retrieve and store from a repository blog posts, performing checks on the content and author before the actual storage.
+**Idea**: develop a very simple (mocked) service that allows retrieving and storing from a repository blog posts, performing checks on the content and author before the actual storage.
 
 {{< /hint >}}
 
@@ -29,14 +29,14 @@ The example has been implemented using:
   - the abstractions offered by _gears_;
   - _Kotlin coroutines_.
 
-The example (and every subsequent one) is organized in three gradle submodules:
+The example (and every subsequent one) is organized into three Gradle submodules:
 
-- `blog-ws-commons` contains code which has been reused for both the monadic and direct versions;
+- `blog-ws-commons` contains code that has been reused for both the monadic and direct versions;
 - a submodule `blog-ws-monadic` with the monadic Scala style and `blog-ws-direct` for the direct versions, both in Kotlin with _coroutines_ and in Scala with _gears_.
 
 ### Structure
 
-The domain is modelled using abstract data types in a common `PostsModel` trait:
+The domain is modeled using abstract data types in a common `PostsModel` trait:
 
 ```scala
 trait PostsModel:
@@ -73,7 +73,7 @@ Both must be designed in an async way.
 
 ### Current monadic `Future`
 
-The interface of the repository and services component of the monadic version are presented hereafter and their complete implementation is available [here]().
+The interface of the repository and services component of the monadic version are presented hereafter and their complete implementation is available [here](https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/blog-ws-monadic/src/main/scala/io/github/tassiLuca/dse/blog).
 
 ```scala
 /** The component exposing blog posts repositories. */
@@ -118,12 +118,12 @@ trait PostsServiceComponent:
     def all()(using ExecutionContext): Future[LazyList[Post]]
 ```
 
-All the exposed functions, since they are asynchronous, returns an instance of `Future[T]` and requires to be called in a scope where a given instance of the `ExecutionContext` is declared.
+All the exposed functions, since they are asynchronous, return an instance of `Future[T]` and require to be called in a scope where a given instance of the `ExecutionContext` is declared.
 
-What's important to delve into is the implementation of the service, and, more precisely, of the `create` method. As already mentioned, before saving the post two checks needs to be performed:
+What's important to delve into is the implementation of the service, and, more precisely, of the `create` method. As already mentioned, before saving the post two checks need to be performed:
 
-1. the post author must have permissions to publish a post and their information needs to be retrieved (supposing they are managed by another microservice);
-2. the content of the post is analyzed in order to prevent the storage and publication of offensive or non-appropriate contents.
+1. the post author must have permission to publish a post and their information needs to be retrieved (supposing they are managed by another microservice);
+2. the content of the post is analyzed in order to prevent the storage and publication of offensive or inappropriate content.
 
 Since these operations are independent from each other they can be spawned and run in parallel.
 
@@ -148,8 +148,8 @@ private def save(authorId: AuthorId, title: Title, body: Body)(using ExecutionCo
 
 This implementation shows the limits of the current monadic `Future` mechanism:
 
-- if we want to achieve the serialization of future's  execution we need to compose them using the `flatMap`, like in the `create` function: first the check on the post existence is performed, and only if it successful and another post with same title doesn't exists the `save` function is started
-  - as a consequence, if we want two futures to run in parallel we have to spawn them before the `for-yield`, as in the `save` function, or use Future's Applicative, like `mapN` provided by Cats. This is error prone and could lead to unexpected sequentiality for non experted Scala programmers, like this:
+- if we want to achieve the serialization of futures execution we need to compose them using the `flatMap`, like in the `create` function: first, the check on the post existence is performed, and only if it is successful and another post with same title doesn't exist the `save` function is started
+  - as a consequence, if we want two futures to run in parallel we have to spawn them before the `for-yield`, as in the `save` function, or use Future's Applicative, like `mapN` provided by Cats. This is error-prone and could lead to unexpected sequentiality, like this:
 
     ```scala
       for
@@ -160,21 +160,21 @@ This implementation shows the limits of the current monadic `Future` mechanism:
       yield post
     ```
 
-- since the publication of a post can be performed only if both of these checks succeeds, it is desirable that, whenever one of the two fails, the other get cancelled.
-Unfortunately, currently, Scala Futures are not cancellable and provides no _structured concurrency_ mechanism.
+- since the publication of a post can be performed only if both of these checks succeed, it is desirable that, whenever one of the two fails, the other gets canceled.
+Unfortunately, currently, Scala Futures are not cancellable and provide no _structured concurrency_ mechanism.
 
-- moreover, they lack referential transparency, i.e. future starts running when they are defined. This mean that passing a reference to a future is not the same as passing the referenced expression.
+- moreover, they lack referential transparency, i.e. future starts running when they are defined. This means that passing a reference to a future is not the same as passing the referenced expression.
 
 ### Direct style: Scala version with `gears`
 
-The API of the gears library is presented hereafter and is built on top of four main abstractions, three of them are here presented (the fourth in next example):
+The API of the gears library is presented hereafter and is built on top of four main abstractions, three of which are here presented (the fourth in the next example):
 
-1. **`Async`** context is **"a capability that allows a computation to suspend while waiting for the result of an async source"**. Code that has access to an instance of the `Async` trait is said to be in an async context and it is able to suspend its execution. Usually it is provided via `given` instances.
+1. **`Async`** context is **"a capability that allows a computation to suspend while waiting for the result of an async source"**. Code that has access to an instance of the `Async` trait is said to be in an async context and can suspend its execution. Usually, it is provided via `given` instances.
    - A common way to obtain an `Async` instance is to use an `Async.blocking`.
 2. **`Async.Source`** modeling an asynchronous source of data that can be polled or awaited by suspending the computation, as well as composed using combinator functions.
-3. **`Future`s** are the primary (in fact, the only) active elements that encapsulate a control flow that, eventually, will deliver a result (either a computed or a failure value that contains an exception). Since `Future`s are `Async.Source`s they can be awaited and combined with other `Future`s, suspending their execution.
-   - **`Task`s** are the abstraction created to create delayed `Future`s, responding to the lack of referential transparency problem. They takes the body of a `Future` as an argument; its `run` method converts that body to a `Future`, starting its execution.
-   - **`Promise`s** allows to define `Future`'s result value externally, instead of executing a specific body of code.
+3. **`Future`s** are the primary (in fact, the only) active elements that encapsulate a control flow that, eventually, will deliver a result (either a computed or a failure value that contains an exception). Since `Future`s are `Async.Source`s can be awaited and combined with other `Future`s, suspending their execution.
+   - **`Task`s** are the abstraction created to create delayed `Future`s, responding to the lack of referential transparency problem. They take the body of a `Future` as an argument; its `run` method converts that body to a `Future`, starting its execution.
+   - **`Promise`s** allow us to define `Future`'s result value externally, instead of executing a specific body of code.
 
 {{< mermaid >}}
 classDiagram
@@ -194,7 +194,7 @@ classDiagram
     +poll() Option[T]
     +onComplete(k: Listener[T])
     +dropListener(k: Listener[T])
-    +awaitResult() T
+    +awaitResult()(using Async) T
   }
 
   Async *--> `Async.Source[+T]`
@@ -224,6 +224,7 @@ classDiagram
   }
   class `Promise[+T]` {
     << trait >>
+    +apply() Promise[T]$
     +asFuture Future[T]
     +complete(result: Try[T])
   }
@@ -309,7 +310,7 @@ trait PostsServiceComponent:
     def all()(using Async): Either[String, LazyList[Post]]
 ```
 
-As you can see, `Future`s are gone and the return type it's just the result of their intent (expressed with `Either` to return a meaningful message in case of failure). The fact they are _suspendable_ is expressed by means of the `Async` context, which is required to invoke those functions.
+As you can see, `Future`s are gone and the return type it's just the result of their intent (expressed with `Either` to return a meaningful message in case of failure). The fact they are _suspendable_ is expressed using the `Async` context, which is required to invoke those functions.
 
 > Key inspiring principle (actually, "stolen" by Kotlin)
 >
@@ -317,22 +318,21 @@ As you can see, `Future`s are gone and the return type it's just the result of t
 
 By default the code is serial. If you want to opt-in concurrency you have to explicitly use a `Future` or `Task` spawning a new control flow that executes asynchronously, allowing the caller to continue its execution.
 
-The other important key feature of the library is the support to **structured concurrency and cancellation mechanisms**:
+The other important key feature of the library is the support for **structured concurrency and cancellation mechanisms**:
 
 - `Future`s are `Cancellable` instances;
   - When you cancel a future using the `cancel()` method, it promptly sets its value to `Failure(CancellationException)`. Additionally, if it's a runnable future, the thread associated with it is interrupted using `Thread.interrupt()`.
-  - to avoid the immediate cancellation, deferring the cancellation after some block is possible using `uninterruptible` function:
+  - to avoid immediate cancellation, deferring the cancellation after some block is possible using `uninterruptible` function:
 
     ```scala
-    val f = Future {
+    val f = Future:
       // this can be interrupted
       uninterruptible:
         // this cannot be interrupted *immediately*
       // this can be interrupted
-    }
     ```
 
-- `Future`s are nestable; it is assured that the lifetime of nested computations is contained within the lifetime of enclosing ones. This is achieved using `CompletionGroup`s, which are cancellable objects themselves and serves as containers for other cancellable objects, that once cancelled, all of its members are cancelled as well.
+- `Future`s are nestable; **the lifetime of nested computations is contained within the lifetime of enclosing ones**. This is achieved using `CompletionGroup`s, which are cancellable objects themselves and serves as containers for other cancellable objects, that once canceled, all of its members are canceled as well.
   - A cancellable object can be included inside the cancellation group of the async context using the `link` method; this is what the [implementation of the `Future` does, under the hood](https://github.com/lampepfl/gears/blob/07989ffdae153b2fe11ac1ece53ce9dd1dbd18ef/shared/src/main/scala/async/futures.scala#L140).
 
 The implementation of the `create` function with direct style in gears looks like this:
@@ -359,10 +359,11 @@ private def verifyContent(title: Title, body: Body): Task[Either[String, PostCon
 Some remarks:
 
 - the `either` boundary have been used to quickly return a `Right[String, Post]` object in case something goes wrong;
-- `authorBy` and `verifyContent` returns referential transparent `Task` instances. Running them, spawns a new `Future` instance;
+- `authorBy` and `verifyContent` returns referential transparent `Task` instances. Running them spawns a new `Future` instance;
 - Thanks to structured concurrency and `zip` combinator we can obtain that if one of the nested two futures fails the enclosing future is cancelled, cancelling also all its unterminated children
   - `zip`: combinator function returning a pair with the results if both `Future`s succeed, otherwise fail with the failure that was returned first.
   - Be aware of the fact to achieve cancellation is necessary to enclose both the content verification and authorization task inside an enclosing `Future`, since the `zip` doesn't provide cancellation mechanism per se. The following code wouldn't work as expected!
+
     ```scala
     val contentVerifier = verifyContent(title, body).run
     val authorizer = authorBy(authorId).run
@@ -381,11 +382,33 @@ Other combinator methods, available on `Future`s instance:
 
 ---
 
-TO FINISH
+### Kotlin Coroutines
 
-tests
+- A **coroutine** in Kotlin is an instance of a *suspendable* computation.
+- Their API is quite similar to the Scala Gears, which has taken inspiration from Kotlin coroutines.
+  | **Scala Gears**            | **Kotlin Coroutines**           |
+  |----------------------------|---------------------------------|
+  | `Async`                    | `CoroutineScope`                |
+  | `Future`                   | `Deferred` / `Job             ` |
+  | `def all()(using Async)`   | `suspend fun all()`             |
 
-kotlin coroutines
+    - `CoroutineContext`: every coroutine must be executed in a coroutine context, including a dispatcher, that determines what thread or threads the coroutine uses for its execution, and the `Job` of the coroutine, which represents a cancellable background piece of work with a life cycle that culminates in its completion.
+      - In the Kotlin Coroutine library, `CoroutineScope` is an interface that can be implemented by any class capable of launching and suspending coroutines.
+
+        ```kotlin
+        public interface CoroutineScope {
+            /**
+            * Returns the context of this scope.
+            */
+            public val coroutineContext: CoroutineContext
+        }
+        ```
+
+      - Several coroutine builders are available, like `launch`, `async`, `runBlocking`, `withContext` which accept an optional `CoroutineContext` parameter that can be used to specify the dispatcher and other context elements.
+
+    - suspending functions are marked with the `suspend` keyword; they can use other suspending functions to suspend the execution of a coroutine.
+
+- Coroutines follow the principle of structured concurrency: `Job`s can be arranged into parent-child hierarchies where cancellation of a parent leads to the immediate cancellation of all its children recursively. Failure of a child with an exception immediately cancels its parent and, consequently, all its other children. 
 
 w.r.t. kotlin coroutines:
 

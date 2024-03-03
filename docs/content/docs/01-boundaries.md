@@ -4,12 +4,14 @@ bookToc: false
 
 # `boundary` & `break`
 
+[[Source code](https://github.com/lampepfl/dotty/blob/3.3.0-RC4/library/src/scala/util/boundary.scala)]
+
 `boundary` & `break` mechanism provides a cleaner alternative to non-local returns:
 
 - `boundary:` is short for `boundary.apply:`
 - the indented code below it is passed as `body` is a context function that is called within `boundary.apply`
   - to `break` an in-scope `given` instance of `Label` is required (i.e. is impossible `break` without an enclosing `boundary`)
-  - Users don't define `Label` instances themselves. Instead, this is done inside the implementation of `boundary.apply` to provide the capability of doing a non-local return [[Source code](https://github.com/lampepfl/dotty/blob/3.3.0-RC4/library/src/scala/util/boundary.scala)]
+  - Users don't define `Label` instances themselves. Instead, this is done inside the implementation of `boundary.apply` to provide the capability of doing a non-local return
     ```scala
     /** Run `body` with freshly generated label as implicit argument. 
       * Catch any breaks associated with that label and return their 
@@ -53,8 +55,6 @@ object optional:
     inline def ?(using label: Label[None.type]): T =
       o.getOrElse(break(None))
 ```
-
-### Rust-like `Result` + `?`
 
 ### `Either` + `?`
 

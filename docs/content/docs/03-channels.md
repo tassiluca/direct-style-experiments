@@ -599,10 +599,9 @@ object FlowOps:
           flow.collect(item => f(item.get).collect(x => collector(Success(x.get))))
 ```
 
-
 ## Conclusions
 
-> - `Channel`s are the basic communication and synchronization primitive for exchanging data between `Future`s/`Coroutines`.
+> - `Channel`s are the basic communication and synchronization primitive for exchanging data between `Future`s/`Coroutine`s.
 >   - Scala Gears support for `Terminable` channels or a review of the closing mechanism should be considered.
 > - The `Flow` abstraction in Kotlin Coroutines is a powerful tool for handling cold streams of data, and it is a perfect fit for functions that need to return a stream of asynchronously computed values **by request**.
 > 
