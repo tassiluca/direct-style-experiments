@@ -33,6 +33,7 @@ class TasksTest extends AnyFunSpec with Matchers {
             i = i + 1
             if i == items then Failure(Error()) else i
           }.schedule(TaskSchedule.RepeatUntilFailure()).run
+          // millis = 0 is the default --------------Ʌ
         i shouldBe 5
       }
 
@@ -75,7 +76,7 @@ class TasksTest extends AnyFunSpec with Matchers {
         it("with Async label leaves immediately the Async context") {
           var consumedItems = 0
           Async.blocking:
-            val timer = Timer(1.seconds)
+            val timer = Timer(2.seconds)
             Future(timer.run())
             produceWithLabel { _ =>
               timer.src.awaitResult

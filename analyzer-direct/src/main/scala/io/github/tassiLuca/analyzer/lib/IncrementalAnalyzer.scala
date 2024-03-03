@@ -1,13 +1,11 @@
 package io.github.tassiLuca.analyzer.lib
 
-import gears.async.Future.MutableCollector
-import gears.async.{Async, Future, Listener, Task}
+import gears.async.{Async, Future, Listener}
 import io.github.tassiLuca.analyzer.commons.lib.{Repository, RepositoryReport}
+import io.github.tassiLuca.boundaries.EitherConversions.given
 import io.github.tassiLuca.boundaries.either
 import io.github.tassiLuca.boundaries.either.?
-import io.github.tassiLuca.boundaries.EitherConversions.given
-import io.github.tassiLuca.pimping.toTry
-import io.github.tassiLuca.pimping.listenerConversion
+import io.github.tassiLuca.pimping.ListenerConversions.given
 import io.github.tassiLuca.pimping.TerminableChannel
 import io.github.tassiLuca.pimping.TerminableChannelOps.foreach
 

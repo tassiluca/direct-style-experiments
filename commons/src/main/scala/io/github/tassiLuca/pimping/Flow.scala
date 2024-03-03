@@ -2,9 +2,8 @@ package io.github.tassiLuca.pimping
 
 import gears.async.{Async, AsyncOperations, Task}
 import io.github.tassiLuca.pimping.TerminableChannelOps.foreach
-
+import io.github.tassiLuca.pimping.ListenerConversions.given
 import java.util.concurrent.Semaphore
-import java.util.concurrent.locks.ReentrantLock
 import scala.compiletime.uninitialized
 import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}

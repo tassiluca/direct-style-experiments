@@ -1,15 +1,20 @@
 package io.github.tassiLuca.rears
 
-import concurrent.duration.{Duration, DurationInt}
 import gears.async.Channel.{Closed, Res}
-import gears.async.default.given
 import gears.async.TaskSchedule.RepeatUntilFailure
+import gears.async.default.given
 import gears.async.{Async, Channel, Future, ReadableChannel, SendableChannel, Task, Timer, UnboundedChannel}
-import scala.language.postfixOps
+import io.github.tassiLuca.pimping.ChannelConversions.given
 
+import scala.concurrent.duration.{Duration, DurationInt}
+import scala.language.postfixOps
+import scala.util.{Failure, Success, Try}
+
+/** Simply, a function that, given in input a [[ReadableChannel]], performs some
+  * kind of transformation, returning, as a result, another [[ReadableChannel]].
+  */
 type PipelineTransformation[T, R] = ReadableChannel[T] => ReadableChannel[R]
 
-// TODO: IMPROVE WITH SRC AND ? IN PLACE OF .toOption?
 extension [T](r: ReadableChannel[T])(using Async)
 
   /** @return a new [[ReadableChannel]] whose elements passes the given predicate [[p]].
@@ -26,7 +31,7 @@ extension [T](r: ReadableChannel[T])(using Async)
     * </pre>
     */
   def filter(p: T => Boolean): ReadableChannel[T] = fromNew[T] { emitter =>
-    val value = r.read().toOption.get
+    val value = r.read().get
     if p(value) then emitter.send(value)
   }
 
@@ -44,7 +49,7 @@ extension [T](r: ReadableChannel[T])(using Async)
     * </pre>
     */
   def map[R](f: T => R): ReadableChannel[R] = fromNew[R] { emitter =>
-    emitter.send(f(r.read().toOption.get))
+    emitter.send(f(r.read().get))
   }
 
   /** @return a new [[ReadableChannel]] whose elements are emitted only after
@@ -66,7 +71,7 @@ extension [T](r: ReadableChannel[T])(using Async)
   def debounce(timespan: Duration): ReadableChannel[T] =
     var lastEmission: Option[Long] = None
     fromNew[T] { emitter =>
-      val value = r.read().toOption.get
+      val value = r.read().get
       val now = System.currentTimeMillis()
       if lastEmission.isEmpty || now - lastEmission.get >= timespan.toMillis then
         emitter.send(value)
@@ -99,7 +104,7 @@ extension [T](r: ReadableChannel[T])(using Async)
   def groupBy[K](keySelector: T => K): ReadableChannel[(K, ReadableChannel[T])] =
     var channels = Map[K, UnboundedChannel[T]]()
     fromNew[(K, UnboundedChannel[T])] { emitter =>
-      val value = r.read().toOption.get
+      val value = r.read().get
       val key = keySelector(value)
       if !channels.contains(key) then
         channels = channels + (key -> UnboundedChannel[T]())
@@ -134,7 +139,7 @@ extension [T](r: ReadableChannel[T])(using Async)
         emitter.send(buffer)
         buffer = List.empty
       else
-        buffer = buffer :+ value._1.asInstanceOf[Either[Closed, T]].toOption.get
+        buffer = buffer :+ value._1.asInstanceOf[Either[Closed, T]].get
         if buffer.size == n then
           emitter.send(buffer)
           buffer = List.empty
@@ -159,12 +164,12 @@ extension [T](r: ReadableChannel[T])(using Async)
     var buffer = List[T]()
     fromNew[List[T]] { emitter =>
       val timer = Timer(timespan)
-      buffer = buffer :+ r.read().toOption.get
+      buffer = buffer :+ r.read().get
       Future { timer.run() }
       val f = Future:
         val tf = Future { timer.src.awaitResult }
         val tr = Task {
-          buffer = buffer :+ r.read().toOption.get
+          buffer = buffer :+ r.read().get
         }.schedule(RepeatUntilFailure()).run
         tr.altWithCancel(tf).awaitResult
       f.awaitResult
@@ -174,13 +179,15 @@ extension [T](r: ReadableChannel[T])(using Async)
     }
 
 // IMPORTANT REMARK: if Async ?=> is omitted the body of the task is intended to be **not**
-// suspendable, leading to the block of the context until the task has failed!
-// See `TasksTest` in root project for more about the task scheduling behavior.
+// suspendable, leading to the block of the context until the task fails!
+// See `TasksTest` in commons tests for more about the task scheduling behavior.
 private def fromNew[T](
     transformation: Async ?=> SendableChannel[T] => Unit,
 )(using Async): ReadableChannel[T] =
   val channel = UnboundedChannel[T]()
   Task {
-    transformation(channel.asSendable)
+    Try(transformation(channel.asSendable)) match
+      case s @ Success(_) => s
+      case f @ Failure(_) => channel.close(); f
   }.schedule(RepeatUntilFailure()).run
   channel.asReadable

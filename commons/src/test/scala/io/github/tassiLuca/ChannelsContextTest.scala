@@ -4,11 +4,11 @@ import gears.async.*
 import gears.async.Channel.Closed
 import gears.async.TaskSchedule.{Every, RepeatUntilFailure}
 import gears.async.default.given
+import io.github.tassiLuca.pimping.asTry
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import io.github.tassiLuca.pimping.toTry
 
-import scala.util.{Failure, Random, Try}
+import scala.util.{Random, Try}
 
 class ChannelsContextTest extends AnyFunSpec with Matchers {
 
@@ -35,7 +35,7 @@ class ChannelsContextTest extends AnyFunSpec with Matchers {
         Future:
           for _ <- 0 to itemsProduced do channel.send(Future { AsyncOperations.sleep(5_000); 0 })
         for _ <- 0 to itemsProduced do
-          val result = channel.read().toTry().flatMap(_.awaitResult)
+          val result = channel.read().asTry.flatMap(_.awaitResult)
           result.isFailure shouldBe true
           intercept[CancellationException](result.get)
     }
@@ -47,8 +47,7 @@ class ChannelsContextTest extends AnyFunSpec with Matchers {
           Future { AsyncOperations.sleep(5_000); 0 }
             .onComplete(Listener((_, f) => channel.send(f.asInstanceOf[Future[Item]])))
         for _ <- 0 to itemsProduced do
-          val result = channel.read().toTry().flatMap(_.awaitResult)
-          println(result)
+          val result = channel.read().asTry.flatMap(_.awaitResult)
           result.isSuccess shouldBe true
           result.get shouldBe 0
     }

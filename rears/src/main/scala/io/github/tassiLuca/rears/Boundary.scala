@@ -19,7 +19,7 @@ trait Producer[E]:
 /** A consumer, i.e. a runnable entity devoted to consume data from a channel. */
 trait Consumer[E, S]:
 
-  /** The [[SendableChannel]] to send items to, where consumers listen for new items. */
+  /** The [[SendableChannel]] to send items to, where the consumer listen for new items. */
   val listeningChannel: SendableChannel[Try[E]] = UnboundedChannel()
 
   /** @return a runnable [[Task]]. */

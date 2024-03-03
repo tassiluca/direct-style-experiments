@@ -95,6 +95,18 @@ class PipelineTransformationsTest extends AnyFunSpec with Matchers {
     }
   }
 
+  describe("Transforming a channel already closed should determine the closing of the new channel") {
+    Async.blocking:
+      val c = UnboundedChannel[Int]()
+      c.close()
+      c.filter(_ % 2 == 0).read() shouldBe Left(Channel.Closed)
+      c.map(_ * 2).read() shouldBe Left(Channel.Closed)
+      c.debounce(1 second).read() shouldBe Left(Channel.Closed)
+      c.buffer(2).read() shouldBe Left(Channel.Closed)
+      c.bufferWithin(2 seconds).read() shouldBe Left(Channel.Closed)
+      c.groupBy(_ % 2 == 0).read() shouldBe Left(Channel.Closed)
+  }
+
   def producer(using Async): ReadableChannel[Int] =
     val channel = UnboundedChannel[Int]()
     Future { for i <- 1 to 10 do channel.send(i) }

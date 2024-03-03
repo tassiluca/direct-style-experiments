@@ -2,7 +2,7 @@ package io.github.tassiLuca.rears
 
 import gears.async.TaskSchedule.RepeatUntilFailure
 import gears.async.{Async, ChannelMultiplexer, ReadableChannel, Task}
-import io.github.tassiLuca.pimping.toTry
+import io.github.tassiLuca.pimping.ChannelConversions.given
 
 object Controller:
 
@@ -16,7 +16,7 @@ object Controller:
   ): Task[Unit] =
     val transformedChannel = transformation(publisherChannel)
     Task {
-      consumer.listeningChannel.send(transformedChannel.read().toTry())
+      consumer.listeningChannel.send(transformedChannel.read())
     }.schedule(RepeatUntilFailure())
 
   /** Creates a runnable [[Task]] forwarding the items read from the [[publisherChannel]] to
