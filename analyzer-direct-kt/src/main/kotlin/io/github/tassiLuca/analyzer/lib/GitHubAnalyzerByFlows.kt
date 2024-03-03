@@ -32,7 +32,6 @@ internal class GitHubAnalyzerByFlows(private val provider: GitHubRepositoryProvi
         }
     }
 
-    @Suppress("InjectDispatcher")
     private fun analyzeAll(repositories: List<Repository>): Flow<RepositoryReport> = channelFlow {
         repositories.forEach { repository ->
             launch {
@@ -42,5 +41,5 @@ internal class GitHubAnalyzerByFlows(private val provider: GitHubRepositoryProvi
                 }
             }
         }
-    }.flowOn(Dispatchers.Default)
+    }
 }
