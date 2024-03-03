@@ -8,17 +8,17 @@ import io.github.tassiLuca.pimping.asTry
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-import scala.util.{Random, Try}
+import scala.util.Random
 
 class ChannelsContextTest extends AnyFunSpec with Matchers {
 
   type Item = Int
-  val itemsProduced = 10
+  val items = 10
 
   describe("Consumer") {
     it("read no item if the producer is run in another context") {
       var i = 0
-      val channel = BufferedChannel[Item](itemsProduced)
+      val channel = BufferedChannel[Item](items)
       Async.blocking:
         channel.consume {
           case Left(_) => ()
@@ -33,38 +33,21 @@ class ChannelsContextTest extends AnyFunSpec with Matchers {
       Async.blocking:
         val channel = UnboundedChannel[Future[Item]]()
         Future:
-          for _ <- 0 to itemsProduced do channel.send(Future { AsyncOperations.sleep(5_000); 0 })
-        for _ <- 0 to itemsProduced do
+          for _ <- 0 until items do channel.send(Future { AsyncOperations.sleep(2_000); 0 })
+        for _ <- 0 until items do
           val result = channel.read().asTry.flatMap(_.awaitResult)
           result.isFailure shouldBe true
           intercept[CancellationException](result.get)
     }
 
-    it("but should work putting the send inside a future") {
+    it("should work spawning futures and await all") {
       Async.blocking:
-        val channel = UnboundedChannel[Future[Item]]()
-        for _ <- 0 to itemsProduced do
-          Future { AsyncOperations.sleep(5_000); 0 }
-            .onComplete(Listener((_, f) => channel.send(f.asInstanceOf[Future[Item]])))
-        for _ <- 0 to itemsProduced do
-          val result = channel.read().asTry.flatMap(_.awaitResult)
-          result.isSuccess shouldBe true
-          result.get shouldBe 0
-    }
-
-    it("instead of future, their results") {
-      Async.blocking:
-        val channel = UnboundedChannel[Try[Item]]()
-        Future:
-          var fs: Seq[Future[Item]] = Seq()
-          for _ <- 0 to itemsProduced do
-            val f = Future { AsyncOperations.sleep(5_000); 100 }
-            fs = fs :+ f
-            f.onComplete(Listener((r, _) => channel.send(r)))
-          fs.awaitAll
-        for _ <- 0 to itemsProduced do
-          val result = channel.read()
-          println(result)
+        var fs: Seq[Future[Item]] = Seq()
+        for _ <- 0 until items do
+          fs = fs :+ Future:
+            AsyncOperations.sleep(2_000)
+            1
+        fs.awaitAll.sum shouldBe items
     }
   }
 
@@ -83,7 +66,7 @@ class ChannelsContextTest extends AnyFunSpec with Matchers {
 
   def produceOn(channel: SendableChannel[Item]): Task[Unit] = Task {
     channel.send(Random.nextInt())
-  }.schedule(Every(500, maxRepetitions = itemsProduced))
+  }.schedule(Every(500, maxRepetitions = items))
 
   extension (channel: ReadableChannel[Item])
     def consume(action: Either[Closed, Item] => Unit): Task[Unit] = Task {
