@@ -14,7 +14,7 @@ trait ThermostatComponent[T <: ThermostatScheduler]:
   val thermostat: Thermostat
 
   /** A [[state]]ful consumer of [[TemperatureEntry]]s in charge of controlling
-    * the heater and keeping track of the last detection average temperature.
+    * the heater and keeping track of the last detected average temperature.
     */
   trait Thermostat
       extends Consumer[Seq[TemperatureEntry], Option[Temperature]]

@@ -19,7 +19,7 @@ interface SensorSourceConsumer<in E : SensorEvent, out S> {
 interface ScheduledConsumer<in E : SensorEvent, out S> : SensorSourceConsumer<E, S>, CoroutineScope {
 
     /** The interval period. */
-    val period: Duration
+    val samplingWindow: Duration
 
     /** The update logic of the consumer. */
     suspend fun update()
@@ -28,7 +28,7 @@ interface ScheduledConsumer<in E : SensorEvent, out S> : SensorSourceConsumer<E,
     fun run() = launch {
         while (true) {
             update()
-            delay(period)
+            delay(samplingWindow)
         }
     }
 }

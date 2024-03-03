@@ -15,10 +15,8 @@ class LightingManager(dashboardService: DashboardService, coroutineContext: Coro
 
     /** Runs the thermostat and the temperature sensors. */
     suspend fun run(sensorSource: Flow<LuminosityEntry>) {
-        println("LightingManager: run")
         lightingSystem.run()
         sensorSource.collect {
-            println("LightingManager: $it")
             lightingSystem.react(it)
         }
     }

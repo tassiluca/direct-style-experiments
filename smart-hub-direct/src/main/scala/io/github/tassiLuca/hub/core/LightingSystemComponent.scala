@@ -13,7 +13,7 @@ trait LightingSystemComponent:
   /** The [[LightingSystem]] instance. */
   val lightingSystem: LightingSystem
 
-  /** A consumer of [[LuminosityEntry]], in charge of controlling the lamps. */
+  /** A consumer of [[LuminosityEntry]], in charge of controlling the lighting system. */
   trait LightingSystem extends Consumer[Seq[LuminosityEntry], Unit]
 
   object LightingSystem:

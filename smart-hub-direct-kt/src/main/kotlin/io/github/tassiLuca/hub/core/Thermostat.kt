@@ -7,7 +7,7 @@ import kotlin.time.Duration
 /** A thermostat. */
 class Thermostat(
     private val targetTemperature: Temperature,
-    override val period: Duration,
+    override val samplingWindow: Duration,
     private val dashboardService: DashboardService,
     override val coroutineContext: CoroutineContext,
 ) : ScheduledConsumer<TemperatureEntry, List<TemperatureEntry>> {

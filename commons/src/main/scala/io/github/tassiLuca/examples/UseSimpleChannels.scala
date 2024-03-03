@@ -1,9 +1,9 @@
 package io.github.tassiLuca.examples
 
+import gears.async.*
 import gears.async.AsyncOperations.sleep
 import gears.async.TaskSchedule.Every
 import gears.async.default.given
-import gears.async.*
 
 import java.time.LocalTime
 
@@ -13,7 +13,7 @@ import java.time.LocalTime
   *   - consumers after consumes 1 items only, i.e. it's not like a subscribe in reactive programming!
   *     - Variant: perform a loop inside the consumer
   */
-object UseSimpleChannels extends App:
+object UseSimpleChannels:
 
   type Item = Int
 
@@ -46,7 +46,7 @@ object UseSimpleChannels extends App:
       println(s"[CONSUMER - ${Thread.currentThread()} @ ${LocalTime.now()}] received $item")
     }
 
-  Async.blocking:
+  @main def useChannels(): Unit = Async.blocking:
     for _ <- 0 until consumers do consumer(channel.asReadable).run
     sleep(10_000)
     scheduledProducer(channel.asSendable).run

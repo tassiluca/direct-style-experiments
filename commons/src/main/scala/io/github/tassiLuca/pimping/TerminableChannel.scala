@@ -6,7 +6,6 @@ import gears.async.{Async, BufferedChannel, Channel, SyncChannel, UnboundedChann
 import scala.annotation.tailrec
 import scala.language.postfixOps
 import scala.reflect.ClassTag
-import scala.util.Try
 
 /** A token to be sent to a channel to signal that it has been terminated. */
 case object Terminated
@@ -16,22 +15,28 @@ type Terminated = Terminated.type
 /** A union type of [[T]] and [[Terminated]]. */
 type Terminable[T] = T | Terminated
 
+/** Exception being raised by [[TerminableChannel.send()]] on terminated [[TerminableChannel]]. */
+class ChannelTerminatedException extends Exception
+
 /** A [[Channel]] that can be terminated, signalling no more items will be sent,
   * still allowing to consumer to read pending values.
+  * Trying to `send` values after its termination arise a [[ChannelTerminatedException]].
+  * When one consumer reads the [[Terminated]] token, the channel is closed. Any subsequent
+  * read will return `Left(Channel.Closed`.
   */
 trait TerminableChannel[T] extends Channel[Terminable[T]]:
-  def terminate()(using Async): Try[Unit] // Try cause could throw java.util.NoSuchElementException in gears...
+  def terminate()(using Async): Unit
 
 object TerminableChannel:
 
-  def ofSync[T: ClassTag]: TerminableChannel[T] =
-    TerminableChannelImpl(SyncChannel())
+  /** Creates a [[TerminableChannel]] backed to [[SyncChannel]]. */
+  def ofSync[T: ClassTag]: TerminableChannel[T] = TerminableChannelImpl(SyncChannel())
 
-  def ofBuffered[T: ClassTag]: TerminableChannel[T] =
-    TerminableChannelImpl(BufferedChannel())
+  /** Creates a [[TerminableChannel]] backed to [[BufferedChannel]]. */
+  def ofBuffered[T: ClassTag]: TerminableChannel[T] = TerminableChannelImpl(BufferedChannel())
 
-  def ofUnbounded[T: ClassTag]: TerminableChannel[T] =
-    TerminableChannelImpl(UnboundedChannel())
+  /** Creates a [[TerminableChannel]] backed to an [[UnboundedChannel]]. */
+  def ofUnbounded[T: ClassTag]: TerminableChannel[T] = TerminableChannelImpl(UnboundedChannel())
 
   private class TerminableChannelImpl[T: ClassTag](c: Channel[Terminable[T]]) extends TerminableChannel[T]:
     opaque type Res[R] = Either[Channel.Closed, R]
@@ -44,18 +49,19 @@ object TerminableChannel:
         case v @ _ => v
       }
 
-    override def sendSource(x: Terminable[T]): Async.Source[Res[Unit]] = x match
-      case Terminated =>
-        synchronized:
-          if _terminated then throw IllegalStateException("Channel already terminated!") else _terminated = true
-        c.sendSource(x)
-      case t => c.sendSource(t)
+    override def sendSource(x: Terminable[T]): Async.Source[Res[Unit]] =
+      synchronized:
+        if _terminated then throw ChannelTerminatedException()
+        else if x == Terminated then _terminated = true
+      c.sendSource(x)
 
     override def close(): Unit = c.close()
 
-    override def terminate()(using Async): Try[Unit] = Try:
-      uninterruptible:
-        c.send(Terminated)
+    override def terminate()(using Async): Unit = uninterruptible:
+      try send(Terminated)
+      // It happens only at the close of the channel due to the call (inside Gears library) of
+      // a CellBuf.dequeue(channels.scala:239) which is empty!
+      catch case e: NoSuchElementException => e.printStackTrace()
 
 object TerminableChannelOps:
 

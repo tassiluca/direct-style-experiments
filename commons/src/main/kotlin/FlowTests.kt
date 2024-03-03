@@ -15,6 +15,7 @@ fun simple(): Flow<Int> = flow {
 fun main(): Unit = runBlocking {
     println("Calling simple function...")
     val flow = simple()
+
     launch {
         println("Calling collect...")
         flow.collect { value -> println(value) }

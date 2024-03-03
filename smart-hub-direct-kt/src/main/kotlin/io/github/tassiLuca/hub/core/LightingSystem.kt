@@ -6,7 +6,7 @@ import kotlin.time.Duration
 
 /** A sensor health checker. */
 class LightingSystem(
-    override val period: Duration,
+    override val samplingWindow: Duration,
     override val coroutineContext: CoroutineContext,
     private val dashboardService: DashboardService,
 ) : ScheduledConsumer<LuminosityEntry, List<LuminosityEntry>> {

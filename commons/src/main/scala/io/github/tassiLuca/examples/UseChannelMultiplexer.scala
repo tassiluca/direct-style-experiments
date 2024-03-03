@@ -1,8 +1,8 @@
 package io.github.tassiLuca.examples
 
+import gears.async.*
 import gears.async.TaskSchedule.Every
 import gears.async.default.given
-import gears.async.*
 
 import java.time.LocalTime
 import scala.util.{Random, Try}
@@ -17,7 +17,7 @@ import scala.util.{Random, Try}
   *   - if a consumer start reading value after the producer started, missing some values, those values are gone => like
   *     "hot observables" in Rx.
   */
-object UseChannelMultiplexer extends App:
+object UseChannelMultiplexer:
 
   type Item = String
 
@@ -49,7 +49,7 @@ object UseChannelMultiplexer extends App:
       }
     (consumingTask, channel)
 
-  Async.blocking:
+  @main def useMultiplexer(): Unit = Async.blocking:
     val multiplexer = ChannelMultiplexer[Item]()
     Future {
       // blocking call until the multiplexer is closed => needs to be called on a new thread

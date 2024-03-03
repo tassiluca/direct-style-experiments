@@ -15,7 +15,7 @@ trait FlowCollector[-T]:
   def emit(value: T)(using Async): Unit
 
 object Flow:
-  inline def apply[T: ClassTag](inline body: FlowCollector[T] ?=> Unit)(using Async): Flow[T] =
+  def apply[T: ClassTag](body: FlowCollector[T] ?=> Unit)(using Async): Flow[T] =
     val flow = FlowImpl[T]()
     flow.task = Task:
       val channel = flow.channel
@@ -26,7 +26,7 @@ object Flow:
       catch case e: Exception => channel.send(Failure(e))
     flow
 
-  class FlowImpl[T: ClassTag] extends Flow[T]:
+  private class FlowImpl[T: ClassTag] extends Flow[T]:
     private[Flow] var task: Task[Unit] = uninitialized
     private[Flow] var channel: TerminableChannel[Try[T]] = uninitialized
     private[Flow] val sync = Semaphore(0)
