@@ -366,7 +366,7 @@ Example:
 
 Going back to the example here is presented a schema summarizing the flows of data and the transformations to apply to them. This is just a simple example used to test the proposed abstractions.
 
-![system design of the example](../../res/img/rears.svg)
+{{< figure src="../../res/img/rears.svg" alt="System design of the example" width="90%" class="center" >}}
 
 [[Sources are available in `smart-hub-direct` submodule](https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/smart-hub-direct/src/main/scala/io/github/tassiLuca/hub)].
 
