@@ -206,7 +206,7 @@ override def analyze(organizationName: String)(
       .map(_.performAnalysis) // 2
     val collector = Collector[RepositoryReport](reposInfo.toList*) // 3
     for _ <- reposInfo.indices do 
-      updateResults(collector.results.read().toTry().?.awaitResult.?) // 4
+      updateResults(collector.results.read().?.awaitResult.?) // 4
     reposInfo.map(_.await)
 
   extension (r: Repository)
@@ -259,7 +259,7 @@ override def analyze(organizationName: String)(
     collectedRepositories = collectedRepositories + 1
   }
   (0 until collectedRepositories).map { _ =>
-    val report = collector.results.read().toTry().?.awaitResult.?
+    val report = collector.results.read().?.awaitResult.?
     updateResults(report)
     report
   }
@@ -334,6 +334,39 @@ private suspend fun collectResults(
 Where, instead, Kotlin Coroutines shine is the implementation of the `RepositoryService` for supporting incremental retrieval of repositories and contributors.
 
 Indeed, Kotlin has a built-in support for cold streams, called **`Flow`**. They are very similar (actually they have been inspired to) cold observable in reactive programming, and **they are the perfect fit for functions that need to return a stream of asynchronously computed values**.
+
+They offer several useful operators for transforming and combining them functionally. An overview of the most common operators is provided in the following section.
+
+{{< columns >}}
+
+*Intermediate flow operators*:
+
+- `filter`/`filterNot` to filter out unwanted values;
+- `map` to transform the values;
+- `transform` to implement more complex transformations (possibly involving suspending operations);
+- `take` and its variant (e.g. `takeWhile`) to limit the number of values emitted;
+- `onEach` to perform side-effects for each value emitted;
+
+<--->
+
+*Terminal flow operators*:
+
+- conversions to various collection types, like `toList`, `toSet`;
+- `first`, `last`, `single` to retrieve the first, last or single value emitted;
+- `reduce` to perform some kind of operation over all items, reducing them to a single one;
+- `fold` to perform some kind of operation over all items, starting from an initial value, accumulating a result;
+
+<--->
+
+*Flows combining operators*:
+
+- `merge` to combine multiple flows into a single one, emitting values from all of them;
+- `zip` 
+- `combine` 
+- `flatMapConcat` / `flatMapMerge` to transform each value into a flow and then concatenate/merge them;
+
+
+{{< /columns >}}
 
 The `RepositoryService` has been here extended with new methods, `flowing***`, returning a `Flow` of results:
 
