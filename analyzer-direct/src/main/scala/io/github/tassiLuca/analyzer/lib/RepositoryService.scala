@@ -1,6 +1,6 @@
 package io.github.tassiLuca.analyzer.lib
 
-import gears.async.{Async, ReadableChannel}
+import gears.async.Async
 import io.github.tassiLuca.analyzer.commons.lib.{Contribution, Release, Repository}
 import io.github.tassiLuca.pimping.TerminableChannel
 

@@ -57,11 +57,11 @@ object TerminableChannel:
 
     override def close(): Unit = c.close()
 
-    override def terminate()(using Async): Unit = uninterruptible:
+    override def terminate()(using Async): Unit =
       try send(Terminated)
       // It happens only at the close of the channel due to the call (inside Gears library) of
       // a CellBuf.dequeue(channels.scala:239) which is empty!
-      catch case e: NoSuchElementException => e.printStackTrace()
+      catch case _: NoSuchElementException => () // e.printStackTrace()
 
 object TerminableChannelOps:
 

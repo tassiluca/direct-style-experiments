@@ -38,13 +38,12 @@ private class IncrementalAnalyzer(repositoryService: RepositoryService) extends 
   )(using Async): Either[String, Seq[RepositoryReport]] = either:
     val reposInfo = repositoryService.incrementalRepositoriesOf(organizationName)
     var allReports = Seq[RepositoryReport]()
-    var fs = Seq[Future[Unit]]()
+    var futures = Seq[Future[Unit]]()
     reposInfo.foreach { repository =>
-      val f = Future:
+      futures = futures :+ Future:
         val report = repository.?.performAnalysis.awaitResult.?
         updateResults(report)
         allReports = allReports :+ report
-      fs = fs :+ f
     }
-    fs.awaitAllOrCancel
+    futures.awaitAllOrCancel
     allReports
