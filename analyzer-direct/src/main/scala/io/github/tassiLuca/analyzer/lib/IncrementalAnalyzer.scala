@@ -17,25 +17,17 @@ private class IncrementalAnalyzer(repositoryService: RepositoryService) extends 
       updateResults: RepositoryReport => Unit,
   )(using Async): Either[String, Seq[RepositoryReport]] = either:
     val reposInfo = repositoryService.incrementalRepositoriesOf(organizationName)
-    val collector = TerminableChannel.ofUnbounded[Try[RepositoryReport]]
-    val f1 = Future:
-      var fs = Seq[Future[RepositoryReport]]()
-      reposInfo.foreach { repository =>
-        val f = repository.?.performAnalysis
-        f.onComplete(Listener((r, _) => collector.send(r)))
-        fs = fs :+ f
-      }
-      fs.awaitAllOrCancel
-    f1.onComplete(() => collector.terminate())
-    val f2 = Future:
-      var allReports = Seq[RepositoryReport]()
-      collector.foreach(f =>
-        val report = f.?
+    var allReports = Seq[RepositoryReport]()
+    var fs = Seq[Future[Unit]]()
+    reposInfo.foreach { repository =>
+      val f = Future:
+        val report = repository.?.performAnalysis.awaitResult.?
         updateResults(report)
-        allReports = allReports :+ report,
-      )
-      allReports
-    f1.zip(f2).await._2
+        allReports = allReports :+ report
+      fs = fs :+ f
+    }
+    fs.awaitAllOrCancel
+    allReports
 
   extension (r: Repository)
     private def performAnalysis(using Async): Future[RepositoryReport] = Future:
