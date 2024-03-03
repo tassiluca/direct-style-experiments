@@ -7,6 +7,8 @@ bookToc: false
 The fourth, yet not mentioned, abstraction of both Kotlin Coroutines and Scala Gears is the **channel**.
 Channels represent the **primitive communication and coordination means** to exchange `Future` (or coroutines in the case of Kotlin) results. They are, at least conceptually, very similar to a queue where it is possible to send (and receive) data -- basically, exploiting the ***producer-consumer*** pattern.
 
+{{< figure src="../../res/img/channel.svg" alt="Channel" class="center" >}}
+
 {{< mermaid >}}
 classDiagram
   class `SendableChannel[-T]` {
@@ -62,12 +64,15 @@ A similar behavior can be achieved also in Gears pimping the framework with the 
 Three types of channels exist:
 
 - **Synchronous Channels**: links a `read` request with a `send` within a _rendezvous_
+  {{< figure src="../../res/img/sync-channel.svg" alt="synchronous channel" >}}
   - `send` (`read`) suspend the process until a consumer `read` (`send`) the value;
   - in Kotlin they are called **Rendezvous Channels**.
 - **Buffered Channels**: a version of a channel with an internal buffer of fixed size
+  {{< figure src="../../res/img/buffered-channel.svg" alt="buffered channel" >}}
   - `send` suspend the producer process if it is full; otherwise, it appends the value to the buffer, returning immediately;
   - `read` suspend if the channel is empty, waiting for a new value.
 - **Unbounded Channels**: a version of a channel with an unbounded buffer
+  {{< figure src="../../res/img/unbounded-channel.svg" alt="unbounded channel" >}}
   - if the programs run out of memory you can get an out-of-memory exception!
   - in Kotlin they are called **Unlimited Channel**.
 
