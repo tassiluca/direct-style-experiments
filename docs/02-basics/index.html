@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Basic asynchronous constructs # The need for a new Future construct # The current implementation of the Future monadic construct suffers the following main cons:
 Lack of referential transparency; Lack of cancellation mechanisms and structured concurrency; Accidental Sequentiality. To show these weaknesses in practice, a simple example of the core of a web service implementation is presented.
-Example: a blog posts service # Idea: develop a very simple (mocked) service which allows to retrieve and store from a repository blog posts, performing checks on the content and author before the actual storage.">
+Example: a blog posts service # Idea: develop a very simple (mocked) service that allows retrieving and storing from a repository blog posts, performing checks on the content and author before the actual storage.">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
 <meta property="og:description" content="Basic asynchronous constructs # The need for a new Future construct # The current implementation of the Future monadic construct suffers the following main cons:
 Lack of referential transparency; Lack of cancellation mechanisms and structured concurrency; Accidental Sequentiality. To show these weaknesses in practice, a simple example of the core of a web service implementation is presented.
-Example: a blog posts service # Idea: develop a very simple (mocked) service which allows to retrieve and store from a repository blog posts, performing checks on the content and author before the actual storage." />
+Example: a blog posts service # Idea: develop a very simple (mocked) service that allows retrieving and storing from a repository blog posts, performing checks on the content and author before the actual storage." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/02-basics/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-03-02T00:32:44+01:00" />
+<meta property="article:modified_time" content="2024-03-04T00:44:41+01:00" />
 
 <title>02 Basics | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
@@ -23,7 +23,7 @@ Example: a blog posts service # Idea: develop a very simple (mocked) service whi
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/02-basics/">
 <link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.3079c33e46bf5b308bdbfa938bf6043ba270f82b73e2ada92c1da0aacca6df5c.css" integrity="sha256-MHnDPka/WzCL2/qTi/YEO6Jw&#43;Ctz4q2pLB2gqsym31w=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.80b39a21ff42bb17811a3f7475e292c42ffa11e1c7019e429e2f4ee473ea9951.js" integrity="sha256-gLOaIf9CuxeBGj90deKSxC/6EeHHAZ5Cni9O5HPqmVE=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.d5959f219b5b3a7549e1e03b840b3a34ab05fd0249b3957b82edcf7f391f897d.js" integrity="sha256-1ZWfIZtbOnVJ4eA7hAs6NKsF/QJJs5V7gu3PfzkfiX0=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -203,7 +203,7 @@ https://github.com/alex-shpak/hugo-book
   <a class="anchor" href="#example-a-blog-posts-service">#</a>
 </h2>
 <blockquote class="book-hint info">
-  <strong>Idea</strong>: develop a very simple (mocked) service which allows to retrieve and store from a repository blog posts, performing checks on the content and author before the actual storage.
+  <strong>Idea</strong>: develop a very simple (mocked) service that allows retrieving and storing from a repository blog posts, performing checks on the content and author before the actual storage.
 </blockquote>
 
 <p>The example has been implemented using:</p>
@@ -216,16 +216,16 @@ https://github.com/alex-shpak/hugo-book
 </ul>
 </li>
 </ul>
-<p>The example (and every subsequent one) is organized in three gradle submodules:</p>
+<p>The example (and every subsequent one) is organized into three Gradle submodules:</p>
 <ul>
-<li><code>blog-ws-commons</code> contains code which has been reused for both the monadic and direct versions;</li>
+<li><code>blog-ws-commons</code> contains code that has been reused for both the monadic and direct versions;</li>
 <li>a submodule <code>blog-ws-monadic</code> with the monadic Scala style and <code>blog-ws-direct</code> for the direct versions, both in Kotlin with <em>coroutines</em> and in Scala with <em>gears</em>.</li>
 </ul>
 <h3 id="structure">
   Structure
   <a class="anchor" href="#structure">#</a>
 </h3>
-<p>The domain is modelled using abstract data types in a common <code>PostsModel</code> trait:</p>
+<p>The domain is modeled using abstract data types in a common <code>PostsModel</code> trait:</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">PostsModel</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">type</span> <span style="color:#d20f39">AuthorId</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">type</span> <span style="color:#d20f39">Title</span>
@@ -265,7 +265,7 @@ https://github.com/alex-shpak/hugo-book
   Current monadic <code>Future</code>
   <a class="anchor" href="#current-monadic-future">#</a>
 </h3>
-<p>The interface of the repository and services component of the monadic version are presented hereafter and their complete implementation is available <a href="">here</a>.</p>
+<p>The interface of the repository and services component of the monadic version are presented hereafter and their complete implementation is available <a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/blog-ws-monadic/src/main/scala/io/github/tassiLuca/dse/blog">here</a>.</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** The component exposing blog posts repositories. */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">PostsRepositoryComponent</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#d20f39">context:</span> <span style="color:#d20f39">PostsModel</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span>
@@ -303,11 +303,11 @@ https://github.com/alex-shpak/hugo-book
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Gets all the stored blog posts in a lazy manner. */</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> all<span style="color:#04a5e5;font-weight:bold">()(</span>using <span style="color:#df8e1d">ExecutionContext</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">LazyList</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]]</span>
-</span></span></code></pre></div><p>All the exposed functions, since they are asynchronous, returns an instance of <code>Future[T]</code> and requires to be called in a scope where a given instance of the <code>ExecutionContext</code> is declared.</p>
-<p>What&rsquo;s important to delve into is the implementation of the service, and, more precisely, of the <code>create</code> method. As already mentioned, before saving the post two checks needs to be performed:</p>
+</span></span></code></pre></div><p>All the exposed functions, since they are asynchronous, return an instance of <code>Future[T]</code> and require to be called in a scope where a given instance of the <code>ExecutionContext</code> is declared.</p>
+<p>What&rsquo;s important to delve into is the implementation of the service, and, more precisely, of the <code>create</code> method. As already mentioned, before saving the post two checks need to be performed:</p>
 <ol>
-<li>the post author must have permissions to publish a post and their information needs to be retrieved (supposing they are managed by another microservice);</li>
-<li>the content of the post is analyzed in order to prevent the storage and publication of offensive or non-appropriate contents.</li>
+<li>the post author must have permission to publish a post and their information needs to be retrieved (supposing they are managed by another microservice);</li>
+<li>the content of the post is analyzed in order to prevent the storage and publication of offensive or inappropriate content.</li>
 </ol>
 <p>Since these operations are independent from each other they can be spawned and run in parallel.</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">override</span> <span style="color:#8839ef">def</span> create<span style="color:#04a5e5;font-weight:bold">(</span>authorId<span style="color:#8839ef">:</span> <span style="color:#d20f39">AuthorId</span><span style="color:#04a5e5;font-weight:bold">,</span> title<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Body</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">ExecutionContext</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span>
@@ -329,10 +329,10 @@ https://github.com/alex-shpak/hugo-book
 </span></span></code></pre></div><p>This implementation shows the limits of the current monadic <code>Future</code> mechanism:</p>
 <ul>
 <li>
-<p>if we want to achieve the serialization of future&rsquo;s  execution we need to compose them using the <code>flatMap</code>, like in the <code>create</code> function: first the check on the post existence is performed, and only if it successful and another post with same title doesn&rsquo;t exists the <code>save</code> function is started</p>
+<p>if we want to achieve the serialization of futures execution we need to compose them using the <code>flatMap</code>, like in the <code>create</code> function: first, the check on the post existence is performed, and only if it is successful and another post with same title doesn&rsquo;t exist the <code>save</code> function is started</p>
 <ul>
 <li>
-<p>as a consequence, if we want two futures to run in parallel we have to spawn them before the <code>for-yield</code>, as in the <code>save</code> function, or use Future&rsquo;s Applicative, like <code>mapN</code> provided by Cats. This is error prone and could lead to unexpected sequentiality for non experted Scala programmers, like this:</p>
+<p>as a consequence, if we want two futures to run in parallel we have to spawn them before the <code>for-yield</code>, as in the <code>save</code> function, or use Future&rsquo;s Applicative, like <code>mapN</code> provided by Cats. This is error-prone and could lead to unexpected sequentiality, like this:</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span>  <span style="color:#8839ef">for</span>
 </span></span><span style="display:flex;"><span>    content <span style="color:#8839ef">&lt;-</span> verifyContent<span style="color:#04a5e5;font-weight:bold">(</span>title<span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#04a5e5;font-weight:bold">)</span>
 </span></span><span style="display:flex;"><span>    author <span style="color:#8839ef">&lt;-</span> authorBy<span style="color:#04a5e5;font-weight:bold">(</span>authorId<span style="color:#04a5e5;font-weight:bold">)</span>
@@ -343,29 +343,29 @@ https://github.com/alex-shpak/hugo-book
 </ul>
 </li>
 <li>
-<p>since the publication of a post can be performed only if both of these checks succeeds, it is desirable that, whenever one of the two fails, the other get cancelled.
-Unfortunately, currently, Scala Futures are not cancellable and provides no <em>structured concurrency</em> mechanism.</p>
+<p>since the publication of a post can be performed only if both of these checks succeed, it is desirable that, whenever one of the two fails, the other gets canceled.
+Unfortunately, currently, Scala Futures are not cancellable and provide no <em>structured concurrency</em> mechanism.</p>
 </li>
 <li>
-<p>moreover, they lack referential transparency, i.e. future starts running when they are defined. This mean that passing a reference to a future is not the same as passing the referenced expression.</p>
+<p>moreover, they lack referential transparency, i.e. future starts running when they are defined. This means that passing a reference to a future is not the same as passing the referenced expression.</p>
 </li>
 </ul>
 <h3 id="direct-style-scala-version-with-gears">
   Direct style: Scala version with <code>gears</code>
   <a class="anchor" href="#direct-style-scala-version-with-gears">#</a>
 </h3>
-<p>The API of the gears library is presented hereafter and is built on top of four main abstractions, three of them are here presented (the fourth in next example):</p>
+<p>The API of the gears library is presented hereafter and is built on top of four main abstractions, three of which are here presented (the fourth in the next example):</p>
 <ol>
-<li><strong><code>Async</code></strong> context is <strong>&ldquo;a capability that allows a computation to suspend while waiting for the result of an async source&rdquo;</strong>. Code that has access to an instance of the <code>Async</code> trait is said to be in an async context and it is able to suspend its execution. Usually it is provided via <code>given</code> instances.
+<li><strong><code>Async</code></strong> context is <strong>&ldquo;a capability that allows a computation to suspend while waiting for the result of an async source&rdquo;</strong>. Code that has access to an instance of the <code>Async</code> trait is said to be in an async context and can suspend its execution. Usually, it is provided via <code>given</code> instances.
 <ul>
 <li>A common way to obtain an <code>Async</code> instance is to use an <code>Async.blocking</code>.</li>
 </ul>
 </li>
 <li><strong><code>Async.Source</code></strong> modeling an asynchronous source of data that can be polled or awaited by suspending the computation, as well as composed using combinator functions.</li>
-<li><strong><code>Future</code>s</strong> are the primary (in fact, the only) active elements that encapsulate a control flow that, eventually, will deliver a result (either a computed or a failure value that contains an exception). Since <code>Future</code>s are <code>Async.Source</code>s they can be awaited and combined with other <code>Future</code>s, suspending their execution.
+<li><strong><code>Future</code>s</strong> are the primary (in fact, the only) active elements that encapsulate a control flow that, eventually, will deliver a result (either a computed or a failure value that contains an exception). Since <code>Future</code>s are <code>Async.Source</code>s can be awaited and combined with other <code>Future</code>s, suspending their execution.
 <ul>
-<li><strong><code>Task</code>s</strong> are the abstraction created to create delayed <code>Future</code>s, responding to the lack of referential transparency problem. They takes the body of a <code>Future</code> as an argument; its <code>run</code> method converts that body to a <code>Future</code>, starting its execution.</li>
-<li><strong><code>Promise</code>s</strong> allows to define <code>Future</code>&rsquo;s result value externally, instead of executing a specific body of code.</li>
+<li><strong><code>Task</code>s</strong> are the abstraction created to create delayed <code>Future</code>s, responding to the lack of referential transparency problem. They take the body of a <code>Future</code> as an argument; its <code>run</code> method converts that body to a <code>Future</code>, starting its execution.</li>
+<li><strong><code>Promise</code>s</strong> allow us to define <code>Future</code>&rsquo;s result value externally, instead of executing a specific body of code.</li>
 </ul>
 </li>
 </ol>
@@ -401,7 +401,7 @@ classDiagram
     +poll() Option[T]
     +onComplete(k: Listener[T])
     +dropListener(k: Listener[T])
-    +awaitResult() T
+    +awaitResult()(using Async) T
   }
 
   Async *--> `Async.Source[+T]`
@@ -431,6 +431,7 @@ classDiagram
   }
   class `Promise[+T]` {
     << trait >>
+    +apply() Promise[T]$
     +asFuture Future[T]
     +complete(result: Try[T])
   }
@@ -509,13 +510,13 @@ classDiagram
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Gets all the stored blog posts in a lazy manner or a string explaining the reason of the failure. */</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> all<span style="color:#04a5e5;font-weight:bold">()(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">LazyList</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]]</span>
-</span></span></code></pre></div><p>As you can see, <code>Future</code>s are gone and the return type it&rsquo;s just the result of their intent (expressed with <code>Either</code> to return a meaningful message in case of failure). The fact they are <em>suspendable</em> is expressed by means of the <code>Async</code> context, which is required to invoke those functions.</p>
+</span></span></code></pre></div><p>As you can see, <code>Future</code>s are gone and the return type it&rsquo;s just the result of their intent (expressed with <code>Either</code> to return a meaningful message in case of failure). The fact they are <em>suspendable</em> is expressed using the <code>Async</code> context, which is required to invoke those functions.</p>
 <blockquote>
 <p>Key inspiring principle (actually, &ldquo;stolen&rdquo; by Kotlin)</p>
 <p><em><strong>❝Concurrency is hard! Concurrency has to be explicit!❞</strong></em></p>
 </blockquote>
 <p>By default the code is serial. If you want to opt-in concurrency you have to explicitly use a <code>Future</code> or <code>Task</code> spawning a new control flow that executes asynchronously, allowing the caller to continue its execution.</p>
-<p>The other important key feature of the library is the support to <strong>structured concurrency and cancellation mechanisms</strong>:</p>
+<p>The other important key feature of the library is the support for <strong>structured concurrency and cancellation mechanisms</strong>:</p>
 <ul>
 <li>
 <p><code>Future</code>s are <code>Cancellable</code> instances;</p>
@@ -524,18 +525,17 @@ classDiagram
 <p>When you cancel a future using the <code>cancel()</code> method, it promptly sets its value to <code>Failure(CancellationException)</code>. Additionally, if it&rsquo;s a runnable future, the thread associated with it is interrupted using <code>Thread.interrupt()</code>.</p>
 </li>
 <li>
-<p>to avoid the immediate cancellation, deferring the cancellation after some block is possible using <code>uninterruptible</code> function:</p>
-<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">val</span> f <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Future</span> <span style="color:#04a5e5;font-weight:bold">{</span>
+<p>to avoid immediate cancellation, deferring the cancellation after some block is possible using <code>uninterruptible</code> function:</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">val</span> f <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Future</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">// this can be interrupted
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>  uninterruptible<span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">// this cannot be interrupted *immediately*
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>  <span style="color:#9ca0b0;font-style:italic">// this can be interrupted
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span><span style="color:#04a5e5;font-weight:bold">}</span>
-</span></span></code></pre></div></li>
+</span></span></span></code></pre></div></li>
 </ul>
 </li>
 <li>
-<p><code>Future</code>s are nestable; it is assured that the lifetime of nested computations is contained within the lifetime of enclosing ones. This is achieved using <code>CompletionGroup</code>s, which are cancellable objects themselves and serves as containers for other cancellable objects, that once cancelled, all of its members are cancelled as well.</p>
+<p><code>Future</code>s are nestable; <strong>the lifetime of nested computations is contained within the lifetime of enclosing ones</strong>. This is achieved using <code>CompletionGroup</code>s, which are cancellable objects themselves and serves as containers for other cancellable objects, that once canceled, all of its members are canceled as well.</p>
 <ul>
 <li>A cancellable object can be included inside the cancellation group of the async context using the <code>link</code> method; this is what the <a href="https://github.com/lampepfl/gears/blob/07989ffdae153b2fe11ac1ece53ce9dd1dbd18ef/shared/src/main/scala/async/futures.scala#L140">implementation of the <code>Future</code> does, under the hood</a>.</li>
 </ul>
@@ -561,11 +561,14 @@ classDiagram
 </span></span></code></pre></div><p>Some remarks:</p>
 <ul>
 <li>the <code>either</code> boundary have been used to quickly return a <code>Right[String, Post]</code> object in case something goes wrong;</li>
-<li><code>authorBy</code> and <code>verifyContent</code> returns referential transparent <code>Task</code> instances. Running them, spawns a new <code>Future</code> instance;</li>
+<li><code>authorBy</code> and <code>verifyContent</code> returns referential transparent <code>Task</code> instances. Running them spawns a new <code>Future</code> instance;</li>
 <li>Thanks to structured concurrency and <code>zip</code> combinator we can obtain that if one of the nested two futures fails the enclosing future is cancelled, cancelling also all its unterminated children
 <ul>
-<li><code>zip</code>: combinator function returning a pair with the results if both <code>Future</code>s succeed, otherwise fail with the failure that was returned first.</li>
-<li>Be aware of the fact to achieve cancellation is necessary to enclose both the content verification and authorization task inside an enclosing <code>Future</code>, since the <code>zip</code> doesn&rsquo;t provide cancellation mechanism per se. The following code wouldn&rsquo;t work as expected!
+<li>
+<p><code>zip</code>: combinator function returning a pair with the results if both <code>Future</code>s succeed, otherwise fail with the failure that was returned first.</p>
+</li>
+<li>
+<p>Be aware of the fact to achieve cancellation is necessary to enclose both the content verification and authorization task inside an enclosing <code>Future</code>, since the <code>zip</code> doesn&rsquo;t provide cancellation mechanism per se. The following code wouldn&rsquo;t work as expected!</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">val</span> contentVerifier <span style="color:#8839ef">=</span> verifyContent<span style="color:#04a5e5;font-weight:bold">(</span>title<span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#04a5e5;font-weight:bold">).</span>run
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">val</span> authorizer <span style="color:#8839ef">=</span> authorBy<span style="color:#04a5e5;font-weight:bold">(</span>authorId<span style="color:#04a5e5;font-weight:bold">).</span>run
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">val</span> <span style="color:#04a5e5;font-weight:bold">(</span>post<span style="color:#04a5e5;font-weight:bold">,</span> author<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=</span> contentVerifier<span style="color:#04a5e5;font-weight:bold">.</span>zip<span style="color:#04a5e5;font-weight:bold">(</span>authorizer<span style="color:#04a5e5;font-weight:bold">).</span>awaitResult<span style="color:#04a5e5;font-weight:bold">.?</span>
@@ -605,9 +608,65 @@ classDiagram
 </tbody>
 </table>
 <hr>
-<p>TO FINISH</p>
-<p>tests</p>
-<p>kotlin coroutines</p>
+<h3 id="kotlin-coroutines">
+  Kotlin Coroutines
+  <a class="anchor" href="#kotlin-coroutines">#</a>
+</h3>
+<ul>
+<li>
+<p>A <strong>coroutine</strong> in Kotlin is an instance of a <em>suspendable</em> computation.</p>
+</li>
+<li>
+<p>Their API is quite similar to the Scala Gears, which has taken inspiration from Kotlin coroutines.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Scala Gears</strong></th>
+<th><strong>Kotlin Coroutines</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Async</code></td>
+<td><code>CoroutineScope</code></td>
+</tr>
+<tr>
+<td><code>Future</code></td>
+<td><code>Deferred</code> / <code>Job             </code></td>
+</tr>
+<tr>
+<td><code>def all()(using Async)</code></td>
+<td><code>suspend fun all()</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>
+<p><code>CoroutineContext</code>: every coroutine must be executed in a coroutine context, including a dispatcher, that determines what thread or threads the coroutine uses for its execution, and the <code>Job</code> of the coroutine, which represents a cancellable background piece of work with a life cycle that culminates in its completion.</p>
+<ul>
+<li>
+<p>In the Kotlin Coroutine library, <code>CoroutineScope</code> is an interface that can be implemented by any class capable of launching and suspending coroutines.</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#8839ef">public</span> <span style="color:#8839ef">interface</span> <span style="color:#df8e1d">CoroutineScope</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">    * Returns the context of this scope.
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">    */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">public</span> <span style="color:#8839ef">val</span> <span style="color:#fe640b">coroutineContext</span>: CoroutineContext
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div></li>
+<li>
+<p>Several coroutine builders are available, like <code>launch</code>, <code>async</code>, <code>runBlocking</code>, <code>withContext</code> which accept an optional <code>CoroutineContext</code> parameter that can be used to specify the dispatcher and other context elements.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>suspending functions are marked with the <code>suspend</code> keyword; they can use other suspending functions to suspend the execution of a coroutine.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Coroutines follow the principle of structured concurrency: <code>Job</code>s can be arranged into parent-child hierarchies where cancellation of a parent leads to the immediate cancellation of all its children recursively. Failure of a child with an exception immediately cancels its parent and, consequently, all its other children.</p>
+</li>
+</ul>
 <p>w.r.t. kotlin coroutines:</p>
 <ul>
 <li>&ldquo;Finally, about function coloring: Capabilities are actually much better here than other language&rsquo;s proposals such as suspend or async which feel clunky in comparison. This becomes obvious when you consider higher order functions. Capabilities let us define a single map (with no change in signature compared to now!) that works for sync as well as async function arguments. That&rsquo;s the real breakthrough here, which will make everything work so much smoother. I have talked about this elsewhere and this response is already very long, so I will leave it at that.&rdquo;</li>
@@ -653,9 +712,9 @@ classDiagram
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/4e8ac99d8ae7175c0758425b18558169842eb67d" title='Last modified by Luca Tassinari | March 1, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/702b60fa431d73aa19eb4fbab65c2d2429cb04bf" title='Last modified by Luca Tassinari | March 3, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>March 1, 2024</span>
+      <span>March 3, 2024</span>
     </a>
   </div>
 

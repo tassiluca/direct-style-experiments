@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="boundary &amp; break # boundary &amp; break mechanism provides a cleaner alternative to non-local returns:
+<meta name="description" content="boundary &amp; break # [Source code]
+boundary &amp; break mechanism provides a cleaner alternative to non-local returns:
 boundary: is short for boundary.apply: the indented code below it is passed as body is a context function that is called within boundary.apply to break an in-scope given instance of Label is required (i.e. is impossible break without an enclosing boundary) Users don&rsquo;t define Label instances themselves. Instead, this is done inside the implementation of boundary.">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
-<meta property="og:description" content="boundary &amp; break # boundary &amp; break mechanism provides a cleaner alternative to non-local returns:
+<meta property="og:description" content="boundary &amp; break # [Source code]
+boundary &amp; break mechanism provides a cleaner alternative to non-local returns:
 boundary: is short for boundary.apply: the indented code below it is passed as body is a context function that is called within boundary.apply to break an in-scope given instance of Label is required (i.e. is impossible break without an enclosing boundary) Users don&rsquo;t define Label instances themselves. Instead, this is done inside the implementation of boundary." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/01-boundaries/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-02-29T17:32:36+01:00" />
+<meta property="article:modified_time" content="2024-03-04T00:44:41+01:00" />
 
 <title>01 Boundaries | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
@@ -21,7 +23,7 @@ boundary: is short for boundary.apply: the indented code below it is passed as b
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/01-boundaries/">
 <link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.3079c33e46bf5b308bdbfa938bf6043ba270f82b73e2ada92c1da0aacca6df5c.css" integrity="sha256-MHnDPka/WzCL2/qTi/YEO6Jw&#43;Ctz4q2pLB2gqsym31w=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.80b39a21ff42bb17811a3f7475e292c42ffa11e1c7019e429e2f4ee473ea9951.js" integrity="sha256-gLOaIf9CuxeBGj90deKSxC/6EeHHAZ5Cni9O5HPqmVE=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.d5959f219b5b3a7549e1e03b840b3a34ab05fd0249b3957b82edcf7f391f897d.js" integrity="sha256-1ZWfIZtbOnVJ4eA7hAs6NKsF/QJJs5V7gu3PfzkfiX0=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -185,13 +187,14 @@ https://github.com/alex-shpak/hugo-book
   <code>boundary</code> &amp; <code>break</code>
   <a class="anchor" href="#boundary--break">#</a>
 </h1>
+<p>[<a href="https://github.com/lampepfl/dotty/blob/3.3.0-RC4/library/src/scala/util/boundary.scala">Source code</a>]</p>
 <p><code>boundary</code> &amp; <code>break</code> mechanism provides a cleaner alternative to non-local returns:</p>
 <ul>
 <li><code>boundary:</code> is short for <code>boundary.apply:</code></li>
 <li>the indented code below it is passed as <code>body</code> is a context function that is called within <code>boundary.apply</code>
 <ul>
 <li>to <code>break</code> an in-scope <code>given</code> instance of <code>Label</code> is required (i.e. is impossible <code>break</code> without an enclosing <code>boundary</code>)</li>
-<li>Users don&rsquo;t define <code>Label</code> instances themselves. Instead, this is done inside the implementation of <code>boundary.apply</code> to provide the capability of doing a non-local return [<a href="https://github.com/lampepfl/dotty/blob/3.3.0-RC4/library/src/scala/util/boundary.scala">Source code</a>]
+<li>Users don&rsquo;t define <code>Label</code> instances themselves. Instead, this is done inside the implementation of <code>boundary.apply</code> to provide the capability of doing a non-local return
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** Run `body` with freshly generated label as implicit argument. 
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * Catch any breaks associated with that label and return their 
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * results instead of `body`&#39;s result.
@@ -238,11 +241,7 @@ But, most importantly, they <strong>lay the foundations</strong> (along with a <
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">      * to the enclosing boundary with [[None]]. */</span>
 </span></span><span style="display:flex;"><span>    inline <span style="color:#8839ef">def</span> <span style="color:#04a5e5;font-weight:bold">?(</span>using label<span style="color:#8839ef">:</span> <span style="color:#d20f39">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">None.</span><span style="color:#8839ef">type</span><span style="color:#04a5e5;font-weight:bold">])</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">T</span> <span style="color:#04a5e5;font-weight:bold">=</span>
 </span></span><span style="display:flex;"><span>      o<span style="color:#04a5e5;font-weight:bold">.</span>getOrElse<span style="color:#04a5e5;font-weight:bold">(</span>break<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">None</span><span style="color:#04a5e5;font-weight:bold">))</span>
-</span></span></code></pre></div><h3 id="rust-like-result--">
-  Rust-like <code>Result</code> + <code>?</code>
-  <a class="anchor" href="#rust-like-result--">#</a>
-</h3>
-<h3 id="either--">
+</span></span></code></pre></div><h3 id="either--">
   <code>Either</code> + <code>?</code>
   <a class="anchor" href="#either--">#</a>
 </h3>
@@ -284,9 +283,9 @@ But, most importantly, they <strong>lay the foundations</strong> (along with a <
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/fc00e499f04523e4b9168eaec03792225edfe010" title='Last modified by Luca Tassinari | February 29, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/702b60fa431d73aa19eb4fbab65c2d2429cb04bf" title='Last modified by Luca Tassinari | March 3, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>February 29, 2024</span>
+      <span>March 3, 2024</span>
     </a>
   </div>
 
