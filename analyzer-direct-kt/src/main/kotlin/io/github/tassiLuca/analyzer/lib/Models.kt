@@ -53,3 +53,17 @@ data class RepositoryReport(
     /** The last release of the repository. */
     val lastRelease: Release?,
 )
+
+internal fun Set<RepositoryReport>.addOrUpdate(other: RepositoryReport): Set<RepositoryReport> {
+    val updatedSet = this.toMutableSet()
+    val existingReport = updatedSet.find { it.name == other.name }
+    if (existingReport != null) {
+        val mergedContributions = (existingReport.contributions + other.contributions).distinct()
+        val updatedReport = existingReport.copy(contributions = mergedContributions)
+        updatedSet.remove(existingReport)
+        updatedSet.add(updatedReport)
+    } else {
+        updatedSet.add(other)
+    }
+    return updatedSet
+}

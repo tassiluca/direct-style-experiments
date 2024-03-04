@@ -25,7 +25,7 @@ internal class GitHubAnalyzerByFlows(private val provider: GitHubRepositoryProvi
             var allReports = emptySet<RepositoryReport>()
             reports.collect {
                 updateResults(it)
-                allReports = allReports + it
+                allReports = allReports.addOrUpdate(it)
             }
             allReports
         }
