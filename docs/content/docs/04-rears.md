@@ -474,7 +474,7 @@ To produce a testable version of this example, a simulated source of sensor data
 The example is runnable via:
 
 ```bash
-./gradlew smart-hub-direct:run
+./gradlew smart-hub-<direct | direct-kt>:run
 ```
 
 Three panels should pop up, one for each sensor type, and a dashboard showing the state of the system.

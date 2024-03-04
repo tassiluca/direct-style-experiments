@@ -213,6 +213,28 @@ listing their information along with all their contributors as soon as they are 
 
 ![expected result](../../res/img/analyzer-e2e.png)
 
+---
+
+To start the application:
+
+```bash
+./gradlew analyzer-<direct | direct-kt | monadic>:run
+```
+
+{{< hint warning >}}
+
+In order to run the application you need to place inside the `analyzer-commons` directory a `.env` file containing [your personal GitHub access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens), like:
+
+```env
+GH_TOKEN=....
+```
+
+or having set an environment variable named `GH_TOKEN`.
+
+{{< /hint >}}
+
+---
+
 The example is structured in two different packages: `lib` and `client`. The former contains the logic of the library, while the latter contains the application (client code).
 As usual, it has been implemented using monadic `Future`s, as well as using Scala Gears and Kotlin Coroutines.
 
@@ -439,28 +461,6 @@ override def analyze(organizationName: String)(
 2. the `foreach` method of `TerminableChannel` is used to iterate over all the repositories sent over the channel as soon as they are retrieved by the service. This is a blocking operation, i.e. it suspends until all the repositories are retrieved;
 3. we start the analysis in a separate `Future` (i.e. thread): this allows you to start the analysis as soon as a repository is fetched by the channel, preventing starting the analysis of the next repository only when the previous one is finished;
 4. once all the repositories are retrieved, i.e. the `foreach` terminates, we wait for the completion of all the started `Future`s. Indeed, when the `foreach` terminates, we have the guarantee that all started futures have been started, but not yet completed!
-
----
-
-To start the application:
-
-```bash
-./gradlew analyzer-direct:run
-```
-
-{{< hint warning >}}
-
-In order to run the application you need to place inside the `analyzer-commons` directory a `.env` file containing [your personal GitHub access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens), like:
-
-```env
-GH_TOKEN=....
-```
-
-or having set an environment variable named `GH_TOKEN`.
-
-{{< /hint >}}
-
----
 
 ### Kotlin Coroutines version
 

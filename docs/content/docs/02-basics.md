@@ -45,6 +45,12 @@ The example is organized into Gradle submodules:
 - `blog-ws-direct` contains the direct version using Scala Gears;
 - `blog-ws-direct-kt` contains the direct version using Kotlin Coroutines.
 
+For this example just the tests are provided. You can explore them in the `test` folders and run via Gradle using the name of the submodule:
+
+```
+./gradlew :blog-ws-<monadic | direct | direct-kt>:test
+```
+
 ### Structure
 
 The domain is modeled using abstract data types in a common `PostsModel` trait:
