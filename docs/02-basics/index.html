@@ -13,7 +13,7 @@ Lack of referential transparency; Lack of cancellation mechanisms and structured
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/02-basics/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-03-04T14:52:54+01:00" />
+<meta property="article:modified_time" content="2024-03-04T18:57:39+01:00" />
 
 <title>02 Basics | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
@@ -21,7 +21,7 @@ Lack of referential transparency; Lack of cancellation mechanisms and structured
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/02-basics/">
 <link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.3079c33e46bf5b308bdbfa938bf6043ba270f82b73e2ada92c1da0aacca6df5c.css" integrity="sha256-MHnDPka/WzCL2/qTi/YEO6Jw&#43;Ctz4q2pLB2gqsym31w=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.ac27a6f81b242ca82529eb8c6965d3d892525c0d8b74d31e4fd1652cce928db6.js" integrity="sha256-rCem&#43;BskLKglKeuMaWXT2JJSXA2LdNMeT9FlLM6SjbY=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.7a116cc67b7551be7d8aef10321ace3563e766b49af7377987d400daa542b9aa.js" integrity="sha256-ehFsxnt1Ub59iu8QMhrONWPnZrSa9zd5h9QA2qVCuao=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -571,8 +571,9 @@ classDiagram
 </ul>
 </li>
 <li>
-<p><code>Future</code>s are nestable; <strong>the lifetime of nested computations is contained within the lifetime of enclosing ones</strong>. This is achieved using <code>CompletionGroup</code>s, which are cancellable objects themselves and serve as containers for other cancellable objects, that once canceled, all of its members are canceled as well.</p>
+<p><code>Future</code>s are nestable; <strong>the lifetime of nested computations is contained within the lifetime of enclosing ones</strong>. This is achieved using <strong><code>CompletionGroup</code>s</strong>, which are cancellable objects themselves and serve as <strong>containers for other cancellable objects</strong>; <strong>once they are canceled, all of their members are canceled as well</strong>.</p>
 <ul>
+<li>The group is accessible through <code>Async.current.group</code>;</li>
 <li>A cancellable object can be included inside the cancellation group of the async context using the <code>link</code> method; this is what the <a href="https://github.com/lampepfl/gears/blob/07989ffdae153b2fe11ac1ece53ce9dd1dbd18ef/shared/src/main/scala/async/futures.scala#L140">implementation of the <code>Future</code> does, under the hood</a>.</li>
 </ul>
 </li>
@@ -608,14 +609,14 @@ classDiagram
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span><span style="color:#8839ef">val</span> contentVerifier <span style="color:#8839ef">=</span> verifyContent<span style="color:#04a5e5;font-weight:bold">(</span>title<span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#04a5e5;font-weight:bold">).</span>run
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">val</span> authorizer <span style="color:#8839ef">=</span> authorBy<span style="color:#04a5e5;font-weight:bold">(</span>authorId<span style="color:#04a5e5;font-weight:bold">).</span>run
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">val</span> <span style="color:#04a5e5;font-weight:bold">(</span>post<span style="color:#04a5e5;font-weight:bold">,</span> author<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=</span> contentVerifier<span style="color:#04a5e5;font-weight:bold">.</span>zip<span style="color:#04a5e5;font-weight:bold">(</span>authorizer<span style="color:#04a5e5;font-weight:bold">).</span>awaitResult<span style="color:#04a5e5;font-weight:bold">.?</span>
-</span></span></code></pre></div><p>👉🏻 To showcase the structured concurrency and cancellation mechanisms of Scala Gears tests have been prepared:</p>
+</span></span></code></pre></div></li>
+</ul>
+</li>
+</ul>
+<p>👉🏻 To showcase the structured concurrency and cancellation mechanisms of Scala Gears tests have been prepared:</p>
 <ul>
-<li><a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/StructuredConcurrencyTest.scala"><code>StructuredConcurrencyTest</code></a></li>
-<li><a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/CancellationTest.scala"><code>CancellationTest</code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li><a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/StructuredConcurrencyTest.scala"><code>StructuredConcurrencyTest</code></a></li>
+<li><a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/CancellationTest.scala"><code>CancellationTest</code></a></li>
 </ul>
 <p>Other combinator methods, available on <code>Future</code>s instance:</p>
 <table>
@@ -691,22 +692,22 @@ classDiagram
 </span></span><span style="display:flex;"><span>      <span style="color:#9ca0b0;font-style:italic">/** Returns the context of this scope. */</span>
 </span></span><span style="display:flex;"><span>      <span style="color:#8839ef">public</span> <span style="color:#8839ef">val</span> <span style="color:#fe640b">coroutineContext</span>: CoroutineContext
 </span></span><span style="display:flex;"><span>  }
-</span></span></code></pre></div><p>Every coroutine must be executed in a coroutine context which is a collection of key-value pairs that provide contextual information for the coroutine, including a dispatcher, that determines what thread or threads the coroutine uses for its execution, and the <code>Job</code> of the coroutine, which represents a cancellable background piece of work with a life cycle that culminates in its completion.</p>
+</span></span></code></pre></div><p>Every coroutine must be executed in a coroutine context, which is a collection of key-value pairs that provide contextual information for the coroutine, including a dispatcher, that determines what thread or threads the coroutine uses for its execution, and the <code>Job</code> of the coroutine, which represents a cancellable background piece of work with a life cycle that culminates in its completion.</p>
 <ul>
 <li>
 <p>Different ways to create a scope:</p>
 <ul>
-<li><code>GlobalScope.launch</code> launching a new coroutine in the global scope &ndash; <em>discouraged because it can lead to memory leaks</em></li>
-<li><code>CoroutineScope(Dispatchers.Default)</code>, using the constructor with a dispatcher</li>
-<li><code>runBlocking</code> - equivalent to the Gears <code>Async.blocking</code> - provides a way to run a coroutine in the <code>MainScope</code>, i.e. on the main/UI thread</li>
+<li><code>GlobalScope.launch</code> launching a new coroutine in the global scope &ndash; <em>discouraged because it can lead to memory leaks</em>;</li>
+<li><code>CoroutineScope(Dispatchers.Default)</code>, using the constructor with a dispatcher;</li>
+<li><code>runBlocking</code> - equivalent to the Gears <code>Async.blocking</code> - provides a way to run a coroutine in the <code>MainScope</code>, i.e. on the main/UI thread.</li>
 </ul>
 </li>
 <li>
 <p>Useful dispatchers:</p>
 <ul>
-<li><code>Default dispatcher</code>: to run CPU-intensive functions. If we forget to choose our dispatcher, this dispatcher will be selected by default.</li>
-<li><code>IO dispatcher</code>: to run I-O bound computation, where we block waiting for input-output operations to complete, like network-related operations, file operations, etc.</li>
-<li><code>Unconfined dispatcher</code>: it isn&rsquo;t restricted to a particular thread, i.e. doesn&rsquo;t change the thread of the coroutine, it operates on the same thread where it was initiated.</li>
+<li><code>Default dispatcher</code>: to run CPU-intensive functions. If we forget to choose our dispatcher, this dispatcher will be selected by default;</li>
+<li><code>IO dispatcher</code>: to run I-O bound computation, where we block waiting for input-output operations to complete, like network-related operations, file operations, etc.;</li>
+<li><code>Unconfined dispatcher</code>: it isn&rsquo;t restricted to a particular thread, i.e. doesn&rsquo;t change the thread of the coroutine, it operates on the same thread where it was initiated;</li>
 <li><code>Main dispatcher</code>: used when we want to interact with the UI. It is restricted to the main thread.</li>
 </ul>
 </li>
@@ -769,7 +770,12 @@ classDiagram
 <li>a <code>coroutineScope</code> is a suspending function used to create a new coroutine scope: it suspends the execution of the current coroutine, releasing the underlying thread for other usages;</li>
 <li>As we said previously, the failure of a child with an exception immediately cancels its parent and, consequently, all its other children: this means that, for handling the cancellation of nested coroutines, we don&rsquo;t need to do anything special, it is already automatically handled by the library.
 <ul>
-<li><a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/kotlin/io/github/tassiLuca/dse/CancellationTest.kt">No matter the order in which coroutines are awaited, if one of them fails all the others get cancelled</a></li>
+<li>with <code>coroutineScope</code> no matter the order in which coroutines are awaited, if one of them fails with an exception it is propagated upwards, cancelling all other ones
+<ul>
+<li>this is not the case for <code>supervisorScope</code>, a coroutine builder ensuring that child coroutines can fail independently without affecting the parent coroutine.</li>
+<li>have a look to <a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/blog-ws-direct-kt/src/test/kotlin/io/github/tassiLuca/dse/CoroutinesCancellationTests.kt">this test</a></li>
+</ul>
+</li>
 <li>This is an advantage over the Scala Gears, where operators like <code>zip</code> and <code>altWithCancel</code> are necessary!</li>
 </ul>
 </li>
@@ -785,6 +791,28 @@ classDiagram
 <li>As <a href="https://github.com/lampepfl/gears/issues/19#issuecomment-1732586362">stated by M. Odersky</a> the <code>Async</code> capability is better than <code>suspend</code> in Kotlin because let defines functions that work for synchronous as well as asynchronous function arguments.</li>
 </ul>
 </blockquote>
+
+
+
+  
+  
+
+
+<a  href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/01-boundaries"   target="_blank" rel="noopener"  class="book-btn">
+  <strong>Previous</strong>: boundary &amp; break
+</a>
+
+
+
+
+  
+  
+
+
+<a  href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/03-channels/"   target="_blank" rel="noopener"  class="book-btn">
+  <strong>Next</strong>: Channels as a communication primitive
+</a>
+
 </article>
  
       
@@ -794,7 +822,7 @@ classDiagram
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/2c4f8075d79bb79f069b94683121de5b5d24a109" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/7a77702ad9fad2340a958cd8ad5a89c99bfc5294" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
       <span>March 4, 2024</span>
     </a>

@@ -12,7 +12,7 @@
       <link>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/01-boundaries/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/01-boundaries/</guid>
-      <description>boundary &amp;amp; break # [Source code]&#xA;boundary &amp;amp; break mechanism provides a cleaner alternative to non-local returns:&#xA;boundary: is short for boundary.apply: the indented code below it is passed as body is a context function that is called within boundary.apply to break an in-scope given instance of Label is required (i.e. is impossible break without an enclosing boundary) Users don&amp;rsquo;t define Label instances themselves. Instead, this is done inside the implementation of boundary.</description>
+      <description>boundary &amp;amp; break # boundary &amp;amp; break Modeling error handling data types with non-local breaks Optional Either + ? boundary &amp;amp; break mechanism provides a cleaner alternative to non-local returns:&#xA;boundary: is short for boundary.apply: the indented code below, passed as body, is a context function that is called within boundary.apply to break, an in-scope given instance of Label is required (i.e. is impossible to break without an enclosing boundary) Users don&amp;rsquo;t define Label instances themselves.</description>
     </item>
     <item>
       <title></title>
@@ -40,7 +40,7 @@
       <link>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/05-conclusions/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/05-conclusions/</guid>
-      <description>Going further and conclusions # Recap # Channels are the basic communication primitive for exchanging data between Futures/Coroutines and they are primarily used to model data sources that are intrinsically hot, i.e. that exist without application&amp;rsquo;s request from them: incoming network connections, event streams, etc&amp;hellip; Flows are control structures, containing executable code. When we call the collect method we invoke the code inside the flow, like executing function&amp;rsquo;s code by calling it.</description>
+      <description>Going further and conclusions # Recap # Channels are the basic communication primitive for exchanging data between Futures/Coroutines and they are primarily used to model data sources that are intrinsically hot, i.e. Flows are control structures, containing executable code. When we call the collect method we invoke the code inside the flow, like executing function&amp;rsquo;s code by calling it. Conclusions and Final Considerations # To conclude, in this project, the main direct-style asynchronous programming abstractions offered by the Kotlin Coroutines and Scala&amp;rsquo;s new, still entirely experimental library proposal, Gears, were analyzed.</description>
     </item>
   </channel>
 </rss>

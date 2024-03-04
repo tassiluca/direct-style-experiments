@@ -3,19 +3,17 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="boundary &amp; break # [Source code]
-boundary &amp; break mechanism provides a cleaner alternative to non-local returns:
-boundary: is short for boundary.apply: the indented code below it is passed as body is a context function that is called within boundary.apply to break an in-scope given instance of Label is required (i.e. is impossible break without an enclosing boundary) Users don&rsquo;t define Label instances themselves. Instead, this is done inside the implementation of boundary.">
+<meta name="description" content="boundary &amp; break # boundary &amp; break Modeling error handling data types with non-local breaks Optional Either &#43; ? boundary &amp; break mechanism provides a cleaner alternative to non-local returns:
+boundary: is short for boundary.apply: the indented code below, passed as body, is a context function that is called within boundary.apply to break, an in-scope given instance of Label is required (i.e. is impossible to break without an enclosing boundary) Users don&rsquo;t define Label instances themselves.">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
-<meta property="og:description" content="boundary &amp; break # [Source code]
-boundary &amp; break mechanism provides a cleaner alternative to non-local returns:
-boundary: is short for boundary.apply: the indented code below it is passed as body is a context function that is called within boundary.apply to break an in-scope given instance of Label is required (i.e. is impossible break without an enclosing boundary) Users don&rsquo;t define Label instances themselves. Instead, this is done inside the implementation of boundary." />
+<meta property="og:description" content="boundary &amp; break # boundary &amp; break Modeling error handling data types with non-local breaks Optional Either &#43; ? boundary &amp; break mechanism provides a cleaner alternative to non-local returns:
+boundary: is short for boundary.apply: the indented code below, passed as body, is a context function that is called within boundary.apply to break, an in-scope given instance of Label is required (i.e. is impossible to break without an enclosing boundary) Users don&rsquo;t define Label instances themselves." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/01-boundaries/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-03-04T11:09:36+01:00" />
+<meta property="article:modified_time" content="2024-03-04T18:57:39+01:00" />
 
 <title>01 Boundaries | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
@@ -23,7 +21,7 @@ boundary: is short for boundary.apply: the indented code below it is passed as b
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/01-boundaries/">
 <link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.3079c33e46bf5b308bdbfa938bf6043ba270f82b73e2ada92c1da0aacca6df5c.css" integrity="sha256-MHnDPka/WzCL2/qTi/YEO6Jw&#43;Ctz4q2pLB2gqsym31w=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.ac27a6f81b242ca82529eb8c6965d3d892525c0d8b74d31e4fd1652cce928db6.js" integrity="sha256-rCem&#43;BskLKglKeuMaWXT2JJSXA2LdNMeT9FlLM6SjbY=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.7a116cc67b7551be7d8aef10321ace3563e766b49af7377987d400daa542b9aa.js" integrity="sha256-ehFsxnt1Ub59iu8QMhrONWPnZrSa9zd5h9QA2qVCuao=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -187,15 +185,27 @@ https://github.com/alex-shpak/hugo-book
   <code>boundary</code> &amp; <code>break</code>
   <a class="anchor" href="#boundary--break">#</a>
 </h1>
-<p>[<a href="https://github.com/lampepfl/dotty/blob/3.3.0-RC4/library/src/scala/util/boundary.scala">Source code</a>]</p>
+<ul>
+<li><a href="#boundary--break"><code>boundary</code> &amp; <code>break</code></a>
+<ul>
+<li><a href="#modeling-error-handling-data-types-with-non-local-breaks">Modeling error handling data types with non-local breaks</a>
+<ul>
+<li><a href="#optional"><code>Optional</code></a></li>
+<li><a href="#either--"><code>Either</code> + <code>?</code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 <p><code>boundary</code> &amp; <code>break</code> mechanism provides a cleaner alternative to non-local returns:</p>
 <ul>
 <li><code>boundary:</code> is short for <code>boundary.apply:</code></li>
-<li>the indented code below it is passed as <code>body</code> is a context function that is called within <code>boundary.apply</code>
+<li>the indented code below, passed as <code>body</code>, is a context function that is called within <code>boundary.apply</code>
 <ul>
-<li>to <code>break</code> an in-scope <code>given</code> instance of <code>Label</code> is required (i.e. is impossible <code>break</code> without an enclosing <code>boundary</code>)</li>
-<li>Users don&rsquo;t define <code>Label</code> instances themselves. Instead, this is done inside the implementation of <code>boundary.apply</code> to provide the capability of doing a non-local return
-<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** Run `body` with freshly generated label as implicit argument. 
+<li>to <code>break</code>, an in-scope <code>given</code> instance of <code>Label</code> is required (i.e. is impossible to <code>break</code> without an enclosing <code>boundary</code>)</li>
+<li>Users don&rsquo;t define <code>Label</code> instances themselves. Instead, this is done inside the implementation of <code>boundary.apply</code> to provide the capability of doing a non-local return [<a href="https://github.com/lampepfl/dotty/blob/3.3.0-RC4/library/src/scala/util/boundary.scala">Ref</a>]:
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">// From the Scala 3 standard library
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span><span style="color:#9ca0b0;font-style:italic">/** Run `body` with freshly generated label as implicit argument. 
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * Catch any breaks associated with that label and return their 
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  * results instead of `body`&#39;s result.
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">  */</span>
@@ -223,6 +233,8 @@ But, most importantly, they <strong>lay the foundations</strong> (along with a <
   Modeling error handling data types with non-local breaks
   <a class="anchor" href="#modeling-error-handling-data-types-with-non-local-breaks">#</a>
 </h2>
+<p>In the following section are presented two data types that can be used to handle errors, both leveraging the <code>boundary</code> and <code>break</code> mechanism.
+The first (<code>optional</code>) has been presented in the <a href="https://www.google.com/search?client=safari&amp;rls=en&amp;q=direct&#43;style&#43;odersky&amp;ie=UTF-8&amp;oe=UTF-8">Scalar conference by M. Odersky</a>, while the second has been implemented to apply the same style also to <code>Either</code> data type.</p>
 <h3 id="optional">
   <code>Optional</code>
   <a class="anchor" href="#optional">#</a>
@@ -245,7 +257,7 @@ But, most importantly, they <strong>lay the foundations</strong> (along with a <
   <code>Either</code> + <code>?</code>
   <a class="anchor" href="#either--">#</a>
 </h3>
-<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** Represents a computation that will hopefully return a [[Right]] value, but might fail with a [[Left]] one. */</span>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** Represents a computation that will hopefully return a [[Right]] value but might fail with a [[Left]] one.*/</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">object</span> <span style="color:#df8e1d">either</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  <span style="color:#d20f39">/**</span> <span style="color:#d20f39">Defines</span> <span style="color:#d20f39">the</span> <span style="color:#d20f39">boundary</span> <span style="color:#d20f39">for</span> <span style="color:#d20f39">the</span> <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">]]</span> returning computation<span style="color:#04a5e5;font-weight:bold">,</span> whose <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">body</span><span style="color:#04a5e5;font-weight:bold">]]</span> is given in input<span style="color:#04a5e5;font-weight:bold">.</span> <span style="color:#04a5e5;font-weight:bold">*/</span>
@@ -262,12 +274,13 @@ But, most importantly, they <strong>lay the foundations</strong> (along with a <
 </span></span><span style="display:flex;"><span>      <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Left</span><span style="color:#04a5e5;font-weight:bold">(</span>value<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> break<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Left</span><span style="color:#04a5e5;font-weight:bold">(</span>value<span style="color:#04a5e5;font-weight:bold">))</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  extension <span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">](</span>t<span style="color:#8839ef">:</span> <span style="color:#d20f39">Try</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">])</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** @return this [[Success]] value or break to the enclosing boundary with a [[Left]] containing the converted
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">      *         `Throwable` exception performed by the implicit [[converter]].
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** @return this [[Success]] value or break to the enclosing boundary with a [[Left]] containing 
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">      *         the converted `Throwable` exception performed by the implicit [[converter]].
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">      */</span>
-</span></span><span style="display:flex;"><span>    inline <span style="color:#8839ef">def</span> <span style="color:#04a5e5;font-weight:bold">?[</span><span style="color:#d20f39">L</span><span style="color:#04a5e5;font-weight:bold">](</span>using <span style="color:#df8e1d">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Left</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">Nothing</span><span style="color:#04a5e5;font-weight:bold">]])(</span>using converter<span style="color:#8839ef">:</span> <span style="color:#d20f39">Conversion</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Throwable</span>, <span style="color:#d20f39">L</span><span style="color:#04a5e5;font-weight:bold">])</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">R</span> <span style="color:#04a5e5;font-weight:bold">=</span> t <span style="color:#8839ef">match</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Success</span><span style="color:#04a5e5;font-weight:bold">(</span>value<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> value
-</span></span><span style="display:flex;"><span>      <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Failure</span><span style="color:#04a5e5;font-weight:bold">(</span>exception<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> break<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Left</span><span style="color:#04a5e5;font-weight:bold">(</span>converter<span style="color:#04a5e5;font-weight:bold">(</span>exception<span style="color:#04a5e5;font-weight:bold">)))</span>
+</span></span><span style="display:flex;"><span>    inline <span style="color:#8839ef">def</span> <span style="color:#04a5e5;font-weight:bold">?[</span><span style="color:#d20f39">L</span><span style="color:#04a5e5;font-weight:bold">](</span>using <span style="color:#df8e1d">Label</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Left</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">L</span>, <span style="color:#d20f39">Nothing</span><span style="color:#04a5e5;font-weight:bold">]])(</span>using converter<span style="color:#8839ef">:</span> <span style="color:#d20f39">Conversion</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Throwable</span>, <span style="color:#d20f39">L</span><span style="color:#04a5e5;font-weight:bold">])</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">R</span> <span style="color:#04a5e5;font-weight:bold">=</span> 
+</span></span><span style="display:flex;"><span>      t <span style="color:#8839ef">match</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Success</span><span style="color:#04a5e5;font-weight:bold">(</span>value<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> value
+</span></span><span style="display:flex;"><span>        <span style="color:#8839ef">case</span> <span style="color:#df8e1d">Failure</span><span style="color:#04a5e5;font-weight:bold">(</span>exception<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> break<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Left</span><span style="color:#04a5e5;font-weight:bold">(</span>converter<span style="color:#04a5e5;font-weight:bold">(</span>exception<span style="color:#04a5e5;font-weight:bold">)))</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** An object encapsulating a collection of `Throwable` given converters. */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">object</span> <span style="color:#df8e1d">EitherConversions</span><span style="color:#8839ef">:</span>
@@ -275,6 +288,28 @@ But, most importantly, they <strong>lay the foundations</strong> (along with a <
 </span></span><span style="display:flex;"><span>  <span style="color:#d20f39">/**</span> <span style="color:#d20f39">Converts</span> <span style="color:#d20f39">a</span> <span style="color:#d20f39">`Throwable`</span> <span style="color:#d20f39">to</span> <span style="color:#d20f39">a</span> <span style="color:#d20f39">`String`</span> <span style="color:#d20f39">with</span> <span style="color:#d20f39">its</span> <span style="color:#d20f39">message.</span> <span style="color:#d20f39">*/</span>
 </span></span><span style="display:flex;"><span>  given <span style="color:#df8e1d">Conversion</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Throwable</span>, <span style="color:#d20f39">String</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#8839ef">_</span><span style="color:#04a5e5;font-weight:bold">.</span>getMessage
 </span></span></code></pre></div><p>This kind of data type will be particularly useful in the next examples to quickly break in case of failures, returning the caller a meaningful error message, and simplifying the error-handling code.</p>
+
+
+
+  
+  
+
+
+<a  href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/"   target="_blank" rel="noopener"  class="book-btn">
+  <strong>Home</strong>
+</a>
+
+
+
+
+  
+  
+
+
+<a  href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/02-basics/"   target="_blank" rel="noopener"  class="book-btn">
+  <strong>Next</strong>: Basic asynchronous constructs
+</a>
+
 </article>
  
       
@@ -284,7 +319,7 @@ But, most importantly, they <strong>lay the foundations</strong> (along with a <
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/7c360a9b87a6d66c7a9f12b7f79f48a2a83a9d12" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/7a77702ad9fad2340a958cd8ad5a89c99bfc5294" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
       <span>March 4, 2024</span>
     </a>

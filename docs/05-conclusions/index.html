@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Going further and conclusions # Recap # Channels are the basic communication primitive for exchanging data between Futures/Coroutines and they are primarily used to model data sources that are intrinsically hot, i.e. that exist without application&rsquo;s request from them: incoming network connections, event streams, etc&hellip; Flows are control structures, containing executable code. When we call the collect method we invoke the code inside the flow, like executing function&rsquo;s code by calling it.">
+<meta name="description" content="Going further and conclusions # Recap # Channels are the basic communication primitive for exchanging data between Futures/Coroutines and they are primarily used to model data sources that are intrinsically hot, i.e. Flows are control structures, containing executable code. When we call the collect method we invoke the code inside the flow, like executing function&rsquo;s code by calling it. Conclusions and Final Considerations # To conclude, in this project, the main direct-style asynchronous programming abstractions offered by the Kotlin Coroutines and Scala&rsquo;s new, still entirely experimental library proposal, Gears, were analyzed.">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
-<meta property="og:description" content="Going further and conclusions # Recap # Channels are the basic communication primitive for exchanging data between Futures/Coroutines and they are primarily used to model data sources that are intrinsically hot, i.e. that exist without application&rsquo;s request from them: incoming network connections, event streams, etc&hellip; Flows are control structures, containing executable code. When we call the collect method we invoke the code inside the flow, like executing function&rsquo;s code by calling it." />
+<meta property="og:description" content="Going further and conclusions # Recap # Channels are the basic communication primitive for exchanging data between Futures/Coroutines and they are primarily used to model data sources that are intrinsically hot, i.e. Flows are control structures, containing executable code. When we call the collect method we invoke the code inside the flow, like executing function&rsquo;s code by calling it. Conclusions and Final Considerations # To conclude, in this project, the main direct-style asynchronous programming abstractions offered by the Kotlin Coroutines and Scala&rsquo;s new, still entirely experimental library proposal, Gears, were analyzed." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/05-conclusions/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-03-04T11:09:36+01:00" />
+<meta property="article:modified_time" content="2024-03-04T18:57:39+01:00" />
 
 <title>05 Conclusions | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
@@ -19,7 +19,7 @@
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/05-conclusions/">
 <link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.3079c33e46bf5b308bdbfa938bf6043ba270f82b73e2ada92c1da0aacca6df5c.css" integrity="sha256-MHnDPka/WzCL2/qTi/YEO6Jw&#43;Ctz4q2pLB2gqsym31w=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.ac27a6f81b242ca82529eb8c6965d3d892525c0d8b74d31e4fd1652cce928db6.js" integrity="sha256-rCem&#43;BskLKglKeuMaWXT2JJSXA2LdNMeT9FlLM6SjbY=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.7a116cc67b7551be7d8aef10321ace3563e766b49af7377987d400daa542b9aa.js" integrity="sha256-ehFsxnt1Ub59iu8QMhrONWPnZrSa9zd5h9QA2qVCuao=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -188,7 +188,7 @@ https://github.com/alex-shpak/hugo-book
   <a class="anchor" href="#recap">#</a>
 </h2>
 <ul>
-<li><code>Channel</code>s are the basic communication primitive for exchanging data between <code>Future</code>s/<code>Coroutines</code> and they are primarily used to model data sources that are <em>intrinsically hot</em>, i.e. <strong>that exist without application&rsquo;s request from them</strong>: incoming network connections, event streams, etc&hellip;</li>
+<li><code>Channel</code>s are the basic communication primitive for exchanging data between <code>Future</code>s/<code>Coroutines</code> and they are primarily used to model data sources that are <em>intrinsically hot</em>, i.e.</li>
 <li><code>Flow</code>s are control structures, containing executable code. When we call the <code>collect</code> method we invoke the code inside the flow, like executing function&rsquo;s code by calling it.</li>
 </ul>
 <h2 id="conclusions-and-final-considerations">
@@ -197,6 +197,17 @@ https://github.com/alex-shpak/hugo-book
 </h2>
 <p>To conclude, in this project, the main direct-style asynchronous programming abstractions offered by the Kotlin Coroutines and Scala&rsquo;s new, still entirely experimental library proposal, Gears, were analyzed.
 During the analysis, input was also provided for its possible extension where it was deemed lacking compared to the Kotlin framework.</p>
+
+
+
+  
+  
+
+
+<a  href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/"   target="_blank" rel="noopener"  class="book-btn">
+  <strong>Home</strong>
+</a>
+
 </article>
  
       
@@ -206,7 +217,7 @@ During the analysis, input was also provided for its possible extension where it
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/7c360a9b87a6d66c7a9f12b7f79f48a2a83a9d12" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/7a77702ad9fad2340a958cd8ad5a89c99bfc5294" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
       <span>March 4, 2024</span>
     </a>
