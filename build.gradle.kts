@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.scalatest)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.dokka)
-    alias(libs.plugins.kotlin.qa)
 }
 
 val projectRepository = projectDir.resolve("libs")
@@ -17,7 +16,6 @@ allprojects {
         apply(plugin = "scala")
         apply(plugin = kotlin.jvm.get().pluginId)
         apply(plugin = dokka.get().pluginId)
-        apply(plugin = kotlin.qa.get().pluginId)
     }
 
     if (!this.name.contains("kt")) {

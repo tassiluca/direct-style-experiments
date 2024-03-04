@@ -5,7 +5,8 @@ interface Analyzer {
 
     /**
      * Performs a **suspending** analysis of the [organizationName]'s repositories, providing the results
-     * incrementally to the [updateResults] function, along with the indication of the completion.
+     * incrementally to the [updateResults] function.
+     * @return a successful [Result], containing the set of [RepositoryReport]s or a failure [Result] if the analysis.
      */
     suspend fun analyze(
         organizationName: String,

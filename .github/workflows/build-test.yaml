@@ -37,8 +37,12 @@ jobs:
         run: ./gradlew test
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build
+      - name: Assemble classes and test classes
         run: ./gradlew classes testClasses
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build
+        run: ./gradlew build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
