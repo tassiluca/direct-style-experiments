@@ -4,8 +4,8 @@
 	<meta name="generator" content="Hugo 0.123.7">
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content=" Direct style for Functional Reactive Programming: an analysis in Scala &amp; Kotlin # Goals of the project # Develop a few examples (not too complex) using asynchronous constructs and try to implement these examples in the two variants: using the current implementation of futures based on monadic constructs and the style that adopts gears (direct style). Analyze aspects such as:
-ergonomicity of the two styles (which one results more thoughtful and/or verbose) which of the two approaches has a real advantage in adoption, and when Pros and cons of the two styles how and when to use one approach rather than the other any limitations and difficulties encountered in using them Table of contents # Boundary and break Basic asynchronous constructs Channels as a communication primitive Reactive-like direct style Conclusions ">
+<meta name="description" content="Direct style for Functional Reactive Programming: an analysis in Scala &amp; Kotlin # Goals of the project # In the realm of asynchronous programming, the Scala ecosystem offers a set of solid monads constructs to tackle complex task functionally with elegance and efficiency, like [Monix Tasks]( and [Cats ](
+However, we are assisting to the increase in adoption of continuation and coroutines in modern runtimes, either exploiting some kind of fibers support, like the project Loom with Virtual Thread in the JVM ecosystem, or via code generation, like Kotlin Coroutines.">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
@@ -183,7 +183,7 @@ https://github.com/alex-shpak/hugo-book
 <nav id="TableOfContents">
   <ul>
     <li><a href="#goals-of-the-project">Goals of the project</a></li>
-    <li><a href="#table-of-contents">Table of contents</a></li>
+    <li><a href="#overview">Overview</a></li>
   </ul>
 </nav>
 
@@ -205,20 +205,22 @@ https://github.com/alex-shpak/hugo-book
   <a class="anchor" href="#goals-of-the-project">#</a>
 </h2>
 <blockquote>
-<p>Develop a few examples (not too complex) using asynchronous constructs and try to implement these examples in the two variants: using the current implementation of futures based on monadic constructs and the style that adopts gears (direct style).
-Analyze aspects such as:</p>
+<p>In the realm of asynchronous programming, the Scala ecosystem offers a set of solid monads constructs to tackle complex task functionally with elegance and efficiency, like [Monix Tasks]( and [Cats ](</p>
+<p>However, we are assisting to the increase in adoption of continuation and coroutines in modern runtimes, either exploiting some kind of fibers support, like the project Loom with Virtual Thread in the JVM ecosystem, or via code generation, like Kotlin Coroutines.</p>
+<p>The goal of this project is to delve into this field through the lens of direct style, developing few examples (not too complex) leveraging the new <em>strawman</em> library <a href="https://github.com/lampepfl/gears">Scala Gears</a>, comparing it with Kotlin&rsquo;s Coroutines and the current implementation of monadic Futures, seeking to analyze aspects such as:</p>
 <ul>
 <li>ergonomicity of the two styles (which one results more thoughtful and/or verbose)</li>
-<li>which of the two approaches has a real advantage in adoption, and when</li>
-<li>Pros and cons of the two styles</li>
+<li>which of the two approaches has a real advantage in adoption</li>
+<li>pros and cons of the two styles</li>
 <li>how and when to use one approach rather than the other</li>
 <li>any limitations and difficulties encountered in using them</li>
 </ul>
 </blockquote>
-<h2 id="table-of-contents">
-  Table of contents
-  <a class="anchor" href="#table-of-contents">#</a>
+<h2 id="overview">
+  Overview
+  <a class="anchor" href="#overview">#</a>
 </h2>
+<p>The project is built around three main example, delving from the fundamentals of the direct style framweork for simple asynchronous computation to reactive like systems.</p>
 <ol>
 <li><a href="./docs/01-boundaries"><code>Boundary</code> and <code>break</code></a></li>
 <li><a href="./docs/02-basics">Basic asynchronous constructs</a></li>
@@ -235,9 +237,9 @@ Analyze aspects such as:</p>
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/d04242c53996c0560db29ddc118ff07df4c55187" title='Last modified by Luca Tassinari | February 25, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/567b8bf783d4a59de9acc970d2d2f9c586f9510a" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>February 25, 2024</span>
+      <span>March 4, 2024</span>
     </a>
   </div>
 
@@ -274,7 +276,7 @@ Analyze aspects such as:</p>
 <nav id="TableOfContents">
   <ul>
     <li><a href="#goals-of-the-project">Goals of the project</a></li>
-    <li><a href="#table-of-contents">Table of contents</a></li>
+    <li><a href="#overview">Overview</a></li>
   </ul>
 </nav>
 
