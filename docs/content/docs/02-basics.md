@@ -521,6 +521,6 @@ private suspend fun verifyContent(title: String, body: String): PostContent { ..
 > - Kotlin Coroutines handles the cancellation of nested coroutines more easily than Scala Gears, where special attention is required;
 > - As [stated by M. Odersky](https://github.com/lampepfl/gears/issues/19#issuecomment-1732586362) the `Async` capability is better than `suspend` in Kotlin because let defines functions that work for synchronous as well as asynchronous function arguments.
 
-{{< button href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/01-boundaries" >}} **Previous**: boundary & break{{< /button >}}
+{{< button relref="/01-boundaries" >}} **Previous**: boundary & break{{< /button >}}
 
-{{< button href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/03-channels/" >}} **Next**: Channels as a communication primitive {{< /button >}}
+{{< button relref="/03-channels" >}} **Next**: Channels as a communication primitive {{< /button >}}

@@ -26,4 +26,38 @@ Here's the outline of the conducted analysis:
 4. [Reactivity in direct style](./docs/04-rears)
 5. [Conclusions](./docs/05-going-further)
 
-Code has been organized in Gradle submodules, one for each version of the examples (current monadic futures, Scala Gears, Kotlin Coroutines):
+Code has been organized in Gradle submodules, one for each version of the examples (current monadic futures, Scala Gears, Kotlin Coroutines).
+Here an overview of the project folder structure:
+
+```plaintext
+direct-style-experiments
+├── analyzer-commons         # common code for analyzers (UI, controller, ...)
+├── analyzer-direct          # analyzer example using Scala Gears
+├── analyzer-direct-kt       # analyzer example using Kotlin Coroutines
+├── analyzer-monadic         # analyzer example using current Futures
+├── blog-ws-commons          # common code for the blog service example
+├── blog-ws-direct           # blog service example using Scala Gears
+├── blog-ws-direct-kt        # blog service example using Kotlin Coroutines
+├── blog-ws-monadic          # blog service example using current Futures
+├── commons/                 # modules with common code for entire project
+│   ├─ src/
+│   │  └─ main/
+│   │     └─ scala/
+│   │        ├─ boundaries   # `boundary` and `break` implementations
+│   │        ├─ examples     # some common examples
+│   │        └─ pimping      # proposed extensions to the Scala Gears library
+│   └─ test                  # general tests (cancellation, structured concurrency, ...)
+├── rears                    # extensions to the Scala Gears library for Rx
+├── smart-hub-direct         # smart hub example using Scala Gears
+└── smart-hub-direct-kt      # smart hub example using Kotlin Coroutines
+```
+
+Generally speaking, the runnable examples can be run by simply executing the `run` Gradle task in the respective submodule, like:
+
+```bash
+./gradlew :analyzer-direct:run
+```
+
+Detailed instructions follows in the specific sections.
+
+**Examples works with a version of the JDK > 21** (Virtual Threads are needed!).

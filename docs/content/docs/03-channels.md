@@ -813,6 +813,6 @@ Success(The Tell-Tale Heart)
 > - The `Flow` abstraction in Kotlin Coroutines is a powerful tool for handling cold streams of data, and it is a perfect fit for functions that need to return a stream of asynchronously computed values **by request**.
 >   - A similar abstraction can be implemented in Scala Gears leveraging `Task`s and `TerminableChannel`s, enabling improved support for an asynchronous flow of data also in Gears, which is currently lacking.
 
-{{< button href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/02-basics" >}} **Previous**: Basic asynchronous constructs{{< /button >}}
+{{< button relref="/02-basics" >}} **Previous**: Basic asynchronous constructs{{< /button >}}
 
-{{< button href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/04-rears" >}} **Next**: Reactivity in direct style{{< /button >}}
+{{< button relref="/04-rears" >}} **Next**: Reactivity in direct style{{< /button >}}

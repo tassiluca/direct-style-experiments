@@ -140,7 +140,7 @@ The attempt, described in the following, has been to extend this framework addin
 - A `Producer` is a runnable entity, programmed with a `Task`, producing items on a channel. It exposes the `publishingChannel` method, which returns a `ReadableChannel` through which interested consumers can read produced items.
 - A `Consumer` is a runnable entity devoted to consuming data from a channel, exposed by the `listeningChannel` method which returns a `SendableChannel` to send items to.
   - It can be made stateful by mixing it with the `State` trait, allowing it to keep track of its state, which is updated every time with the result of the `react`ion (i.e. its return type).
-  - **Warning**: like in an event-loop, the `react`ion logic should not perform long-lasting blocking operation, otherwise, the whole system will not react to new events.
+  - **Warning** Like in an event-loop, the `react`ion logic should not perform long-lasting blocking operation, otherwise, the whole system will not react to new events: the `Async` capability is though needed if you want to give the client the ability to invoke `Future`s within this block; otherwise, another option (alternative to the following) would be to encapsulate the reaction behavior within a `Task` and run it at every received data. However, race conditions could take place in this last case.
 
 ```scala
 /** A producer, i.e. a runnable entity producing items on a channel. */
@@ -468,6 +468,8 @@ Going back to the example here is presented a schema summarizing the flows of da
     ).run
   ```
 
+---
+
 To produce a testable version of this example, a simulated source of sensor data has been created, backed to a GUI, through which the user can simulate the behavior of the sensors.
 The example is runnable via:
 
@@ -479,6 +481,8 @@ Three panels should pop up, one for each sensor type, and a dashboard showing th
 Entering some value in the panels and pressing the "Send" button, after 5 seconds (the configured sampling window), the system should react to the data received, updating the dashboard with the new state.
 
 {{< figure src="../../res/img/smart-hub.png" alt="Smart Hub application" width="90%" >}}
+
+---
 
 ### Kotlin Coroutines version
 
@@ -551,8 +555,8 @@ suspend fun run(sensorSource: Flow<TemperatureEntry>) {
 ## Takeaways
 
 - Channels in Scala Gears are fine to model flow of data **that exist without application's request from them**: incoming network connections, event streams, etc...
-- 
 
-{{< button href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/03-channels" >}} **Previous**: Channels as a communication primitive{{< /button >}}
 
-{{< button href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/05-conclusions" >}} **Next**: Conclusions{{< /button >}}
+{{< button relref="/03-channels" >}} **Previous**: Channels as a communication primitive{{< /button >}}
+
+{{< button relref="/05-conclusions" >}} **Next**: Conclusions{{< /button >}}

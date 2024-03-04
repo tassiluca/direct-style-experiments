@@ -14,4 +14,4 @@ bookToc: false
 To conclude, in this project, the main direct-style asynchronous programming abstractions offered by the Kotlin Coroutines and Scala's new, still entirely experimental library proposal, Gears, were analyzed.
 During the analysis, input was also provided for its possible extension where it was deemed lacking compared to the Kotlin framework.
 
-{{< button href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/" >}} **Home** {{< /button >}}
+{{< button relref="/" >}} **Home** {{< /button >}}

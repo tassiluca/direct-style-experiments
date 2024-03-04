@@ -99,6 +99,6 @@ object EitherConversions:
 
 This kind of data type will be particularly useful in the next examples to quickly break in case of failures, returning the caller a meaningful error message, and simplifying the error-handling code.
 
-{{< button href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/" >}} **Home** {{< /button >}}
+{{< button relref="/" >}} **Home** {{< /button >}}
 
-{{< button href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/02-basics/" >}} **Next**: Basic asynchronous constructs {{< /button >}}
+{{< button relref="/02-basics" >}} **Next**: Basic asynchronous constructs {{< /button >}}

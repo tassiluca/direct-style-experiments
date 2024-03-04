@@ -13,7 +13,17 @@
 
     &.smallest {
         width: 50%;
-    }   
+    }
+
+    @media screen and (max-width: 768px) {
+        &.smaller {
+            width: 100%;
+        }
+
+        &.smallest {
+            width: 100%;
+        }
+    }
 }
 
 figure.center {
