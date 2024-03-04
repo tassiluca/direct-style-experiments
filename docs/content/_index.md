@@ -11,8 +11,7 @@
 > - ergonomics of the two styles (which one results more thoughtful and/or verbose);
 > - which of the two approaches has a real advantage in adoption;
 > - pros and cons of the two styles;
-> - how and when to use one approach rather than the other;
-> - any limitations and difficulties encountered in using them;
+> - any limitations and difficulties encountered in using them.
 
 ## Overview
 
@@ -58,6 +57,6 @@ Generally speaking, the runnable examples can be run by simply executing the `ru
 ./gradlew :analyzer-direct:run
 ```
 
-Detailed instructions follows in the specific sections.
+Detailed instructions follows in the specific sections (and in `README`).
 
 **Examples works with a version of the JDK > 21** (Virtual Threads are needed!).
