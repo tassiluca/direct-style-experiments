@@ -450,7 +450,7 @@ To start the application:
 
 {{< hint warning >}}
 
-In order to use the application you need to place inside the `analyzer-commons` module a `.env` file containing [your personal GitHub access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens), like:
+In order to run the application you need to place inside the `analyzer-commons` directory a `.env` file containing [your personal GitHub access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens), like:
 
 ```env
 GH_TOKEN=....

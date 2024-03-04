@@ -5,7 +5,7 @@ import io.github.tassiLuca.hub.core.{Luminosity, Temperature}
 
 import scala.concurrent.duration.DurationInt
 
-val samplingWindow = 5.seconds
+val samplingWindow = 10.seconds
 
 enum Message:
   case HeaterOn, HeaterOff, Alert, HeaterGetState, TemperatureUpdate, LuminosityUpdate, LightingOff, LightingOn

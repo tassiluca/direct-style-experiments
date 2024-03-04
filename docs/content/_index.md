@@ -51,12 +51,18 @@ direct-style-experiments
 └── smart-hub-direct-kt      # smart hub example using Kotlin Coroutines
 ```
 
+**IMPORTANT NOTE: Examples works with a version of the JDK > 21** (Virtual Threads are needed!).
+
+To build and run all the tests:
+
+```
+./gradlew build
+```
+
 Generally speaking, the runnable examples can be run by simply executing the `run` Gradle task in the respective submodule, like:
 
-```bash
+```
 ./gradlew :analyzer-direct:run
 ```
 
-Detailed instructions follows in the specific sections (and in `README`).
-
-**Examples works with a version of the JDK > 21** (Virtual Threads are needed!).
+Detailed instructions can be found in the `README` file of each submodule and in the [documentation](https://tassiluca.github.io/direct-style-experiments/).

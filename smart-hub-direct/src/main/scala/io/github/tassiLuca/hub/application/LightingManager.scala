@@ -11,7 +11,7 @@ import scala.language.postfixOps
 /** The hub managing the lighting system. */
 trait LightingManager extends LightingSystemComponent with LampsComponent with DashboardServiceComponent:
   override val lightingSystem: LightingSystem = LightingSystem()
-  private val samplingWindow = 5 seconds
+  private val samplingWindow = 10 seconds
 
   /** Runs the manager, spawning a new controller consuming the given [[source]] of events. */
   def run(source: ReadableChannel[LuminosityEntry])(using Async, AsyncOperations): Unit =

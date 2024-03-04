@@ -23,7 +23,7 @@ trait ThermostatManager
     with DashboardServiceComponent:
   override val thermostat: Thermostat = Thermostat(ThermostatScheduler.byHour(19))
   override val sensorHealthChecker: SensorHealthChecker = SensorHealthChecker()
-  private val samplingWindow = 5 seconds
+  private val samplingWindow = 10 seconds
 
   /** Runs the manager, spawning a new controller consuming the given [[source]] of events. */
   def run(source: ReadableChannel[TemperatureEntry])(using Async, AsyncOperations): Unit =

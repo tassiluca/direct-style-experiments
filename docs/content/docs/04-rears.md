@@ -478,7 +478,7 @@ The example is runnable via:
 ```
 
 Three panels should pop up, one for each sensor type, and a dashboard showing the state of the system.
-Entering some value in the panels and pressing the "Send" button, after 5 seconds (the configured sampling window), the system should react to the data received, updating the dashboard with the new state.
+Entering some value in the panels and pressing the "Send" button, after 10 seconds (the configured sampling window), the system should react to the data received, updating the dashboard with the new state.
 
 {{< figure src="../../res/img/smart-hub.png" alt="Smart Hub application" width="90%" >}}
 

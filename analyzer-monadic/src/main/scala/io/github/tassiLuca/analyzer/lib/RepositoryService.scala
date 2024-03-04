@@ -35,13 +35,13 @@ object RepositoryService:
     private val request = basicRequest.auth.bearer(System.getenv("GH_TOKEN"))
 
     override def repositoriesOf(organizationName: String): EitherT[Task, String, Seq[Repository]] =
-      performRequest[Seq[Repository]](uri"$apiUrl/orgs/$organizationName/repos")
+      performRequest[Seq[Repository]](uri"$apiUrl/orgs/$organizationName/repos?per_page=100")
 
     override def contributorsOf(
         organizationName: String,
         repositoryName: String,
     ): EitherT[Task, String, Seq[Contribution]] =
-      performRequest[Seq[Contribution]](uri"$apiUrl/repos/$organizationName/$repositoryName/contributors")
+      performRequest[Seq[Contribution]](uri"$apiUrl/repos/$organizationName/$repositoryName/contributors?per_page=100")
 
     override def lastReleaseOf(
         organizationName: String,
