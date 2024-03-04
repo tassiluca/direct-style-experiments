@@ -33,7 +33,7 @@
       <link>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/04-rears/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/04-rears/</guid>
-      <description>On the reactivity # So far, we&amp;rsquo;ve explored the basics of asynchronous abstraction mechanisms provided by the direct style of the Scala Gears and Kotlin Coroutines frameworks. The goal of this last example is to investigate, using a simple example, whether these two frameworks offer sufficient idiomatic abstractions to deal with event-based reactive systems.&#xA;Smart Hub example # Idea: in an IoT context, a multitude of sensors of different types, each replicated to ensure accuracy, transmit their measurements to a central hub, which in turn needs to react, in real-time, forwarding to the appropriate controller the data, possibly performing some kind of transformation.</description>
+      <description>Reactivity in direct style # So far, we&amp;rsquo;ve explored the basics of asynchronous abstraction mechanisms provided by the direct style of the Scala Gears and Kotlin Coroutines frameworks. The goal of this last example is to investigate, using a simple example, whether these two frameworks offer sufficient idiomatic abstractions to deal with event-based reactive systems.&#xA;Smart Hub example # Idea: in an IoT context, a multitude of sensors of different types, each replicated to ensure accuracy, transmit their measurements to a central hub, which in turn needs to react, in real-time, forwarding to the appropriate controller the data, possibly performing some kind of transformation.</description>
     </item>
     <item>
       <title></title>
