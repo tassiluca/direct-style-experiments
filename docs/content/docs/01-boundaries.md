@@ -89,3 +89,5 @@ object EitherConversions:
   /** Converts a `Throwable` to a `String` with its message. */
   given Conversion[Throwable, String] = _.getMessage
 ```
+
+This kind of data type will be particularly useful in the next examples to quickly break in case of failures, returning the caller a meaningful error message, and simplifying the error-handling code.

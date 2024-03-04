@@ -26,38 +26,51 @@ The example has been implemented using:
 
 - the continuation style through the current Scala `Future` monadic constructs;
 - the direct style, through:
-  - the abstractions offered by _gears_;
+  - the abstractions offered by _Gears_;
   - _Kotlin coroutines_.
 
-The example (and every subsequent one) is organized into three Gradle submodules:
+The example is organized into Gradle submodules:
 
 - `blog-ws-commons` contains code that has been reused for both the monadic and direct versions;
-- a submodule `blog-ws-monadic` with the monadic Scala style and `blog-ws-direct` for the direct versions, both in Kotlin with _coroutines_ and in Scala with _gears_.
+- `blog-ws-monadic` contains the monadic Scala style;
+- `blog-ws-direct` contains the direct version using Scala Gears;
+- `blog-ws-direct-kt` contains the direct version using Kotlin Coroutines.
 
 ### Structure
 
 The domain is modeled using abstract data types in a common `PostsModel` trait:
 
 ```scala
+/** The model of a simple blog posts service. */
 trait PostsModel:
-  type AuthorId
-  type Title
-  type Body
-  type PostContent = (Title, Body)
 
-  /** A blog post, comprising of an author, title, body and the information about last modification. */
-  case class Post(author: Author, title: Title, body: Body, lastModification: Date)
+  /** The post author's identifier. */
+  type AuthorId
+
+  /** The posts title. */
+  type Title
+
+  /** The posts body. */
+  type Body
+
+  /** The content of the post. */
+  type PostContent = (Title, Body)
 
   /** A post author and their info. */
   case class Author(authorId: AuthorId, name: String, surname: String)
 
-  /** A function that verifies the content of the post, 
-    * returning [[Right]] with the content of the post if the
-    * verification succeeds or [[Left]] with the reason why failed.
+  /** A blog post, comprising an author, title, body and the last modification. */
+  case class Post(author: Author, title: Title, body: Body, lastModification: Date)
+
+  /** A function that verifies the content of the post, returning [[Right]] with the content of
+    * the post if the verification succeeds or [[Left]] with the reason why failed.
     */
   type ContentVerifier = (Title, Body) => Either[String, PostContent]
 
-  type AuthorsVerifier = AuthorId => Author
+  /** A function that verifies the author has appropriate permissions, returning [[Right]]
+    * with their information or [[Left]] with the reason why failed.
+    */
+  type AuthorsVerifier = AuthorId => Either[String, Author]
 ```
 
 To implement the service two components have been conceived, following the Cake Pattern:
@@ -67,7 +80,7 @@ To implement the service two components have been conceived, following the Cake 
   - mocks a DB technology with an in-memory collection.
 - `PostsServiceComponent`
   - is the component exposing the `Service` interface.
-  - is the component that would be called by the controller of the ReSTful web service.  
+  - it would be called by the controller of the ReSTful web service.  
 
 Both must be designed in an async way.
 
@@ -88,10 +101,12 @@ trait PostsRepositoryComponent:
     /** Save the given [[post]]. */
     def save(post: Post)(using ExecutionContext): Future[Post]
 
-    /** Return a future completed with true if a post exists with the given title, false otherwise. */
+    /** @return a [[Future]] completed with true if a post exists with 
+      *         the given title, false otherwise. */
     def exists(postTitle: Title)(using ExecutionContext): Future[Boolean]
 
-    /** Load all the saved post. */
+    /** @return a [[Future]] completed either with a defined optional 
+      *         post with given [[postTitle]] or an empty one. */
     def load(postTitle: Title)(using ExecutionContext): Future[Option[Post]]
 
     /** Load the post with the given [[postTitle]]. */
@@ -101,7 +116,7 @@ trait PostsRepositoryComponent:
 ```scala
 /** The component blog posts service. */
 trait PostsServiceComponent:
-  context: PostsRepositoryComponent with PostsModel =>
+  context: PostsRepositoryComponent & PostsModel =>
 
   /** The blog post service instance. */
   val service: PostsService
@@ -112,7 +127,7 @@ trait PostsServiceComponent:
     def create(authorId: AuthorId, title: Title, body: Body)(using ExecutionContext): Future[Post]
 
     /** Get a post from its [[title]]. */
-    def get(title: Title)(using ExecutionContext): Future[Post]
+    def get(title: Title)(using ExecutionContext): Future[Option[Post]]
 
     /** Gets all the stored blog posts in a lazy manner. */
     def all()(using ExecutionContext): Future[LazyList[Post]]
@@ -122,7 +137,7 @@ All the exposed functions, since they are asynchronous, return an instance of `F
 
 What's important to delve into is the implementation of the service, and, more precisely, of the `create` method. As already mentioned, before saving the post two checks need to be performed:
 
-1. the post author must have permission to publish a post and their information needs to be retrieved (supposing they are managed by another microservice);
+1. the post author must have permission to publish a post and their information needs to be retrieved (supposing they are managed by another service);
 2. the content of the post is analyzed in order to prevent the storage and publication of offensive or inappropriate content.
 
 Since these operations are independent from each other they can be spawned and run in parallel.
@@ -144,20 +159,27 @@ private def save(authorId: AuthorId, title: Title, body: Body)(using ExecutionCo
     post = Post(author, content._1, content._2, Date())
     _ <- context.repository.save(post)
   yield post
+
+/* Pretending to make a call to the Authorship Service that keeps track of authorized authors. */
+private def authorBy(id: AuthorId)(using ExecutionContext): Future[Author] = ???
+
+/* Some local computation that verifies the content of the post is appropriate. */
+private def verifyContent(title: Title, body: Body)(using ExecutionContext): Future[PostContent] = ???
 ```
 
 This implementation shows the limits of the current monadic `Future` mechanism:
 
 - if we want to achieve the serialization of futures execution we need to compose them using the `flatMap`, like in the `create` function: first, the check on the post existence is performed, and only if it is successful and another post with same title doesn't exist the `save` function is started
-  - as a consequence, if we want two futures to run in parallel we have to spawn them before the `for-yield`, as in the `save` function, or use Future's Applicative, like `mapN` provided by Cats. This is error-prone and could lead to unexpected sequentiality, like this:
+  - as a consequence, if we want two futures to run in parallel we have to spawn them before the `for-yield`, as in the `save` function. This is error-prone and could lead to unexpected sequentiality, like this:
 
     ```scala
-      for
-        content <- verifyContent(title, body)
-        author <- authorBy(authorId)
-        post = Post(author, content._1, content._2, Date())
-        _ <- context.repository.save(post)
-      yield post
+    // THIS IS WRONG: the two futures are started sequentially!
+    for
+      content <- verifyContent(title, body)
+      author <- authorBy(authorId)
+      post = Post(author, content._1, content._2, Date())
+      _ <- context.repository.save(post)
+    yield post
     ```
 
 - since the publication of a post can be performed only if both of these checks succeed, it is desirable that, whenever one of the two fails, the other gets canceled.
@@ -171,7 +193,7 @@ The API of the gears library is presented hereafter and is built on top of four 
 
 1. **`Async`** context is **"a capability that allows a computation to suspend while waiting for the result of an async source"**. Code that has access to an instance of the `Async` trait is said to be in an async context and can suspend its execution. Usually, it is provided via `given` instances.
    - A common way to obtain an `Async` instance is to use an `Async.blocking`.
-2. **`Async.Source`** modeling an asynchronous source of data that can be polled or awaited by suspending the computation, as well as composed using combinator functions.
+2. **`Async.Source`** model an asynchronous source of data that can be polled or awaited by suspending the computation, as well as composed using combinator functions.
 3. **`Future`s** are the primary (in fact, the only) active elements that encapsulate a control flow that, eventually, will deliver a result (either a computed or a failure value that contains an exception). Since `Future`s are `Async.Source`s can be awaited and combined with other `Future`s, suspending their execution.
    - **`Task`s** are the abstraction created to create delayed `Future`s, responding to the lack of referential transparency problem. They take the body of a `Future` as an argument; its `run` method converts that body to a `Future`, starting its execution.
    - **`Promise`s** allow us to define `Future`'s result value externally, instead of executing a specific body of code.
@@ -263,7 +285,7 @@ classDiagram
 
 {{< /mermaid >}}
 
-Going back to our example, the interface of both the repository and service components becomes:
+Going back to our example, the interface of both the repository and service components becomes ([here](https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/blog-ws-direct/src/main/scala/io/github/tassiLuca/dse/blog) you can find the complete sources):
 
 ```scala
 /** The component exposing blog posts repositories. */
@@ -276,35 +298,35 @@ trait PostsRepositoryComponent:
   /** The repository in charge of storing and retrieving blog posts. */
   trait PostsRepository:
     /** Save the given [[post]]. */
-    def save(post: Post)(using Async): Post
+    def save(post: Post)(using Async): Either[String, Post]
 
     /** Return true if a post exists with the given title, false otherwise. */
-    def exists(postTitle: Title)(using Async): Boolean
+    def exists(postTitle: Title)(using Async): Either[String, Boolean]
 
     /** Load the post with the given [[postTitle]]. */
-    def load(postTitle: Title)(using Async): Option[Post]
+    def load(postTitle: Title)(using Async): Either[String, Option[Post]]
 
     /** Load all the saved post. */
-    def loadAll()(using Async): LazyList[Post]
+    def loadAll()(using Async): Either[String, LazyList[Post]]
 ```
 
 ```scala
 /** The blog posts service component. */
 trait PostsServiceComponent:
-  context: PostsRepositoryComponent with PostsModel =>
+  context: PostsRepositoryComponent & PostsModel =>
 
   /** The blog post service instance. */
   val service: PostsService
 
   /** The service exposing a set of functionalities to interact with blog posts. */
   trait PostsService:
-    /** Creates a new blog post with the given [[title]] and [[body]], authored by [[authorId]], or a string explaining
-      * the reason of the failure.
+    /** Creates a new blog post with the given [[title]] and [[body]], authored by [[authorId]],
+      * or a string explaining the reason of the failure.
       */
     def create(authorId: AuthorId, title: Title, body: Body)(using Async): Either[String, Post]
 
     /** Get a post from its [[title]] or a string explaining the reason of the failure. */
-    def get(title: Title)(using Async): Either[String, Post]
+    def get(title: Title)(using Async): Either[String, Option[Post]]
 
     /** Gets all the stored blog posts in a lazy manner or a string explaining the reason of the failure. */
     def all()(using Async): Either[String, LazyList[Post]]
@@ -312,7 +334,7 @@ trait PostsServiceComponent:
 
 As you can see, `Future`s are gone and the return type it's just the result of their intent (expressed with `Either` to return a meaningful message in case of failure). The fact they are _suspendable_ is expressed using the `Async` context, which is required to invoke those functions.
 
-> Key inspiring principle (actually, "stolen" by Kotlin)
+> Key inspiring principle (actually, taken by Kotlin)
 >
 > ***&#10077;Concurrency is hard! Concurrency has to be explicit!&#10078;***
 
@@ -332,27 +354,26 @@ The other important key feature of the library is the support for **structured c
       // this can be interrupted
     ```
 
-- `Future`s are nestable; **the lifetime of nested computations is contained within the lifetime of enclosing ones**. This is achieved using `CompletionGroup`s, which are cancellable objects themselves and serves as containers for other cancellable objects, that once canceled, all of its members are canceled as well.
+- `Future`s are nestable; **the lifetime of nested computations is contained within the lifetime of enclosing ones**. This is achieved using `CompletionGroup`s, which are cancellable objects themselves and serve as containers for other cancellable objects, that once canceled, all of its members are canceled as well.
   - A cancellable object can be included inside the cancellation group of the async context using the `link` method; this is what the [implementation of the `Future` does, under the hood](https://github.com/lampepfl/gears/blob/07989ffdae153b2fe11ac1ece53ce9dd1dbd18ef/shared/src/main/scala/async/futures.scala#L140).
 
 The implementation of the `create` function with direct style in gears looks like this:
 
 ```scala
-override def create(authorId: AuthorId, title: Title, body: Body)(using Async): Either[String, Post] =
-  if context.repository.exists(title)
-  then Left(s"A post entitled $title already exists")
-  else either:
+override def create(authorId: AuthorId, title: Title, body: Body)(using Async): Either[String, Post] = 
+  either:
+    if context.repository.exists(title).? then left(s"A post entitled $title already exists")
     val f = Future:
-      val content = verifyContent(title, body).run // spawning a new Future
-      val author = authorBy(authorId).run // spawninig a new Future
+      val content = verifyContent(title, body).run
+      val author = authorBy(authorId).run
       content.zip(author).await
     val (post, author) = f.awaitResult.?
-    context.repository.save(Post(author, post.?._1, post.?._2, Date()))
+    context.repository.save(Post(author.?, post.?._1, post.?._2, Date())).?
 
 /* Pretending to make a call to the Authorship Service that keeps track of authorized authors. */
-private def authorBy(id: AuthorId): Task[Author] = ???
+private def authorBy(id: AuthorId): Task[Either[String, Author]] = ???
 
-/* Some local computation that verifies the content of the post is appropriate (e.g. not offensive, ...). */
+/* Some local computation that verifies the content of the post is appropriate. */
 private def verifyContent(title: Title, body: Body): Task[Either[String, PostContent]] = ???
 ```
 
@@ -362,13 +383,18 @@ Some remarks:
 - `authorBy` and `verifyContent` returns referential transparent `Task` instances. Running them spawns a new `Future` instance;
 - Thanks to structured concurrency and `zip` combinator we can obtain that if one of the nested two futures fails the enclosing future is cancelled, cancelling also all its unterminated children
   - `zip`: combinator function returning a pair with the results if both `Future`s succeed, otherwise fail with the failure that was returned first.
-  - Be aware of the fact to achieve cancellation is necessary to enclose both the content verification and authorization task inside an enclosing `Future`, since the `zip` doesn't provide cancellation mechanism per se. The following code wouldn't work as expected!
+  - Be aware of the fact to achieve cancellation is necessary to enclose both the content verification and authorization task inside an enclosing `Future`, since the `zip` doesn't provide a cancellation mechanism per se. The following code wouldn't work as expected!
 
     ```scala
+    // WRONG: doesn't provide cancellation!
     val contentVerifier = verifyContent(title, body).run
     val authorizer = authorBy(authorId).run
     val (post, author) = contentVerifier.zip(authorizer).awaitResult.?
     ```
+
+    👉🏻 To showcase the structured concurrency and cancellation mechanisms of Scala Gears tests have been prepared:
+      - [`StructuredConcurrencyTest`](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/StructuredConcurrencyTest.scala)
+      - [`CancellationTest`](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/CancellationTest.scala)
 
 Other combinator methods, available on `Future`s instance:
 
@@ -380,70 +406,103 @@ Other combinator methods, available on `Future`s instance:
 | `Seq[Future[T]].awaitAll`            | `.await` for all futures in the sequence, returns the results in a sequence, or throws if any futures fail. |
 | `Seq[Future[T]].awaitAllOrCancel`    | Like `awaitAll`, but cancels all futures as soon as one of them fails. |
 
----
-
 ### Kotlin Coroutines
 
 - A **coroutine** in Kotlin is an instance of a *suspendable* computation.
-- Their API is quite similar to the Scala Gears, which has taken inspiration from Kotlin coroutines.
+- Their API is quite similar to the Scala Gears, which has taken inspiration from Kotlin coroutines. To try to make a comparison, the following table shows the correspondence between the two libraries:
   | **Scala Gears**            | **Kotlin Coroutines**           |
   |----------------------------|---------------------------------|
   | `Async`                    | `CoroutineScope`                |
-  | `Future`                   | `Deferred` / `Job             ` |
+  | `Future[Unit]`             | `Job`                           |
+  | `Future[T]`                | `Deferred<T>`                   |
   | `def all()(using Async)`   | `suspend fun all()`             |
 
-    - `CoroutineContext`: every coroutine must be executed in a coroutine context, including a dispatcher, that determines what thread or threads the coroutine uses for its execution, and the `Job` of the coroutine, which represents a cancellable background piece of work with a life cycle that culminates in its completion.
-      - In the Kotlin Coroutine library, `CoroutineScope` is an interface that can be implemented by any class capable of launching and suspending coroutines.
+    - In the Kotlin Coroutine library, `CoroutineScope` is an interface that defines a single property, `coroutineContext`, which returns the `CoroutineContext` that defines the scope in which the coroutine runs.
 
-        ```kotlin
+      ```kotlin
         public interface CoroutineScope {
-            /**
-            * Returns the context of this scope.
-            */
+            /** Returns the context of this scope. */
             public val coroutineContext: CoroutineContext
         }
         ```
 
-      - Several coroutine builders are available, like `launch`, `async`, `runBlocking`, `withContext` which accept an optional `CoroutineContext` parameter that can be used to specify the dispatcher and other context elements.
+        Every coroutine must be executed in a coroutine context which is a collection of key-value pairs that provide contextual information for the coroutine, including a dispatcher, that determines what thread or threads the coroutine uses for its execution, and the `Job` of the coroutine, which represents a cancellable background piece of work with a life cycle that culminates in its completion.
+
+      - Different ways to create a scope:
+        - `GlobalScope.launch` launching a new coroutine in the global scope -- *discouraged because it can lead to memory leaks*
+        - `CoroutineScope(Dispatchers.Default)`, using the constructor with a dispatcher
+        - `runBlocking` - equivalent to the Gears `Async.blocking` - provides a way to run a coroutine in the `MainScope`, i.e. on the main/UI thread
+  
+      - Useful dispatchers:
+        - `Default dispatcher`: to run CPU-intensive functions. If we forget to choose our dispatcher, this dispatcher will be selected by default.
+        - `IO dispatcher`: to run I-O bound computation, where we block waiting for input-output operations to complete, like network-related operations, file operations, etc.
+        - `Unconfined dispatcher`: it isn't restricted to a particular thread, i.e. doesn't change the thread of the coroutine, it operates on the same thread where it was initiated.
+        - `Main dispatcher`: used when we want to interact with the UI. It is restricted to the main thread.
+
+      - Several coroutine builders exist, like `launch`, `async`, `withContext` which accept an optional `CoroutineContext` parameter that can be used to specify the dispatcher and other context elements.
+
+      ```kotlin
+      fun main(): Unit = runBlocking { // this: CoroutineScope
+          val job: Job = this.launch(Dispatchers.IO) { // launch a new coroutine and continue
+              delay(1000L) // non-blocking delay for 1 second (default time unit is ms)
+              print("Kotlin Coroutine!") // print after delay
+          }
+          val job2: Deferred<String> = async {
+              delay(100L)
+              "Hello"
+          }
+          print(job2.await() + " ") // wait until child coroutine completes
+          job.join() // wait until the job is done and "Kotlin Coroutine!" is printed
+      }
+      ```
 
     - suspending functions are marked with the `suspend` keyword; they can use other suspending functions to suspend the execution of a coroutine.
 
-- Coroutines follow the principle of structured concurrency: `Job`s can be arranged into parent-child hierarchies where cancellation of a parent leads to the immediate cancellation of all its children recursively. Failure of a child with an exception immediately cancels its parent and, consequently, all its other children. 
+- Coroutines follow the principle of structured concurrency: coroutines can be arranged into parent-child hierarchies where the cancellation of a parent leads to the immediate cancellation of all its children recursively. Failure of a child with an exception immediately cancels its parent and, consequently, all its other children.
 
-w.r.t. kotlin coroutines:
+Going back to our example, the interface of the service with Kotlin coroutines looks like this ([here](https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/blog-ws-direct-kt/src/main/kotlin/io/github/tassiLuca/dse/blog) you can find the complete sources):
 
-- "Finally, about function coloring: Capabilities are actually much better here than other language's proposals such as suspend or async which feel clunky in comparison. This becomes obvious when you consider higher order functions. Capabilities let us define a single map (with no change in signature compared to now!) that works for sync as well as async function arguments. That's the real breakthrough here, which will make everything work so much smoother. I have talked about this elsewhere and this response is already very long, so I will leave it at that."
+```kotlin
+/** The service exposing a set of functionalities to interact with blog posts. */
+interface PostsService {
 
-how suspension is implemented
+    /** Creates a new post. */
+    suspend fun create(authorId: String, title: String, body: String): Result<Post>
 
----
+    /** Retrieves a post by its title. */
+    suspend fun get(title: String): Result<Post>
 
-## Best practices
+    /** Retrieves all the posts. */
+    suspend fun getAll(): Result<Sequence<Post>>
+}
+```
 
-Some of the best practices of Kotlin Coroutines that can be applied to Scala's direct style Gears as well:
+The implementation of the `create` function:
 
-- **Do not use `Future`/`async` with an immediate `await`**: it makes no sense to define an asynchronous computation if we have to immediately wait for its result without doing anything else in the meantime:
+```kotlin
+override suspend fun create(authorId: String, title: String, body: String): Result<Post> = runCatching {
+    coroutineScope {
+        require(!repository.exists(title)) { "Post with title $title already exists" }
+        val content = async { verifyContent(title, body) }
+        val author = async { authorBy(authorId) }
+        val post = Post(author.await(), content.await(), Date())
+        repository.save(post)
+    }
+}
 
-  ```scala
-  // DON'T
-  val f = Future:
-    // some suspending operation...
-    service.postByTitle("Direct style guidelines")
-  val post = f.await
+/* Pretending to make a call to the Authorship Service that keeps track of authorized authors. */
+private suspend fun authorBy(id: String): Author { ... }
 
-  // DO
-  val post = service.get("Direct style guidelines")
-  ```
+/* Some local computation that verifies the content of the post is appropriate. */
+private suspend fun verifyContent(title: String, body: String): PostContent { ... }
+```
 
-  In case a few async tasks need to be started the last one does not require to be run in a new `Future`/`async`, though can be beneficial for readability and maintainability reasons:
+- a `coroutineScope` is a suspending function used to create a new coroutine scope: it suspends the execution of the current coroutine, releasing the underlying thread for other usages;
+- As we said previously, the failure of a child with an exception immediately cancels its parent and, consequently, all its other children: this means that, for handling the cancellation of nested coroutines, we don't need to do anything special, it is already automatically handled by the library.
+  - This is an advantage over the Scala Gears, where operators like `zip` and `altWithCancel` are necessary
 
-  ```scala
-  Future:
-    val post = Future { service.postByTitle("Direct style guidelines") }
-    val users = Future { service.user() } // not necessary here, but useful for readability
-    showPost(post.await, users.await)
-  ```
+## Takeaways
 
-- **Suspending functions await completion of their children**
-
-## Conclusions
+- Scala Gears offers, despite the syntactical differences, very similar concepts to Kotlin Coroutines, with structured concurrency and cancellation mechanisms;
+- Kotlin Coroutines handles the cancellation of nested coroutines more easily than Scala Gears, where special attention is required;
+- As [stated by M. Odersky](https://github.com/lampepfl/gears/issues/19#issuecomment-1732586362) the `Async` capability is better than `suspend` in Kotlin because let defines functions that work for synchronous as well as asynchronous function arguments.
