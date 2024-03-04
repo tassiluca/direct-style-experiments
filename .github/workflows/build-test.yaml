@@ -1,4 +1,4 @@
-name: Build, Test, and Check codebase
+name: Build and Test codebase
 
 on:
   push:
