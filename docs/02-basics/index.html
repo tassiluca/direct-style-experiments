@@ -3,19 +3,17 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Basic asynchronous constructs # The need for a new Future construct # The current implementation of the Future monadic construct suffers the following main cons:
-Lack of referential transparency; Lack of cancellation mechanisms and structured concurrency; Accidental Sequentiality. To show these weaknesses in practice, a simple example of the core of a web service implementation is presented.
-Example: a blog posts service # Idea: develop a very simple (mocked) service that allows retrieving and storing from a repository blog posts, performing checks on the content and author before the actual storage.">
+<meta name="description" content="Basic asynchronous constructs # Basic asynchronous constructs The need for a new Future construct Example: a blog posts service Structure Current monadic Future Direct style: Scala version with gears Kotlin Coroutines Takeaways The need for a new Future construct # The current implementation of the Future monadic construct suffers the following main cons:
+Lack of referential transparency; Lack of cancellation mechanisms and structured concurrency; Accidental Sequentiality. To show these weaknesses in practice, a simple example of the core of a web service implementation is presented.">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
-<meta property="og:description" content="Basic asynchronous constructs # The need for a new Future construct # The current implementation of the Future monadic construct suffers the following main cons:
-Lack of referential transparency; Lack of cancellation mechanisms and structured concurrency; Accidental Sequentiality. To show these weaknesses in practice, a simple example of the core of a web service implementation is presented.
-Example: a blog posts service # Idea: develop a very simple (mocked) service that allows retrieving and storing from a repository blog posts, performing checks on the content and author before the actual storage." />
+<meta property="og:description" content="Basic asynchronous constructs # Basic asynchronous constructs The need for a new Future construct Example: a blog posts service Structure Current monadic Future Direct style: Scala version with gears Kotlin Coroutines Takeaways The need for a new Future construct # The current implementation of the Future monadic construct suffers the following main cons:
+Lack of referential transparency; Lack of cancellation mechanisms and structured concurrency; Accidental Sequentiality. To show these weaknesses in practice, a simple example of the core of a web service implementation is presented." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/02-basics/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-03-04T11:09:36+01:00" />
+<meta property="article:modified_time" content="2024-03-04T14:52:54+01:00" />
 
 <title>02 Basics | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
@@ -23,7 +21,7 @@ Example: a blog posts service # Idea: develop a very simple (mocked) service tha
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/02-basics/">
 <link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.3079c33e46bf5b308bdbfa938bf6043ba270f82b73e2ada92c1da0aacca6df5c.css" integrity="sha256-MHnDPka/WzCL2/qTi/YEO6Jw&#43;Ctz4q2pLB2gqsym31w=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.ef17430e690794ac9b1d36e19d87f20a295a480721b3fcdaee69db25ec1bb1ce.js" integrity="sha256-7xdDDmkHlKybHTbhnYfyCilaSAchs/za7mnbJewbsc4=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.eafc0e554694128e51a0771c4810eb9d22c332525d7e14c6cb6d09cb32a9bb65.js" integrity="sha256-6vwOVUaUEo5RoHccSBDrnSLDMlJdfhTGy20JyzKpu2U=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -187,6 +185,22 @@ https://github.com/alex-shpak/hugo-book
   Basic asynchronous constructs
   <a class="anchor" href="#basic-asynchronous-constructs">#</a>
 </h1>
+<ul>
+<li><a href="#basic-asynchronous-constructs">Basic asynchronous constructs</a>
+<ul>
+<li><a href="#the-need-for-a-new-future-construct">The need for a new <code>Future</code> construct</a></li>
+<li><a href="#example-a-blog-posts-service">Example: a blog posts service</a>
+<ul>
+<li><a href="#structure">Structure</a></li>
+<li><a href="#current-monadic-future">Current monadic <code>Future</code></a></li>
+<li><a href="#direct-style-scala-version-with-gears">Direct style: Scala version with <code>gears</code></a></li>
+<li><a href="#kotlin-coroutines">Kotlin Coroutines</a></li>
+</ul>
+</li>
+<li><a href="#takeaways">Takeaways</a></li>
+</ul>
+</li>
+</ul>
 <h2 id="the-need-for-a-new-future-construct">
   The need for a new <code>Future</code> construct
   <a class="anchor" href="#the-need-for-a-new-future-construct">#</a>
@@ -755,7 +769,8 @@ classDiagram
 <li>a <code>coroutineScope</code> is a suspending function used to create a new coroutine scope: it suspends the execution of the current coroutine, releasing the underlying thread for other usages;</li>
 <li>As we said previously, the failure of a child with an exception immediately cancels its parent and, consequently, all its other children: this means that, for handling the cancellation of nested coroutines, we don&rsquo;t need to do anything special, it is already automatically handled by the library.
 <ul>
-<li>This is an advantage over the Scala Gears, where operators like <code>zip</code> and <code>altWithCancel</code> are necessary</li>
+<li><a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/kotlin/io/github/tassiLuca/dse/CancellationTest.kt">No matter the order in which coroutines are awaited, if one of them fails all the others get cancelled</a></li>
+<li>This is an advantage over the Scala Gears, where operators like <code>zip</code> and <code>altWithCancel</code> are necessary!</li>
 </ul>
 </li>
 </ul>
@@ -763,11 +778,13 @@ classDiagram
   Takeaways
   <a class="anchor" href="#takeaways">#</a>
 </h2>
+<blockquote>
 <ul>
 <li>Scala Gears offers, despite the syntactical differences, very similar concepts to Kotlin Coroutines, with structured concurrency and cancellation mechanisms;</li>
 <li>Kotlin Coroutines handles the cancellation of nested coroutines more easily than Scala Gears, where special attention is required;</li>
 <li>As <a href="https://github.com/lampepfl/gears/issues/19#issuecomment-1732586362">stated by M. Odersky</a> the <code>Async</code> capability is better than <code>suspend</code> in Kotlin because let defines functions that work for synchronous as well as asynchronous function arguments.</li>
 </ul>
+</blockquote>
 </article>
  
       
@@ -777,7 +794,7 @@ classDiagram
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/7c360a9b87a6d66c7a9f12b7f79f48a2a83a9d12" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/2c4f8075d79bb79f069b94683121de5b5d24a109" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
       <span>March 4, 2024</span>
     </a>

@@ -13,7 +13,7 @@ Smart Hub example # Idea: in an IoT context, a multitude of sensors of different
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/04-rears/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-03-03T17:08:43+01:00" />
+<meta property="article:modified_time" content="2024-03-04T14:52:54+01:00" />
 
 <title>04 Rears | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
@@ -21,7 +21,7 @@ Smart Hub example # Idea: in an IoT context, a multitude of sensors of different
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/04-rears/">
 <link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.3079c33e46bf5b308bdbfa938bf6043ba270f82b73e2ada92c1da0aacca6df5c.css" integrity="sha256-MHnDPka/WzCL2/qTi/YEO6Jw&#43;Ctz4q2pLB2gqsym31w=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.ef17430e690794ac9b1d36e19d87f20a295a480721b3fcdaee69db25ec1bb1ce.js" integrity="sha256-7xdDDmkHlKybHTbhnYfyCilaSAchs/za7mnbJewbsc4=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.eafc0e554694128e51a0771c4810eb9d22c332525d7e14c6cb6d09cb32a9bb65.js" integrity="sha256-6vwOVUaUEo5RoHccSBDrnSLDMlJdfhTGy20JyzKpu2U=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -676,7 +676,7 @@ Despite their names including <code>flow</code>, which we&rsquo;ve seen are cold
 </span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** The flow of sensor events. */</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">val</span> <span style="color:#fe640b">sensorEvents</span>: SharedFlow&lt;E&gt;
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>Like all flows, they have all the kinds of operators presented in the previous example. Despite this, they do not support, at the moment, all the operators that Rx offers, like <code>debounce</code>, <code>groupBy</code>, etc&hellip; (even if some PR are open to adding them in the framework).</p>
+</span></span></code></pre></div><p>Like all flows, they have all the kinds of operators presented in the previous example. Despite this, they do not support, at the moment, all the operators that Rx offers, like <code>groupBy</code>, <code>buffer</code> (in the Rx conception), etc&hellip; (even if some proposals are pending to add them in the framework).</p>
 <p>For this reason, the consumer of events has been implemented manually, using a loop that, every <code>samplingWindow</code> time, reacts to the data received, updating the state of the system.
 By the way, if this solution appears to be less elegant, since <code>Flow</code>s are, de facto, the porting of Rx&rsquo;s <code>Observable's</code> into the Coroutines world, <a href="https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-rx2/">libraries exists to convert them to <code>Observable</code> and vice versa</a>.
 This could offer (in some cases and where necessary) a way to use the full power of Rx operator, if needed.</p>
@@ -729,9 +729,9 @@ This could offer (in some cases and where necessary) a way to use the full power
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/64e4647beed9310bc26e1c7cf1d76558455dcd0f" title='Last modified by Luca Tassinari | March 3, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/2c4f8075d79bb79f069b94683121de5b5d24a109" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>March 3, 2024</span>
+      <span>March 4, 2024</span>
     </a>
   </div>
 
