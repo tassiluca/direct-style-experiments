@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Docs on PPS-22-direct-style-experiments</title>
-    <link>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/</link>
-    <description>Recent content in Docs on PPS-22-direct-style-experiments</description>
+    <title>Docs on direct-style-experiments</title>
+    <link>https://tassiluca.github.io/direct-style-experiments/docs/</link>
+    <description>Recent content in Docs on direct-style-experiments</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <atom:link href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://tassiluca.github.io/direct-style-experiments/docs/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title></title>
-      <link>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/01-boundaries/</link>
+      <link>https://tassiluca.github.io/direct-style-experiments/docs/01-boundaries/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/01-boundaries/</guid>
+      <guid>https://tassiluca.github.io/direct-style-experiments/docs/01-boundaries/</guid>
       <description>boundary &amp;amp; break # boundary &amp;amp; break Modeling error handling data types with non-local breaks Optional Either + ? boundary &amp;amp; break mechanism provides a cleaner alternative to non-local returns:&#xA;boundary: is short for boundary.apply: the indented code below, passed as body, is a context function that is called within boundary.apply to break, an in-scope given instance of Label is required (i.e. is impossible to break without an enclosing boundary) Users don&amp;rsquo;t define Label instances themselves.</description>
     </item>
     <item>
       <title></title>
-      <link>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/02-basics/</link>
+      <link>https://tassiluca.github.io/direct-style-experiments/docs/02-basics/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/02-basics/</guid>
+      <guid>https://tassiluca.github.io/direct-style-experiments/docs/02-basics/</guid>
       <description>Basic asynchronous constructs # Basic asynchronous constructs The need for a new Future construct Example: a blog posts service Structure Current monadic Future Direct style: Scala version with gears Kotlin Coroutines Takeaways The need for a new Future construct # The current implementation of the Future monadic construct suffers the following main cons:&#xA;Lack of referential transparency; Lack of cancellation mechanisms and structured concurrency; Accidental Sequentiality. To show these weaknesses in practice, a simple example of the core of a web service implementation is presented.</description>
     </item>
     <item>
       <title></title>
-      <link>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/03-channels/</link>
+      <link>https://tassiluca.github.io/direct-style-experiments/docs/03-channels/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/03-channels/</guid>
+      <guid>https://tassiluca.github.io/direct-style-experiments/docs/03-channels/</guid>
       <description>Channels as a communication primitive # Channels as a communication primitive Introduction Analyzer example Future monadic version Scala Gears version Kotlin Coroutines version Introducing Flows in Gears Showcasing Flows Takeaways Introduction # The fourth, yet not mentioned, abstraction of both Kotlin Coroutines and Scala Gears is the channel. Channels represent the primitive communication and coordination means to exchange Future (or coroutines in the case of Kotlin) results. They are, at least conceptually, very similar to a queue where it is possible to send (and receive) data &amp;ndash; basically, exploiting the producer-consumer pattern.</description>
     </item>
     <item>
       <title></title>
-      <link>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/04-rears/</link>
+      <link>https://tassiluca.github.io/direct-style-experiments/docs/04-rears/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/04-rears/</guid>
+      <guid>https://tassiluca.github.io/direct-style-experiments/docs/04-rears/</guid>
       <description>Reactivity in direct style # So far, we&amp;rsquo;ve explored the basics of asynchronous abstraction mechanisms provided by the direct style of the Scala Gears and Kotlin Coroutines frameworks. The goal of this last example is to investigate, using a simple example, whether these two frameworks offer sufficient idiomatic abstractions to deal with event-based reactive systems.&#xA;Smart Hub example # Idea: in an IoT context, a multitude of sensors of different types, each replicated to ensure accuracy, transmit their measurements to a central hub, which in turn needs to react, in real-time, forwarding to the appropriate controller the data, possibly performing some kind of transformation.</description>
     </item>
     <item>
       <title></title>
-      <link>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/05-conclusions/</link>
+      <link>https://tassiluca.github.io/direct-style-experiments/docs/05-conclusions/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/05-conclusions/</guid>
+      <guid>https://tassiluca.github.io/direct-style-experiments/docs/05-conclusions/</guid>
       <description>Going further and conclusions # Recap # Channels are the basic communication primitive for exchanging data between Futures/Coroutines and they are primarily used to model data sources that are intrinsically hot, i.e. Flows are control structures, containing executable code. When we call the collect method we invoke the code inside the flow, like executing function&amp;rsquo;s code by calling it. Conclusions and Final Considerations # To conclude, in this project, the main direct-style asynchronous programming abstractions offered by the Kotlin Coroutines and Scala&amp;rsquo;s new, still entirely experimental library proposal, Gears, were analyzed.</description>
     </item>
   </channel>
