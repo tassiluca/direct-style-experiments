@@ -15,7 +15,7 @@ Example: a blog posts service # Idea: develop a very simple (mocked) service tha
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/02-basics/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-03-04T00:44:41+01:00" />
+<meta property="article:modified_time" content="2024-03-04T11:09:36+01:00" />
 
 <title>02 Basics | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
@@ -23,7 +23,7 @@ Example: a blog posts service # Idea: develop a very simple (mocked) service tha
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/02-basics/">
 <link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.3079c33e46bf5b308bdbfa938bf6043ba270f82b73e2ada92c1da0aacca6df5c.css" integrity="sha256-MHnDPka/WzCL2/qTi/YEO6Jw&#43;Ctz4q2pLB2gqsym31w=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.d5959f219b5b3a7549e1e03b840b3a34ab05fd0249b3957b82edcf7f391f897d.js" integrity="sha256-1ZWfIZtbOnVJ4eA7hAs6NKsF/QJJs5V7gu3PfzkfiX0=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.ef17430e690794ac9b1d36e19d87f20a295a480721b3fcdaee69db25ec1bb1ce.js" integrity="sha256-7xdDDmkHlKybHTbhnYfyCilaSAchs/za7mnbJewbsc4=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -211,40 +211,53 @@ https://github.com/alex-shpak/hugo-book
 <li>the continuation style through the current Scala <code>Future</code> monadic constructs;</li>
 <li>the direct style, through:
 <ul>
-<li>the abstractions offered by <em>gears</em>;</li>
+<li>the abstractions offered by <em>Gears</em>;</li>
 <li><em>Kotlin coroutines</em>.</li>
 </ul>
 </li>
 </ul>
-<p>The example (and every subsequent one) is organized into three Gradle submodules:</p>
+<p>The example is organized into Gradle submodules:</p>
 <ul>
 <li><code>blog-ws-commons</code> contains code that has been reused for both the monadic and direct versions;</li>
-<li>a submodule <code>blog-ws-monadic</code> with the monadic Scala style and <code>blog-ws-direct</code> for the direct versions, both in Kotlin with <em>coroutines</em> and in Scala with <em>gears</em>.</li>
+<li><code>blog-ws-monadic</code> contains the monadic Scala style;</li>
+<li><code>blog-ws-direct</code> contains the direct version using Scala Gears;</li>
+<li><code>blog-ws-direct-kt</code> contains the direct version using Kotlin Coroutines.</li>
 </ul>
 <h3 id="structure">
   Structure
   <a class="anchor" href="#structure">#</a>
 </h3>
 <p>The domain is modeled using abstract data types in a common <code>PostsModel</code> trait:</p>
-<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">PostsModel</span><span style="color:#8839ef">:</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">type</span> <span style="color:#d20f39">AuthorId</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">type</span> <span style="color:#d20f39">Title</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">type</span> <span style="color:#d20f39">Body</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">type</span> <span style="color:#d20f39">PostContent</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Title</span><span style="color:#04a5e5;font-weight:bold">,</span> <span style="color:#df8e1d">Body</span><span style="color:#04a5e5;font-weight:bold">)</span>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** The model of a simple blog posts service. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">PostsModel</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** A blog post, comprising of an author, title, body and the information about last modification. */</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">case</span> <span style="color:#8839ef">class</span> <span style="color:#df8e1d">Post</span><span style="color:#04a5e5;font-weight:bold">(</span>author<span style="color:#8839ef">:</span> <span style="color:#d20f39">Author</span><span style="color:#04a5e5;font-weight:bold">,</span> title<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Body</span><span style="color:#04a5e5;font-weight:bold">,</span> lastModification<span style="color:#8839ef">:</span> <span style="color:#d20f39">Date</span><span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">/**</span> <span style="color:#d20f39">The</span> <span style="color:#d20f39">post</span> <span style="color:#d20f39">author</span><span style="color:#d20f39">&#39;</span><span style="color:#d20f39">s</span> <span style="color:#d20f39">identifier.</span> <span style="color:#d20f39">*/</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">type</span> <span style="color:#d20f39">AuthorId</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** The posts title. */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">type</span> <span style="color:#d20f39">Title</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** The posts body. */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">type</span> <span style="color:#d20f39">Body</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** The content of the post. */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">type</span> <span style="color:#d20f39">PostContent</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Title</span><span style="color:#04a5e5;font-weight:bold">,</span> <span style="color:#df8e1d">Body</span><span style="color:#04a5e5;font-weight:bold">)</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** A post author and their info. */</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">case</span> <span style="color:#8839ef">class</span> <span style="color:#df8e1d">Author</span><span style="color:#04a5e5;font-weight:bold">(</span>authorId<span style="color:#8839ef">:</span> <span style="color:#d20f39">AuthorId</span><span style="color:#04a5e5;font-weight:bold">,</span> name<span style="color:#8839ef">:</span> <span style="color:#d20f39">String</span><span style="color:#04a5e5;font-weight:bold">,</span> surname<span style="color:#8839ef">:</span> <span style="color:#d20f39">String</span><span style="color:#04a5e5;font-weight:bold">)</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** A function that verifies the content of the post, 
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">    * returning [[Right]] with the content of the post if the
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">    * verification succeeds or [[Left]] with the reason why failed.
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** A blog post, comprising an author, title, body and the last modification. */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">case</span> <span style="color:#8839ef">class</span> <span style="color:#df8e1d">Post</span><span style="color:#04a5e5;font-weight:bold">(</span>author<span style="color:#8839ef">:</span> <span style="color:#d20f39">Author</span><span style="color:#04a5e5;font-weight:bold">,</span> title<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Body</span><span style="color:#04a5e5;font-weight:bold">,</span> lastModification<span style="color:#8839ef">:</span> <span style="color:#d20f39">Date</span><span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** A function that verifies the content of the post, returning [[Right]] with the content of
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">    * the post if the verification succeeds or [[Left]] with the reason why failed.
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">    */</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">type</span> <span style="color:#d20f39">ContentVerifier</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Title</span><span style="color:#04a5e5;font-weight:bold">,</span> <span style="color:#df8e1d">Body</span><span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span> <span style="color:#df8e1d">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">PostContent</span><span style="color:#04a5e5;font-weight:bold">]</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">type</span> <span style="color:#d20f39">AuthorsVerifier</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#df8e1d">AuthorId</span> <span style="color:#8839ef">=&gt;</span> <span style="color:#df8e1d">Author</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** A function that verifies the author has appropriate permissions, returning [[Right]]
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">    * with their information or [[Left]] with the reason why failed.
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">    */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">type</span> <span style="color:#d20f39">AuthorsVerifier</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#df8e1d">AuthorId</span> <span style="color:#8839ef">=&gt;</span> <span style="color:#df8e1d">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">Author</span><span style="color:#04a5e5;font-weight:bold">]</span>
 </span></span></code></pre></div><p>To implement the service two components have been conceived, following the Cake Pattern:</p>
 <ul>
 <li><code>PostsRepositoryComponent</code>
@@ -256,7 +269,7 @@ https://github.com/alex-shpak/hugo-book
 <li><code>PostsServiceComponent</code>
 <ul>
 <li>is the component exposing the <code>Service</code> interface.</li>
-<li>is the component that would be called by the controller of the ReSTful web service.</li>
+<li>it would be called by the controller of the ReSTful web service.</li>
 </ul>
 </li>
 </ul>
@@ -278,17 +291,19 @@ https://github.com/alex-shpak/hugo-book
 </span></span><span style="display:flex;"><span>    <span style="color:#d20f39">/**</span> <span style="color:#d20f39">Save</span> <span style="color:#d20f39">the</span> <span style="color:#d20f39">given</span> <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">post</span><span style="color:#04a5e5;font-weight:bold">]].</span> <span style="color:#04a5e5;font-weight:bold">*/</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> save<span style="color:#04a5e5;font-weight:bold">(</span>post<span style="color:#8839ef">:</span> <span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">ExecutionContext</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Return a future completed with true if a post exists with the given title, false otherwise. */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** @return a [[Future]] completed with true if a post exists with 
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">      *         the given title, false otherwise. */</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> exists<span style="color:#04a5e5;font-weight:bold">(</span>postTitle<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">ExecutionContext</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Boolean</span><span style="color:#04a5e5;font-weight:bold">]</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Load all the saved post. */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** @return a [[Future]] completed either with a defined optional 
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">      *         post with given [[postTitle]] or an empty one. */</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> load<span style="color:#04a5e5;font-weight:bold">(</span>postTitle<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">ExecutionContext</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Option</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]]</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Load the post with the given [[postTitle]]. */</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> loadAll<span style="color:#04a5e5;font-weight:bold">()(</span>using <span style="color:#df8e1d">ExecutionContext</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">LazyList</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]]</span>
 </span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** The component blog posts service. */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">PostsServiceComponent</span><span style="color:#8839ef">:</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">context:</span> <span style="color:#d20f39">PostsRepositoryComponent</span> <span style="color:#d20f39">with</span> <span style="color:#d20f39">PostsModel</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">context:</span> <span style="color:#d20f39">PostsRepositoryComponent</span> <span style="color:#d20f39">&amp;</span> <span style="color:#d20f39">PostsModel</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** The blog post service instance. */</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">val</span> service<span style="color:#8839ef">:</span> <span style="color:#d20f39">PostsService</span>
@@ -299,14 +314,14 @@ https://github.com/alex-shpak/hugo-book
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> create<span style="color:#04a5e5;font-weight:bold">(</span>authorId<span style="color:#8839ef">:</span> <span style="color:#d20f39">AuthorId</span><span style="color:#04a5e5;font-weight:bold">,</span> title<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Body</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">ExecutionContext</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Get a post from its [[title]]. */</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> get<span style="color:#04a5e5;font-weight:bold">(</span>title<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">ExecutionContext</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> get<span style="color:#04a5e5;font-weight:bold">(</span>title<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">ExecutionContext</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Option</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]]</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Gets all the stored blog posts in a lazy manner. */</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> all<span style="color:#04a5e5;font-weight:bold">()(</span>using <span style="color:#df8e1d">ExecutionContext</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">LazyList</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]]</span>
 </span></span></code></pre></div><p>All the exposed functions, since they are asynchronous, return an instance of <code>Future[T]</code> and require to be called in a scope where a given instance of the <code>ExecutionContext</code> is declared.</p>
 <p>What&rsquo;s important to delve into is the implementation of the service, and, more precisely, of the <code>create</code> method. As already mentioned, before saving the post two checks need to be performed:</p>
 <ol>
-<li>the post author must have permission to publish a post and their information needs to be retrieved (supposing they are managed by another microservice);</li>
+<li>the post author must have permission to publish a post and their information needs to be retrieved (supposing they are managed by another service);</li>
 <li>the content of the post is analyzed in order to prevent the storage and publication of offensive or inappropriate content.</li>
 </ol>
 <p>Since these operations are independent from each other they can be spawned and run in parallel.</p>
@@ -326,19 +341,26 @@ https://github.com/alex-shpak/hugo-book
 </span></span><span style="display:flex;"><span>    post <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Post</span><span style="color:#04a5e5;font-weight:bold">(</span>author<span style="color:#04a5e5;font-weight:bold">,</span> content<span style="color:#04a5e5;font-weight:bold">.</span>_1<span style="color:#04a5e5;font-weight:bold">,</span> content<span style="color:#04a5e5;font-weight:bold">.</span>_2<span style="color:#04a5e5;font-weight:bold">,</span> <span style="color:#df8e1d">Date</span><span style="color:#04a5e5;font-weight:bold">())</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">_</span> <span style="color:#8839ef">&lt;-</span> context<span style="color:#04a5e5;font-weight:bold">.</span>repository<span style="color:#04a5e5;font-weight:bold">.</span>save<span style="color:#04a5e5;font-weight:bold">(</span>post<span style="color:#04a5e5;font-weight:bold">)</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">yield</span> post
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/* Pretending to make a call to the Authorship Service that keeps track of authorized authors. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">private</span> <span style="color:#8839ef">def</span> authorBy<span style="color:#04a5e5;font-weight:bold">(</span>id<span style="color:#8839ef">:</span> <span style="color:#d20f39">AuthorId</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">ExecutionContext</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Author</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#04a5e5;font-weight:bold">???</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/* Some local computation that verifies the content of the post is appropriate. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">private</span> <span style="color:#8839ef">def</span> verifyContent<span style="color:#04a5e5;font-weight:bold">(</span>title<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Body</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">ExecutionContext</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">PostContent</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#04a5e5;font-weight:bold">???</span>
 </span></span></code></pre></div><p>This implementation shows the limits of the current monadic <code>Future</code> mechanism:</p>
 <ul>
 <li>
 <p>if we want to achieve the serialization of futures execution we need to compose them using the <code>flatMap</code>, like in the <code>create</code> function: first, the check on the post existence is performed, and only if it is successful and another post with same title doesn&rsquo;t exist the <code>save</code> function is started</p>
 <ul>
 <li>
-<p>as a consequence, if we want two futures to run in parallel we have to spawn them before the <code>for-yield</code>, as in the <code>save</code> function, or use Future&rsquo;s Applicative, like <code>mapN</code> provided by Cats. This is error-prone and could lead to unexpected sequentiality, like this:</p>
-<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span>  <span style="color:#8839ef">for</span>
-</span></span><span style="display:flex;"><span>    content <span style="color:#8839ef">&lt;-</span> verifyContent<span style="color:#04a5e5;font-weight:bold">(</span>title<span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#04a5e5;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>    author <span style="color:#8839ef">&lt;-</span> authorBy<span style="color:#04a5e5;font-weight:bold">(</span>authorId<span style="color:#04a5e5;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>    post <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Post</span><span style="color:#04a5e5;font-weight:bold">(</span>author<span style="color:#04a5e5;font-weight:bold">,</span> content<span style="color:#04a5e5;font-weight:bold">.</span>_1<span style="color:#04a5e5;font-weight:bold">,</span> content<span style="color:#04a5e5;font-weight:bold">.</span>_2<span style="color:#04a5e5;font-weight:bold">,</span> <span style="color:#df8e1d">Date</span><span style="color:#04a5e5;font-weight:bold">())</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">_</span> <span style="color:#8839ef">&lt;-</span> context<span style="color:#04a5e5;font-weight:bold">.</span>repository<span style="color:#04a5e5;font-weight:bold">.</span>save<span style="color:#04a5e5;font-weight:bold">(</span>post<span style="color:#04a5e5;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">yield</span> post
+<p>as a consequence, if we want two futures to run in parallel we have to spawn them before the <code>for-yield</code>, as in the <code>save</code> function. This is error-prone and could lead to unexpected sequentiality, like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">// THIS IS WRONG: the two futures are started sequentially!
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span><span style="color:#8839ef">for</span>
+</span></span><span style="display:flex;"><span>  content <span style="color:#8839ef">&lt;-</span> verifyContent<span style="color:#04a5e5;font-weight:bold">(</span>title<span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>  author <span style="color:#8839ef">&lt;-</span> authorBy<span style="color:#04a5e5;font-weight:bold">(</span>authorId<span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>  post <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Post</span><span style="color:#04a5e5;font-weight:bold">(</span>author<span style="color:#04a5e5;font-weight:bold">,</span> content<span style="color:#04a5e5;font-weight:bold">.</span>_1<span style="color:#04a5e5;font-weight:bold">,</span> content<span style="color:#04a5e5;font-weight:bold">.</span>_2<span style="color:#04a5e5;font-weight:bold">,</span> <span style="color:#df8e1d">Date</span><span style="color:#04a5e5;font-weight:bold">())</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">_</span> <span style="color:#8839ef">&lt;-</span> context<span style="color:#04a5e5;font-weight:bold">.</span>repository<span style="color:#04a5e5;font-weight:bold">.</span>save<span style="color:#04a5e5;font-weight:bold">(</span>post<span style="color:#04a5e5;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">yield</span> post
 </span></span></code></pre></div></li>
 </ul>
 </li>
@@ -361,7 +383,7 @@ Unfortunately, currently, Scala Futures are not cancellable and provide no <em>s
 <li>A common way to obtain an <code>Async</code> instance is to use an <code>Async.blocking</code>.</li>
 </ul>
 </li>
-<li><strong><code>Async.Source</code></strong> modeling an asynchronous source of data that can be polled or awaited by suspending the computation, as well as composed using combinator functions.</li>
+<li><strong><code>Async.Source</code></strong> model an asynchronous source of data that can be polled or awaited by suspending the computation, as well as composed using combinator functions.</li>
 <li><strong><code>Future</code>s</strong> are the primary (in fact, the only) active elements that encapsulate a control flow that, eventually, will deliver a result (either a computed or a failure value that contains an exception). Since <code>Future</code>s are <code>Async.Source</code>s can be awaited and combined with other <code>Future</code>s, suspending their execution.
 <ul>
 <li><strong><code>Task</code>s</strong> are the abstraction created to create delayed <code>Future</code>s, responding to the lack of referential transparency problem. They take the body of a <code>Future</code> as an argument; its <code>run</code> method converts that body to a <code>Future</code>, starting its execution.</li>
@@ -470,7 +492,7 @@ classDiagram
 
 </p>
 
-<p>Going back to our example, the interface of both the repository and service components becomes:</p>
+<p>Going back to our example, the interface of both the repository and service components becomes (<a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/blog-ws-direct/src/main/scala/io/github/tassiLuca/dse/blog">here</a> you can find the complete sources):</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** The component exposing blog posts repositories. */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">PostsRepositoryComponent</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#d20f39">context:</span> <span style="color:#d20f39">PostsModel</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span>
@@ -481,38 +503,38 @@ classDiagram
 </span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** The repository in charge of storing and retrieving blog posts. */</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">trait</span> <span style="color:#df8e1d">PostsRepository</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#d20f39">/**</span> <span style="color:#d20f39">Save</span> <span style="color:#d20f39">the</span> <span style="color:#d20f39">given</span> <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">post</span><span style="color:#04a5e5;font-weight:bold">]].</span> <span style="color:#04a5e5;font-weight:bold">*/</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> save<span style="color:#04a5e5;font-weight:bold">(</span>post<span style="color:#8839ef">:</span> <span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Post</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> save<span style="color:#04a5e5;font-weight:bold">(</span>post<span style="color:#8839ef">:</span> <span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Return true if a post exists with the given title, false otherwise. */</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> exists<span style="color:#04a5e5;font-weight:bold">(</span>postTitle<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Boolean</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> exists<span style="color:#04a5e5;font-weight:bold">(</span>postTitle<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">Boolean</span><span style="color:#04a5e5;font-weight:bold">]</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Load the post with the given [[postTitle]]. */</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> load<span style="color:#04a5e5;font-weight:bold">(</span>postTitle<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Option</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> load<span style="color:#04a5e5;font-weight:bold">(</span>postTitle<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">Option</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]]</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Load all the saved post. */</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> loadAll<span style="color:#04a5e5;font-weight:bold">()(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">LazyList</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> loadAll<span style="color:#04a5e5;font-weight:bold">()(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">LazyList</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]]</span>
 </span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** The blog posts service component. */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">PostsServiceComponent</span><span style="color:#8839ef">:</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">context:</span> <span style="color:#d20f39">PostsRepositoryComponent</span> <span style="color:#d20f39">with</span> <span style="color:#d20f39">PostsModel</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">context:</span> <span style="color:#d20f39">PostsRepositoryComponent</span> <span style="color:#d20f39">&amp;</span> <span style="color:#d20f39">PostsModel</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** The blog post service instance. */</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">val</span> service<span style="color:#8839ef">:</span> <span style="color:#d20f39">PostsService</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** The service exposing a set of functionalities to interact with blog posts. */</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">trait</span> <span style="color:#df8e1d">PostsService</span><span style="color:#8839ef">:</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#d20f39">/**</span> <span style="color:#d20f39">Creates</span> <span style="color:#d20f39">a</span> <span style="color:#d20f39">new</span> <span style="color:#d20f39">blog</span> <span style="color:#d20f39">post</span> <span style="color:#d20f39">with</span> <span style="color:#d20f39">the</span> <span style="color:#d20f39">given</span> <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">title</span><span style="color:#04a5e5;font-weight:bold">]]</span> and <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">body</span><span style="color:#04a5e5;font-weight:bold">]],</span> authored by <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">authorId</span><span style="color:#04a5e5;font-weight:bold">]],</span> or a string explaining
-</span></span><span style="display:flex;"><span>      <span style="color:#04a5e5;font-weight:bold">*</span> the reason of the failure<span style="color:#04a5e5;font-weight:bold">.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#d20f39">/**</span> <span style="color:#d20f39">Creates</span> <span style="color:#d20f39">a</span> <span style="color:#d20f39">new</span> <span style="color:#d20f39">blog</span> <span style="color:#d20f39">post</span> <span style="color:#d20f39">with</span> <span style="color:#d20f39">the</span> <span style="color:#d20f39">given</span> <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">title</span><span style="color:#04a5e5;font-weight:bold">]]</span> and <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">body</span><span style="color:#04a5e5;font-weight:bold">]],</span> authored by <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">authorId</span><span style="color:#04a5e5;font-weight:bold">]],</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#04a5e5;font-weight:bold">*</span> or a string explaining the reason of the failure<span style="color:#04a5e5;font-weight:bold">.</span>
 </span></span><span style="display:flex;"><span>      <span style="color:#04a5e5;font-weight:bold">*/</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> create<span style="color:#04a5e5;font-weight:bold">(</span>authorId<span style="color:#8839ef">:</span> <span style="color:#d20f39">AuthorId</span><span style="color:#04a5e5;font-weight:bold">,</span> title<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Body</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Get a post from its [[title]] or a string explaining the reason of the failure. */</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> get<span style="color:#04a5e5;font-weight:bold">(</span>title<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> get<span style="color:#04a5e5;font-weight:bold">(</span>title<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">Option</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]]</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Gets all the stored blog posts in a lazy manner or a string explaining the reason of the failure. */</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">def</span> all<span style="color:#04a5e5;font-weight:bold">()(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">LazyList</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]]</span>
 </span></span></code></pre></div><p>As you can see, <code>Future</code>s are gone and the return type it&rsquo;s just the result of their intent (expressed with <code>Either</code> to return a meaningful message in case of failure). The fact they are <em>suspendable</em> is expressed using the <code>Async</code> context, which is required to invoke those functions.</p>
 <blockquote>
-<p>Key inspiring principle (actually, &ldquo;stolen&rdquo; by Kotlin)</p>
+<p>Key inspiring principle (actually, taken by Kotlin)</p>
 <p><em><strong>❝Concurrency is hard! Concurrency has to be explicit!❞</strong></em></p>
 </blockquote>
 <p>By default the code is serial. If you want to opt-in concurrency you have to explicitly use a <code>Future</code> or <code>Task</code> spawning a new control flow that executes asynchronously, allowing the caller to continue its execution.</p>
@@ -535,28 +557,27 @@ classDiagram
 </ul>
 </li>
 <li>
-<p><code>Future</code>s are nestable; <strong>the lifetime of nested computations is contained within the lifetime of enclosing ones</strong>. This is achieved using <code>CompletionGroup</code>s, which are cancellable objects themselves and serves as containers for other cancellable objects, that once canceled, all of its members are canceled as well.</p>
+<p><code>Future</code>s are nestable; <strong>the lifetime of nested computations is contained within the lifetime of enclosing ones</strong>. This is achieved using <code>CompletionGroup</code>s, which are cancellable objects themselves and serve as containers for other cancellable objects, that once canceled, all of its members are canceled as well.</p>
 <ul>
 <li>A cancellable object can be included inside the cancellation group of the async context using the <code>link</code> method; this is what the <a href="https://github.com/lampepfl/gears/blob/07989ffdae153b2fe11ac1ece53ce9dd1dbd18ef/shared/src/main/scala/async/futures.scala#L140">implementation of the <code>Future</code> does, under the hood</a>.</li>
 </ul>
 </li>
 </ul>
 <p>The implementation of the <code>create</code> function with direct style in gears looks like this:</p>
-<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">override</span> <span style="color:#8839ef">def</span> create<span style="color:#04a5e5;font-weight:bold">(</span>authorId<span style="color:#8839ef">:</span> <span style="color:#d20f39">AuthorId</span><span style="color:#04a5e5;font-weight:bold">,</span> title<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Body</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">if</span> context<span style="color:#04a5e5;font-weight:bold">.</span>repository<span style="color:#04a5e5;font-weight:bold">.</span>exists<span style="color:#04a5e5;font-weight:bold">(</span>title<span style="color:#04a5e5;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>  then <span style="color:#df8e1d">Left</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#40a02b">s&#34;A post entitled </span><span style="color:#40a02b">$title</span><span style="color:#40a02b"> already exists&#34;</span><span style="color:#04a5e5;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">else</span> either<span style="color:#8839ef">:</span>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">override</span> <span style="color:#8839ef">def</span> create<span style="color:#04a5e5;font-weight:bold">(</span>authorId<span style="color:#8839ef">:</span> <span style="color:#d20f39">AuthorId</span><span style="color:#04a5e5;font-weight:bold">,</span> title<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Body</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> 
+</span></span><span style="display:flex;"><span>  either<span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#d20f39">if</span> <span style="color:#d20f39">context.repository.exists</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#d20f39">title</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#d20f39">.?</span> <span style="color:#d20f39">then</span> <span style="color:#d20f39">left</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#d20f39">s</span><span style="color:#d20f39">&#34;</span><span style="color:#d20f39">A</span> <span style="color:#d20f39">post</span> <span style="color:#d20f39">entitled</span> <span style="color:#d20f39">$title</span> <span style="color:#d20f39">already</span> <span style="color:#d20f39">exists</span><span style="color:#d20f39">&#34;</span><span style="color:#04a5e5;font-weight:bold">)</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#d20f39">val</span> <span style="color:#d20f39">f</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#df8e1d">Future</span><span style="color:#8839ef">:</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#d20f39">val</span> <span style="color:#d20f39">content</span> <span style="color:#04a5e5;font-weight:bold">=</span> verifyContent<span style="color:#04a5e5;font-weight:bold">(</span>title<span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#04a5e5;font-weight:bold">).</span>run <span style="color:#9ca0b0;font-style:italic">// spawning a new Future
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>      <span style="color:#8839ef">val</span> author <span style="color:#8839ef">=</span> authorBy<span style="color:#04a5e5;font-weight:bold">(</span>authorId<span style="color:#04a5e5;font-weight:bold">).</span>run <span style="color:#9ca0b0;font-style:italic">// spawninig a new Future
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>      content<span style="color:#04a5e5;font-weight:bold">.</span>zip<span style="color:#04a5e5;font-weight:bold">(</span>author<span style="color:#04a5e5;font-weight:bold">).</span>await
+</span></span><span style="display:flex;"><span>      <span style="color:#d20f39">val</span> <span style="color:#d20f39">content</span> <span style="color:#04a5e5;font-weight:bold">=</span> verifyContent<span style="color:#04a5e5;font-weight:bold">(</span>title<span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#04a5e5;font-weight:bold">).</span>run
+</span></span><span style="display:flex;"><span>      <span style="color:#8839ef">val</span> author <span style="color:#8839ef">=</span> authorBy<span style="color:#04a5e5;font-weight:bold">(</span>authorId<span style="color:#04a5e5;font-weight:bold">).</span>run
+</span></span><span style="display:flex;"><span>      content<span style="color:#04a5e5;font-weight:bold">.</span>zip<span style="color:#04a5e5;font-weight:bold">(</span>author<span style="color:#04a5e5;font-weight:bold">).</span>await
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">val</span> <span style="color:#04a5e5;font-weight:bold">(</span>post<span style="color:#04a5e5;font-weight:bold">,</span> author<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=</span> f<span style="color:#04a5e5;font-weight:bold">.</span>awaitResult<span style="color:#04a5e5;font-weight:bold">.?</span>
-</span></span><span style="display:flex;"><span>    context<span style="color:#04a5e5;font-weight:bold">.</span>repository<span style="color:#04a5e5;font-weight:bold">.</span>save<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Post</span><span style="color:#04a5e5;font-weight:bold">(</span>author<span style="color:#04a5e5;font-weight:bold">,</span> post<span style="color:#04a5e5;font-weight:bold">.?.</span>_1<span style="color:#04a5e5;font-weight:bold">,</span> post<span style="color:#04a5e5;font-weight:bold">.?.</span>_2<span style="color:#04a5e5;font-weight:bold">,</span> <span style="color:#df8e1d">Date</span><span style="color:#04a5e5;font-weight:bold">()))</span>
+</span></span><span style="display:flex;"><span>    context<span style="color:#04a5e5;font-weight:bold">.</span>repository<span style="color:#04a5e5;font-weight:bold">.</span>save<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Post</span><span style="color:#04a5e5;font-weight:bold">(</span>author<span style="color:#04a5e5;font-weight:bold">.?,</span> post<span style="color:#04a5e5;font-weight:bold">.?.</span>_1<span style="color:#04a5e5;font-weight:bold">,</span> post<span style="color:#04a5e5;font-weight:bold">.?.</span>_2<span style="color:#04a5e5;font-weight:bold">,</span> <span style="color:#df8e1d">Date</span><span style="color:#04a5e5;font-weight:bold">())).?</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/* Pretending to make a call to the Authorship Service that keeps track of authorized authors. */</span>
-</span></span><span style="display:flex;"><span><span style="color:#8839ef">private</span> <span style="color:#8839ef">def</span> authorBy<span style="color:#04a5e5;font-weight:bold">(</span>id<span style="color:#8839ef">:</span> <span style="color:#d20f39">AuthorId</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Task</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Author</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#04a5e5;font-weight:bold">???</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">private</span> <span style="color:#8839ef">def</span> authorBy<span style="color:#04a5e5;font-weight:bold">(</span>id<span style="color:#8839ef">:</span> <span style="color:#d20f39">AuthorId</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Task</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">Author</span><span style="color:#04a5e5;font-weight:bold">]]</span> <span style="color:#8839ef">=</span> <span style="color:#04a5e5;font-weight:bold">???</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/* Some local computation that verifies the content of the post is appropriate (e.g. not offensive, ...). */</span>
+</span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/* Some local computation that verifies the content of the post is appropriate. */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">private</span> <span style="color:#8839ef">def</span> verifyContent<span style="color:#04a5e5;font-weight:bold">(</span>title<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Body</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Task</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">PostContent</span><span style="color:#04a5e5;font-weight:bold">]]</span> <span style="color:#8839ef">=</span> <span style="color:#04a5e5;font-weight:bold">???</span>
 </span></span></code></pre></div><p>Some remarks:</p>
 <ul>
@@ -568,11 +589,17 @@ classDiagram
 <p><code>zip</code>: combinator function returning a pair with the results if both <code>Future</code>s succeed, otherwise fail with the failure that was returned first.</p>
 </li>
 <li>
-<p>Be aware of the fact to achieve cancellation is necessary to enclose both the content verification and authorization task inside an enclosing <code>Future</code>, since the <code>zip</code> doesn&rsquo;t provide cancellation mechanism per se. The following code wouldn&rsquo;t work as expected!</p>
-<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">val</span> contentVerifier <span style="color:#8839ef">=</span> verifyContent<span style="color:#04a5e5;font-weight:bold">(</span>title<span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#04a5e5;font-weight:bold">).</span>run
+<p>Be aware of the fact to achieve cancellation is necessary to enclose both the content verification and authorization task inside an enclosing <code>Future</code>, since the <code>zip</code> doesn&rsquo;t provide a cancellation mechanism per se. The following code wouldn&rsquo;t work as expected!</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">// WRONG: doesn&#39;t provide cancellation!
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span><span style="color:#8839ef">val</span> contentVerifier <span style="color:#8839ef">=</span> verifyContent<span style="color:#04a5e5;font-weight:bold">(</span>title<span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#04a5e5;font-weight:bold">).</span>run
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">val</span> authorizer <span style="color:#8839ef">=</span> authorBy<span style="color:#04a5e5;font-weight:bold">(</span>authorId<span style="color:#04a5e5;font-weight:bold">).</span>run
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">val</span> <span style="color:#04a5e5;font-weight:bold">(</span>post<span style="color:#04a5e5;font-weight:bold">,</span> author<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=</span> contentVerifier<span style="color:#04a5e5;font-weight:bold">.</span>zip<span style="color:#04a5e5;font-weight:bold">(</span>authorizer<span style="color:#04a5e5;font-weight:bold">).</span>awaitResult<span style="color:#04a5e5;font-weight:bold">.?</span>
-</span></span></code></pre></div></li>
+</span></span></code></pre></div><p>👉🏻 To showcase the structured concurrency and cancellation mechanisms of Scala Gears tests have been prepared:</p>
+<ul>
+<li><a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/StructuredConcurrencyTest.scala"><code>StructuredConcurrencyTest</code></a></li>
+<li><a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/CancellationTest.scala"><code>CancellationTest</code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -607,7 +634,6 @@ classDiagram
 </tr>
 </tbody>
 </table>
-<hr>
 <h3 id="kotlin-coroutines">
   Kotlin Coroutines
   <a class="anchor" href="#kotlin-coroutines">#</a>
@@ -617,7 +643,7 @@ classDiagram
 <p>A <strong>coroutine</strong> in Kotlin is an instance of a <em>suspendable</em> computation.</p>
 </li>
 <li>
-<p>Their API is quite similar to the Scala Gears, which has taken inspiration from Kotlin coroutines.</p>
+<p>Their API is quite similar to the Scala Gears, which has taken inspiration from Kotlin coroutines. To try to make a comparison, the following table shows the correspondence between the two libraries:</p>
 <table>
 <thead>
 <tr>
@@ -631,8 +657,12 @@ classDiagram
 <td><code>CoroutineScope</code></td>
 </tr>
 <tr>
-<td><code>Future</code></td>
-<td><code>Deferred</code> / <code>Job             </code></td>
+<td><code>Future[Unit]</code></td>
+<td><code>Job</code></td>
+</tr>
+<tr>
+<td><code>Future[T]</code></td>
+<td><code>Deferred&lt;T&gt;</code></td>
 </tr>
 <tr>
 <td><code>def all()(using Async)</code></td>
@@ -642,67 +672,102 @@ classDiagram
 </table>
 <ul>
 <li>
-<p><code>CoroutineContext</code>: every coroutine must be executed in a coroutine context, including a dispatcher, that determines what thread or threads the coroutine uses for its execution, and the <code>Job</code> of the coroutine, which represents a cancellable background piece of work with a life cycle that culminates in its completion.</p>
+<p>In the Kotlin Coroutine library, <code>CoroutineScope</code> is an interface that defines a single property, <code>coroutineContext</code>, which returns the <code>CoroutineContext</code> that defines the scope in which the coroutine runs.</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span>  <span style="color:#8839ef">public</span> <span style="color:#8839ef">interface</span> <span style="color:#df8e1d">CoroutineScope</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#9ca0b0;font-style:italic">/** Returns the context of this scope. */</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#8839ef">public</span> <span style="color:#8839ef">val</span> <span style="color:#fe640b">coroutineContext</span>: CoroutineContext
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><p>Every coroutine must be executed in a coroutine context which is a collection of key-value pairs that provide contextual information for the coroutine, including a dispatcher, that determines what thread or threads the coroutine uses for its execution, and the <code>Job</code> of the coroutine, which represents a cancellable background piece of work with a life cycle that culminates in its completion.</p>
 <ul>
 <li>
-<p>In the Kotlin Coroutine library, <code>CoroutineScope</code> is an interface that can be implemented by any class capable of launching and suspending coroutines.</p>
-<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#8839ef">public</span> <span style="color:#8839ef">interface</span> <span style="color:#df8e1d">CoroutineScope</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/**
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">    * Returns the context of this scope.
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">    */</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">public</span> <span style="color:#8839ef">val</span> <span style="color:#fe640b">coroutineContext</span>: CoroutineContext
-</span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div></li>
-<li>
-<p>Several coroutine builders are available, like <code>launch</code>, <code>async</code>, <code>runBlocking</code>, <code>withContext</code> which accept an optional <code>CoroutineContext</code> parameter that can be used to specify the dispatcher and other context elements.</p>
-</li>
+<p>Different ways to create a scope:</p>
+<ul>
+<li><code>GlobalScope.launch</code> launching a new coroutine in the global scope &ndash; <em>discouraged because it can lead to memory leaks</em></li>
+<li><code>CoroutineScope(Dispatchers.Default)</code>, using the constructor with a dispatcher</li>
+<li><code>runBlocking</code> - equivalent to the Gears <code>Async.blocking</code> - provides a way to run a coroutine in the <code>MainScope</code>, i.e. on the main/UI thread</li>
 </ul>
 </li>
+<li>
+<p>Useful dispatchers:</p>
+<ul>
+<li><code>Default dispatcher</code>: to run CPU-intensive functions. If we forget to choose our dispatcher, this dispatcher will be selected by default.</li>
+<li><code>IO dispatcher</code>: to run I-O bound computation, where we block waiting for input-output operations to complete, like network-related operations, file operations, etc.</li>
+<li><code>Unconfined dispatcher</code>: it isn&rsquo;t restricted to a particular thread, i.e. doesn&rsquo;t change the thread of the coroutine, it operates on the same thread where it was initiated.</li>
+<li><code>Main dispatcher</code>: used when we want to interact with the UI. It is restricted to the main thread.</li>
+</ul>
+</li>
+<li>
+<p>Several coroutine builders exist, like <code>launch</code>, <code>async</code>, <code>withContext</code> which accept an optional <code>CoroutineContext</code> parameter that can be used to specify the dispatcher and other context elements.</p>
+</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#8839ef">fun</span> <span style="color:#1e66f5">main</span>(): Unit = runBlocking { <span style="color:#9ca0b0;font-style:italic">// this: CoroutineScope
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>    <span style="color:#8839ef">val</span> <span style="color:#fe640b">job</span>: Job = <span style="color:#8839ef">this</span>.launch(<span style="color:#df8e1d">Dispatchers</span>.IO) { <span style="color:#9ca0b0;font-style:italic">// launch a new coroutine and continue
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>        delay(<span style="color:#fe640b">1000L</span>) <span style="color:#9ca0b0;font-style:italic">// non-blocking delay for 1 second (default time unit is ms)
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>        print(<span style="color:#40a02b">&#34;Kotlin Coroutine!&#34;</span>) <span style="color:#9ca0b0;font-style:italic">// print after delay
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">val</span> <span style="color:#fe640b">job2</span>: Deferred&lt;String&gt; = async {
+</span></span><span style="display:flex;"><span>        delay(<span style="color:#fe640b">100L</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#40a02b">&#34;Hello&#34;</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    print(job2.await() + <span style="color:#40a02b">&#34; &#34;</span>) <span style="color:#9ca0b0;font-style:italic">// wait until child coroutine completes
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>    job.join() <span style="color:#9ca0b0;font-style:italic">// wait until the job is done and &#34;Kotlin Coroutine!&#34; is printed
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>}
+</span></span></code></pre></div></li>
 <li>
 <p>suspending functions are marked with the <code>suspend</code> keyword; they can use other suspending functions to suspend the execution of a coroutine.</p>
 </li>
 </ul>
 </li>
 <li>
-<p>Coroutines follow the principle of structured concurrency: <code>Job</code>s can be arranged into parent-child hierarchies where cancellation of a parent leads to the immediate cancellation of all its children recursively. Failure of a child with an exception immediately cancels its parent and, consequently, all its other children.</p>
+<p>Coroutines follow the principle of structured concurrency: coroutines can be arranged into parent-child hierarchies where the cancellation of a parent leads to the immediate cancellation of all its children recursively. Failure of a child with an exception immediately cancels its parent and, consequently, all its other children.</p>
 </li>
 </ul>
-<p>w.r.t. kotlin coroutines:</p>
-<ul>
-<li>&ldquo;Finally, about function coloring: Capabilities are actually much better here than other language&rsquo;s proposals such as suspend or async which feel clunky in comparison. This becomes obvious when you consider higher order functions. Capabilities let us define a single map (with no change in signature compared to now!) that works for sync as well as async function arguments. That&rsquo;s the real breakthrough here, which will make everything work so much smoother. I have talked about this elsewhere and this response is already very long, so I will leave it at that.&rdquo;</li>
-</ul>
-<p>how suspension is implemented</p>
-<hr>
-<h2 id="best-practices">
-  Best practices
-  <a class="anchor" href="#best-practices">#</a>
-</h2>
-<p>Some of the best practices of Kotlin Coroutines that can be applied to Scala&rsquo;s direct style Gears as well:</p>
-<ul>
-<li>
-<p><strong>Do not use <code>Future</code>/<code>async</code> with an immediate <code>await</code></strong>: it makes no sense to define an asynchronous computation if we have to immediately wait for its result without doing anything else in the meantime:</p>
-<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">// DON&#39;T
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span><span style="color:#8839ef">val</span> f <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Future</span><span style="color:#8839ef">:</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">// some suspending operation...
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>  service<span style="color:#04a5e5;font-weight:bold">.</span>postByTitle<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#40a02b">&#34;Direct style guidelines&#34;</span><span style="color:#04a5e5;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span><span style="color:#8839ef">val</span> post <span style="color:#8839ef">=</span> f<span style="color:#04a5e5;font-weight:bold">.</span>await
+<p>Going back to our example, the interface of the service with Kotlin coroutines looks like this (<a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/blog-ws-direct-kt/src/main/kotlin/io/github/tassiLuca/dse/blog">here</a> you can find the complete sources):</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** The service exposing a set of functionalities to interact with blog posts. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">interface</span> <span style="color:#df8e1d">PostsService</span> {
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">// DO
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span><span style="color:#8839ef">val</span> post <span style="color:#8839ef">=</span> service<span style="color:#04a5e5;font-weight:bold">.</span>get<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#40a02b">&#34;Direct style guidelines&#34;</span><span style="color:#04a5e5;font-weight:bold">)</span>
-</span></span></code></pre></div><p>In case a few async tasks need to be started the last one does not require to be run in a new <code>Future</code>/<code>async</code>, though can be beneficial for readability and maintainability reasons:</p>
-<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#df8e1d">Future</span><span style="color:#8839ef">:</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#d20f39">val</span> <span style="color:#d20f39">post</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#df8e1d">Future</span> <span style="color:#04a5e5;font-weight:bold">{</span> service<span style="color:#04a5e5;font-weight:bold">.</span>postByTitle<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#40a02b">&#34;Direct style guidelines&#34;</span><span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#04a5e5;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">val</span> users <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Future</span> <span style="color:#04a5e5;font-weight:bold">{</span> service<span style="color:#04a5e5;font-weight:bold">.</span>user<span style="color:#04a5e5;font-weight:bold">()</span> <span style="color:#04a5e5;font-weight:bold">}</span> <span style="color:#9ca0b0;font-style:italic">// not necessary here, but useful for readability
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>  showPost<span style="color:#04a5e5;font-weight:bold">(</span>post<span style="color:#04a5e5;font-weight:bold">.</span>await<span style="color:#04a5e5;font-weight:bold">,</span> users<span style="color:#04a5e5;font-weight:bold">.</span>await<span style="color:#04a5e5;font-weight:bold">)</span>
-</span></span></code></pre></div></li>
-<li>
-<p><strong>Suspending functions await completion of their children</strong></p>
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Creates a new post. */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">suspend</span> <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">create</span>(authorId: String, title: String, body: String): Result&lt;Post&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Retrieves a post by its title. */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">suspend</span> <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">get</span>(title: String): Result&lt;Post&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#9ca0b0;font-style:italic">/** Retrieves all the posts. */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">suspend</span> <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">getAll</span>(): Result&lt;Sequence&lt;Post&gt;&gt;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The implementation of the <code>create</code> function:</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#8839ef">override</span> <span style="color:#8839ef">suspend</span> <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">create</span>(authorId: String, title: String, body: String): Result&lt;Post&gt; = runCatching {
+</span></span><span style="display:flex;"><span>    coroutineScope {
+</span></span><span style="display:flex;"><span>        require(!repository.exists(title)) { <span style="color:#40a02b">&#34;Post with title </span><span style="color:#40a02b">$title</span><span style="color:#40a02b"> already exists&#34;</span> }
+</span></span><span style="display:flex;"><span>        <span style="color:#8839ef">val</span> <span style="color:#fe640b">content</span> = async { verifyContent(title, body) }
+</span></span><span style="display:flex;"><span>        <span style="color:#8839ef">val</span> <span style="color:#fe640b">author</span> = async { authorBy(authorId) }
+</span></span><span style="display:flex;"><span>        <span style="color:#8839ef">val</span> <span style="color:#fe640b">post</span> = Post(author.await(), content.await(), Date())
+</span></span><span style="display:flex;"><span>        repository.save(post)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/* Pretending to make a call to the Authorship Service that keeps track of authorized authors. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">private</span> <span style="color:#8839ef">suspend</span> <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">authorBy</span>(id: String): Author { <span style="color:#04a5e5;font-weight:bold">..</span>. }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/* Some local computation that verifies the content of the post is appropriate. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#8839ef">private</span> <span style="color:#8839ef">suspend</span> <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">verifyContent</span>(title: String, body: String): PostContent { <span style="color:#04a5e5;font-weight:bold">..</span>. }
+</span></span></code></pre></div><ul>
+<li>a <code>coroutineScope</code> is a suspending function used to create a new coroutine scope: it suspends the execution of the current coroutine, releasing the underlying thread for other usages;</li>
+<li>As we said previously, the failure of a child with an exception immediately cancels its parent and, consequently, all its other children: this means that, for handling the cancellation of nested coroutines, we don&rsquo;t need to do anything special, it is already automatically handled by the library.
+<ul>
+<li>This is an advantage over the Scala Gears, where operators like <code>zip</code> and <code>altWithCancel</code> are necessary</li>
+</ul>
 </li>
 </ul>
-<h2 id="conclusions">
-  Conclusions
-  <a class="anchor" href="#conclusions">#</a>
+<h2 id="takeaways">
+  Takeaways
+  <a class="anchor" href="#takeaways">#</a>
 </h2>
+<ul>
+<li>Scala Gears offers, despite the syntactical differences, very similar concepts to Kotlin Coroutines, with structured concurrency and cancellation mechanisms;</li>
+<li>Kotlin Coroutines handles the cancellation of nested coroutines more easily than Scala Gears, where special attention is required;</li>
+<li>As <a href="https://github.com/lampepfl/gears/issues/19#issuecomment-1732586362">stated by M. Odersky</a> the <code>Async</code> capability is better than <code>suspend</code> in Kotlin because let defines functions that work for synchronous as well as asynchronous function arguments.</li>
+</ul>
 </article>
  
       
@@ -712,9 +777,9 @@ classDiagram
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/702b60fa431d73aa19eb4fbab65c2d2429cb04bf" title='Last modified by Luca Tassinari | March 3, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/7c360a9b87a6d66c7a9f12b7f79f48a2a83a9d12" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>March 3, 2024</span>
+      <span>March 4, 2024</span>
     </a>
   </div>
 

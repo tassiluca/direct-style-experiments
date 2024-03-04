@@ -4,8 +4,8 @@
 	<meta name="generator" content="Hugo 0.123.7">
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Direct style for Functional Reactive Programming: an analysis in Scala &amp; Kotlin # Goals of the project # In the realm of asynchronous programming, the Scala ecosystem offers a set of solid monads constructs to tackle complex task functionally with elegance and efficiency, like [Monix Tasks]( and [Cats ](
-However, we are assisting to the increase in adoption of continuation and coroutines in modern runtimes, either exploiting some kind of fibers support, like the project Loom with Virtual Thread in the JVM ecosystem, or via code generation, like Kotlin Coroutines.">
+<meta name="description" content="Direct style for Functional Reactive Programming: an analysis in Scala &amp; Kotlin # Goals of the project # In the realm of asynchronous programming, the Scala ecosystem offers a set of solid monads constructs to tackle complex task functionally with elegance and efficiency, like Monix Tasks and Cats Effect.
+However, we are assisting to the increase in adoption of continuation and coroutines in modern runtimes, either exploiting some kind of fibers support, like the project Loom with Virtual Threads, or via code generation, like Kotlin Coroutines.">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
@@ -19,7 +19,7 @@ However, we are assisting to the increase in adoption of continuation and corout
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/">
 <link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.3079c33e46bf5b308bdbfa938bf6043ba270f82b73e2ada92c1da0aacca6df5c.css" integrity="sha256-MHnDPka/WzCL2/qTi/YEO6Jw&#43;Ctz4q2pLB2gqsym31w=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.d5959f219b5b3a7549e1e03b840b3a34ab05fd0249b3957b82edcf7f391f897d.js" integrity="sha256-1ZWfIZtbOnVJ4eA7hAs6NKsF/QJJs5V7gu3PfzkfiX0=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.ef17430e690794ac9b1d36e19d87f20a295a480721b3fcdaee69db25ec1bb1ce.js" integrity="sha256-7xdDDmkHlKybHTbhnYfyCilaSAchs/za7mnbJewbsc4=" crossorigin="anonymous"></script>
 <link rel="alternate" type="application/rss+xml" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/index.xml" title="PPS-22-direct-style-experiments" />
 <!--
 Made with Book Theme
@@ -205,9 +205,11 @@ https://github.com/alex-shpak/hugo-book
   <a class="anchor" href="#goals-of-the-project">#</a>
 </h2>
 <blockquote>
-<p>In the realm of asynchronous programming, the Scala ecosystem offers a set of solid monads constructs to tackle complex task functionally with elegance and efficiency, like [Monix Tasks]( and [Cats ](</p>
-<p>However, we are assisting to the increase in adoption of continuation and coroutines in modern runtimes, either exploiting some kind of fibers support, like the project Loom with Virtual Thread in the JVM ecosystem, or via code generation, like Kotlin Coroutines.</p>
+<p>In the realm of asynchronous programming, the Scala ecosystem offers a set of solid monads constructs to tackle complex task functionally with elegance and efficiency, like <a href="https://monix.io/docs/current/eval/task.html">Monix Tasks</a> and <a href="https://typelevel.org/cats-effect/">Cats Effect</a>.</p>
+<p>However, we are assisting to the increase in adoption of continuation and coroutines in modern runtimes, either exploiting some kind of fibers support, like the project Loom with Virtual Threads, or via code generation, like Kotlin Coroutines.</p>
 <p>The goal of this project is to delve into this field through the lens of direct style, developing few examples (not too complex) leveraging the new <em>strawman</em> library <a href="https://github.com/lampepfl/gears">Scala Gears</a>, comparing it with Kotlin&rsquo;s Coroutines and the current implementation of monadic Futures, seeking to analyze aspects such as:</p>
+</blockquote>
+<blockquote>
 <ul>
 <li>ergonomicity of the two styles (which one results more thoughtful and/or verbose)</li>
 <li>which of the two approaches has a real advantage in adoption</li>
@@ -220,7 +222,7 @@ https://github.com/alex-shpak/hugo-book
   Overview
   <a class="anchor" href="#overview">#</a>
 </h2>
-<p>The project is built around three main example, delving from the fundamentals of the direct style framweork for simple asynchronous computation to reactive like systems.</p>
+<p>The project is built around three main examples, delving from the fundamentals of the direct style frameworks for simple asynchronous computation to more complex reactive-like systems.</p>
 <ol>
 <li><a href="./docs/01-boundaries"><code>Boundary</code> and <code>break</code></a></li>
 <li><a href="./docs/02-basics">Basic asynchronous constructs</a></li>
@@ -237,7 +239,7 @@ https://github.com/alex-shpak/hugo-book
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/567b8bf783d4a59de9acc970d2d2f9c586f9510a" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/7c360a9b87a6d66c7a9f12b7f79f48a2a83a9d12" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
       <span>March 4, 2024</span>
     </a>
