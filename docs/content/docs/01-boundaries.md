@@ -4,15 +4,19 @@ bookToc: false
 
 # `boundary` & `break`
 
-[[Source code](https://github.com/lampepfl/dotty/blob/3.3.0-RC4/library/src/scala/util/boundary.scala)]
+- [`boundary` \& `break`](#boundary--break)
+  - [Modeling error handling data types with non-local breaks](#modeling-error-handling-data-types-with-non-local-breaks)
+    - [`Optional`](#optional)
+    - [`Either` + `?`](#either--)
 
 `boundary` & `break` mechanism provides a cleaner alternative to non-local returns:
 
 - `boundary:` is short for `boundary.apply:`
-- the indented code below it is passed as `body` is a context function that is called within `boundary.apply`
-  - to `break` an in-scope `given` instance of `Label` is required (i.e. is impossible `break` without an enclosing `boundary`)
-  - Users don't define `Label` instances themselves. Instead, this is done inside the implementation of `boundary.apply` to provide the capability of doing a non-local return
+- the indented code below, passed as `body`, is a context function that is called within `boundary.apply`
+  - to `break`, an in-scope `given` instance of `Label` is required (i.e. is impossible to `break` without an enclosing `boundary`)
+  - Users don't define `Label` instances themselves. Instead, this is done inside the implementation of `boundary.apply` to provide the capability of doing a non-local return [[Ref](https://github.com/lampepfl/dotty/blob/3.3.0-RC4/library/src/scala/util/boundary.scala)]:
     ```scala
+    // From the Scala 3 standard library
     /** Run `body` with freshly generated label as implicit argument. 
       * Catch any breaks associated with that label and return their 
       * results instead of `body`'s result.
@@ -34,8 +38,10 @@ But, most importantly, they **lay the foundations** (along with a **`resume` mec
 
 {{< /hint >}}
 
-
 ## Modeling error handling data types with non-local breaks
+
+In the following section are presented two data types that can be used to handle errors, both leveraging the `boundary` and `break` mechanism.
+The first (`optional`) has been presented in the [Scalar conference by M. Odersky](https://www.google.com/search?client=safari&rls=en&q=direct+style+odersky&ie=UTF-8&oe=UTF-8), while the second has been implemented to apply the same style also to `Either` data type.
 
 ### `Optional`
 
@@ -59,7 +65,7 @@ object optional:
 ### `Either` + `?`
 
 ```scala
-/** Represents a computation that will hopefully return a [[Right]] value, but might fail with a [[Left]] one. */
+/** Represents a computation that will hopefully return a [[Right]] value but might fail with a [[Left]] one.*/
 object either:
 
   /** Defines the boundary for the [[Either]] returning computation, whose [[body]] is given in input. */
@@ -76,12 +82,13 @@ object either:
       case Left(value) => break(Left(value))
 
   extension [R](t: Try[R])
-    /** @return this [[Success]] value or break to the enclosing boundary with a [[Left]] containing the converted
-      *         `Throwable` exception performed by the implicit [[converter]].
+    /** @return this [[Success]] value or break to the enclosing boundary with a [[Left]] containing 
+      *         the converted `Throwable` exception performed by the implicit [[converter]].
       */
-    inline def ?[L](using Label[Left[L, Nothing]])(using converter: Conversion[Throwable, L]): R = t match
-      case Success(value) => value
-      case Failure(exception) => break(Left(converter(exception)))
+    inline def ?[L](using Label[Left[L, Nothing]])(using converter: Conversion[Throwable, L]): R = 
+      t match
+        case Success(value) => value
+        case Failure(exception) => break(Left(converter(exception)))
 
 /** An object encapsulating a collection of `Throwable` given converters. */
 object EitherConversions:
@@ -91,3 +98,7 @@ object EitherConversions:
 ```
 
 This kind of data type will be particularly useful in the next examples to quickly break in case of failures, returning the caller a meaningful error message, and simplifying the error-handling code.
+
+{{< button href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/" >}} **Home** {{< /button >}}
+
+{{< button href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/02-basics/" >}} **Next**: Basic asynchronous constructs {{< /button >}}

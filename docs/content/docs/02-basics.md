@@ -363,7 +363,8 @@ The other important key feature of the library is the support for **structured c
       // this can be interrupted
     ```
 
-- `Future`s are nestable; **the lifetime of nested computations is contained within the lifetime of enclosing ones**. This is achieved using `CompletionGroup`s, which are cancellable objects themselves and serve as containers for other cancellable objects, that once canceled, all of its members are canceled as well.
+- `Future`s are nestable; **the lifetime of nested computations is contained within the lifetime of enclosing ones**. This is achieved using **`CompletionGroup`s**, which are cancellable objects themselves and serve as **containers for other cancellable objects**; **once they are canceled, all of their members are canceled as well**.
+  - The group is accessible through `Async.current.group`;
   - A cancellable object can be included inside the cancellation group of the async context using the `link` method; this is what the [implementation of the `Future` does, under the hood](https://github.com/lampepfl/gears/blob/07989ffdae153b2fe11ac1ece53ce9dd1dbd18ef/shared/src/main/scala/async/futures.scala#L140).
 
 The implementation of the `create` function with direct style in gears looks like this:
@@ -401,9 +402,10 @@ Some remarks:
     val (post, author) = contentVerifier.zip(authorizer).awaitResult.?
     ```
 
-    👉🏻 To showcase the structured concurrency and cancellation mechanisms of Scala Gears tests have been prepared:
-      - [`StructuredConcurrencyTest`](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/StructuredConcurrencyTest.scala)
-      - [`CancellationTest`](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/CancellationTest.scala)
+👉🏻 To showcase the structured concurrency and cancellation mechanisms of Scala Gears tests have been prepared:
+
+- [`StructuredConcurrencyTest`](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/StructuredConcurrencyTest.scala)
+- [`CancellationTest`](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/CancellationTest.scala)
 
 Other combinator methods, available on `Future`s instance:
 
@@ -435,17 +437,17 @@ Other combinator methods, available on `Future`s instance:
         }
         ```
 
-        Every coroutine must be executed in a coroutine context which is a collection of key-value pairs that provide contextual information for the coroutine, including a dispatcher, that determines what thread or threads the coroutine uses for its execution, and the `Job` of the coroutine, which represents a cancellable background piece of work with a life cycle that culminates in its completion.
+        Every coroutine must be executed in a coroutine context, which is a collection of key-value pairs that provide contextual information for the coroutine, including a dispatcher, that determines what thread or threads the coroutine uses for its execution, and the `Job` of the coroutine, which represents a cancellable background piece of work with a life cycle that culminates in its completion.
 
       - Different ways to create a scope:
-        - `GlobalScope.launch` launching a new coroutine in the global scope -- *discouraged because it can lead to memory leaks*
-        - `CoroutineScope(Dispatchers.Default)`, using the constructor with a dispatcher
-        - `runBlocking` - equivalent to the Gears `Async.blocking` - provides a way to run a coroutine in the `MainScope`, i.e. on the main/UI thread
+        - `GlobalScope.launch` launching a new coroutine in the global scope -- *discouraged because it can lead to memory leaks*;
+        - `CoroutineScope(Dispatchers.Default)`, using the constructor with a dispatcher;
+        - `runBlocking` - equivalent to the Gears `Async.blocking` - provides a way to run a coroutine in the `MainScope`, i.e. on the main/UI thread.
   
       - Useful dispatchers:
-        - `Default dispatcher`: to run CPU-intensive functions. If we forget to choose our dispatcher, this dispatcher will be selected by default.
-        - `IO dispatcher`: to run I-O bound computation, where we block waiting for input-output operations to complete, like network-related operations, file operations, etc.
-        - `Unconfined dispatcher`: it isn't restricted to a particular thread, i.e. doesn't change the thread of the coroutine, it operates on the same thread where it was initiated.
+        - `Default dispatcher`: to run CPU-intensive functions. If we forget to choose our dispatcher, this dispatcher will be selected by default;
+        - `IO dispatcher`: to run I-O bound computation, where we block waiting for input-output operations to complete, like network-related operations, file operations, etc.;
+        - `Unconfined dispatcher`: it isn't restricted to a particular thread, i.e. doesn't change the thread of the coroutine, it operates on the same thread where it was initiated;
         - `Main dispatcher`: used when we want to interact with the UI. It is restricted to the main thread.
 
       - Several coroutine builders exist, like `launch`, `async`, `withContext` which accept an optional `CoroutineContext` parameter that can be used to specify the dispatcher and other context elements.
@@ -508,7 +510,9 @@ private suspend fun verifyContent(title: String, body: String): PostContent { ..
 
 - a `coroutineScope` is a suspending function used to create a new coroutine scope: it suspends the execution of the current coroutine, releasing the underlying thread for other usages;
 - As we said previously, the failure of a child with an exception immediately cancels its parent and, consequently, all its other children: this means that, for handling the cancellation of nested coroutines, we don't need to do anything special, it is already automatically handled by the library.
-  - [No matter the order in which coroutines are awaited, if one of them fails all the others get cancelled](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/kotlin/io/github/tassiLuca/dse/CancellationTest.kt)
+  - with `coroutineScope` no matter the order in which coroutines are awaited, if one of them fails with an exception it is propagated upwards, cancelling all other ones
+    - this is not the case for `supervisorScope`, a coroutine builder ensuring that child coroutines can fail independently without affecting the parent coroutine.
+    - have a look to [this test](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/blog-ws-direct-kt/src/test/kotlin/io/github/tassiLuca/dse/CoroutinesCancellationTests.kt)
   - This is an advantage over the Scala Gears, where operators like `zip` and `altWithCancel` are necessary!
 
 ## Takeaways
@@ -516,3 +520,7 @@ private suspend fun verifyContent(title: String, body: String): PostContent { ..
 > - Scala Gears offers, despite the syntactical differences, very similar concepts to Kotlin Coroutines, with structured concurrency and cancellation mechanisms;
 > - Kotlin Coroutines handles the cancellation of nested coroutines more easily than Scala Gears, where special attention is required;
 > - As [stated by M. Odersky](https://github.com/lampepfl/gears/issues/19#issuecomment-1732586362) the `Async` capability is better than `suspend` in Kotlin because let defines functions that work for synchronous as well as asynchronous function arguments.
+
+{{< button href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/01-boundaries" >}} **Previous**: boundary & break{{< /button >}}
+
+{{< button href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/03-channels/" >}} **Next**: Channels as a communication primitive {{< /button >}}

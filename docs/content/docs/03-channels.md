@@ -218,7 +218,7 @@ As usual, it has been implemented using monadic `Future`s, as well as using Scal
 
 ### Future monadic version
 
-[[The sources are available inside the `analyzer-monadic` submodule](https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/blog-ws-monadic/src/main/scala/io/github/tassiLuca/dse/blogv).]
+[[The sources are available inside the `analyzer-monadic` submodule](https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/blog-ws-monadic/src/main/scala/io/github/tassiLuca/dse/blog).]
 
 The entry point of the library is the `Analyzer` interface which takes in input the organization name and a function through which is possible to react to results while they are computed.
 
@@ -463,6 +463,8 @@ or having set an environment variable named `GH_TOKEN`.
 ---
 
 ### Kotlin Coroutines version
+
+[[The sources are available inside the `analyzer-direct-kt` submodule](https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/analyzer-direct-kt/src/main/kotlin/io/github/tassiLuca/analyzer).]
 
 The analyzer interface reflects the Scala Gears one: a `Result` is used in place of `Either`, and the suspendable function `udateResults` is marked with the `suspend` keyword in place of the `using Async` context.
 
@@ -802,7 +804,7 @@ Success(The Tell-Tale Heart)
 
 {{< /columns >}}
 
-[More tests on `Flows` can be found in `commons`, `pimping` pakcage](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/pimping/FlowTest.scala).
+👉🏻 [More tests on `Flows` can be found in `commons`, `pimping` pakcage](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/pimping/FlowTest.scala).
 
 ## Takeaways
 
@@ -810,3 +812,7 @@ Success(The Tell-Tale Heart)
 >   - Scala Gears support for `Terminable` channels or a review of the closing mechanism should be considered.
 > - The `Flow` abstraction in Kotlin Coroutines is a powerful tool for handling cold streams of data, and it is a perfect fit for functions that need to return a stream of asynchronously computed values **by request**.
 >   - A similar abstraction can be implemented in Scala Gears leveraging `Task`s and `TerminableChannel`s, enabling improved support for an asynchronous flow of data also in Gears, which is currently lacking.
+
+{{< button href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/02-basics" >}} **Previous**: Basic asynchronous constructs{{< /button >}}
+
+{{< button href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/04-rears" >}} **Next**: Reactivity in direct style{{< /button >}}

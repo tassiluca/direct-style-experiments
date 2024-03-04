@@ -548,4 +548,11 @@ suspend fun run(sensorSource: Flow<TemperatureEntry>) {
 }
 ```
 
-## Conclusions
+## Takeaways
+
+- Channels in Scala Gears are fine to model flow of data **that exist without application's request from them**: incoming network connections, event streams, etc...
+- 
+
+{{< button href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/03-channels" >}} **Previous**: Channels as a communication primitive{{< /button >}}
+
+{{< button href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/05-conclusions" >}} **Next**: Conclusions{{< /button >}}

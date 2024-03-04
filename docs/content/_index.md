@@ -27,5 +27,3 @@ Here's the outline of the conducted analysis:
 5. [Conclusions](./docs/05-going-further)
 
 Code has been organized in Gradle submodules, one for each version of the examples (current monadic futures, Scala Gears, Kotlin Coroutines):
-
-
