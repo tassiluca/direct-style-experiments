@@ -1,14 +1,14 @@
 package io.github.tassiLuca.analyzer.client
 
-import gears.async.{Async, Future}
+import gears.async.{Async, AsyncOperations, Future}
 import io.github.tassiLuca.analyzer.commons.client.{AnalyzerView, AppController, OrganizationReport}
 import io.github.tassiLuca.analyzer.commons.lib.RepositoryReport
 import io.github.tassiLuca.analyzer.lib.{Analyzer, RepositoryService}
 
 object AppController:
-  def direct(using Async): AppController = DirectAppController()
+  def direct(using Async, AsyncOperations): AppController = DirectAppController()
 
-  private class DirectAppController(using Async) extends AppController:
+  private class DirectAppController(using Async, AsyncOperations) extends AppController:
     private val view = AnalyzerView.gui(this)
     private val analyzer = Analyzer.incremental(RepositoryService.ofGitHub())
     private var currentComputation: Option[Future[Unit]] = None
