@@ -29,4 +29,11 @@ class SwingDashboardService : DashboardService {
     override fun alertNotified(message: String) = SwingUtilities.invokeLater {
         view.alertsModel().insertRow(0, arrayOf(message))
     }
+
+    override fun updateSchedule(schedule: Map<Pair<String, String>, String>) {
+        view.scheduleModel().rowCount = 0
+        schedule.forEach { (t, u) ->
+            view.scheduleModel().addRow(arrayOf(t.first, t.second, u))
+        }
+    }
 }

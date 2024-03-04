@@ -20,4 +20,7 @@ interface DashboardService {
 
     /** Notifies an alert [message]. */
     fun alertNotified(message: String)
+
+    /** Updates the [schedule]. */
+    fun updateSchedule(schedule: Map<Pair<String, String>, String>)
 }

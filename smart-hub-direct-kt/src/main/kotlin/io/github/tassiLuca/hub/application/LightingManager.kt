@@ -22,6 +22,6 @@ class LightingManager(dashboardService: DashboardService, coroutineContext: Coro
     }
 
     companion object {
-        private val SAMPLING_WINDOW = 5.seconds
+        private val SAMPLING_WINDOW = 10.seconds
     }
 }

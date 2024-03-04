@@ -19,7 +19,6 @@ class LightingSystem(
     }
 
     override suspend fun update() {
-        println("LightingSystem: $state")
         if (state.isNotEmpty()) {
             val average = state.map { it.luminosity }.average()
             dashboardService.luminosityUpdated(average)

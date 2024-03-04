@@ -9,7 +9,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.seconds
 
 /** Manages the thermostat and the temperature sensors. */
-class ThermostatManager(dashboardService: DashboardService, coroutineContext: CoroutineContext) {
+class ThermostatManager(private val dashboardService: DashboardService, coroutineContext: CoroutineContext) {
 
     /** The thermostat. */
     val thermostat = Thermostat(TEMPERATURE_TARGET, SAMPLING_WINDOW, dashboardService, coroutineContext)
@@ -23,6 +23,7 @@ class ThermostatManager(dashboardService: DashboardService, coroutineContext: Co
 
     /** Runs the thermostat and the temperature sensors. */
     suspend fun run(sensorSource: Flow<TemperatureEntry>) {
+        dashboardService.updateSchedule(mapOf("ALWAYS" to "09-24" to "19.0"))
         thermostat.run()
         temperatureSensorsChecker.run()
         sensorSource.collect {

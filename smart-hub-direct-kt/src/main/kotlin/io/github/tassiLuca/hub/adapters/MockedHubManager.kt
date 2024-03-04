@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.coroutineContext
 
 /** A mocked hub manager. */
 class MockedHubManager(override val coroutineContext: CoroutineContext) : CoroutineScope {
