@@ -13,15 +13,15 @@ Smart Hub example # Idea: in an IoT context, a multitude of sensors of different
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/04-rears/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-03-04T18:57:39+01:00" />
+<meta property="article:modified_time" content="2024-03-04T20:10:46+01:00" />
 
 <title>04 Rears | PPS-22-direct-style-experiments</title>
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
 <link rel="icon" href="/PPS-22-direct-style-experiments/favicon.png" >
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/docs/04-rears/">
-<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.3079c33e46bf5b308bdbfa938bf6043ba270f82b73e2ada92c1da0aacca6df5c.css" integrity="sha256-MHnDPka/WzCL2/qTi/YEO6Jw&#43;Ctz4q2pLB2gqsym31w=" crossorigin="anonymous">
+<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.42504dd4648e8da78376617fd32b73c3ae6afbe9f805c36868bc831b07002332.css" integrity="sha256-QlBN1GSOjaeDdmF/0ytzw65q&#43;&#43;n4BcNoaLyDGwcAIzI=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.7a116cc67b7551be7d8aef10321ace3563e766b49af7377987d400daa542b9aa.js" integrity="sha256-ehFsxnt1Ub59iu8QMhrONWPnZrSa9zd5h9QA2qVCuao=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.19d8f85e12429745e6f1107a6dff3b5cfe2a5c515d78e329be453ad6790c6ab3.js" integrity="sha256-Gdj4XhJCl0Xm8RB6bf87XP4qXFFdeOMpvkU61nkMarM=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -348,7 +348,7 @@ classDiagram
 <li>A <code>Consumer</code> is a runnable entity devoted to consuming data from a channel, exposed by the <code>listeningChannel</code> method which returns a <code>SendableChannel</code> to send items to.
 <ul>
 <li>It can be made stateful by mixing it with the <code>State</code> trait, allowing it to keep track of its state, which is updated every time with the result of the <code>react</code>ion (i.e. its return type).</li>
-<li><strong>Warning</strong>: like in an event-loop, the <code>react</code>ion logic should not perform long-lasting blocking operation, otherwise, the whole system will not react to new events.</li>
+<li><strong>Warning</strong> Like in an event-loop, the <code>react</code>ion logic should not perform long-lasting blocking operation, otherwise, the whole system will not react to new events: the <code>Async</code> capability is though needed if you want to give the client the ability to invoke <code>Future</code>s within this block; otherwise, another option (alternative to the following) would be to encapsulate the reaction behavior within a <code>Task</code> and run it at every received data. However, race conditions could take place in this last case.</li>
 </ul>
 </li>
 </ul>
@@ -644,6 +644,7 @@ For example:</p>
 </span></span><span style="display:flex;"><span>  <span style="color:#04a5e5;font-weight:bold">).</span>run
 </span></span></code></pre></div></li>
 </ul>
+<hr>
 <p>To produce a testable version of this example, a simulated source of sensor data has been created, backed to a GUI, through which the user can simulate the behavior of the sensors.
 The example is runnable via:</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./gradlew smart-hub-direct:run
@@ -653,6 +654,7 @@ Entering some value in the panels and pressing the &ldquo;Send&rdquo; button, af
          alt="Smart Hub application" width="90%"/>
 </figure>
 
+<hr>
 <h3 id="kotlin-coroutines-version">
   Kotlin Coroutines version
   <a class="anchor" href="#kotlin-coroutines-version">#</a>
@@ -722,27 +724,24 @@ This could offer (in some cases and where necessary) a way to use the full power
 </h2>
 <ul>
 <li>Channels in Scala Gears are fine to model flow of data <strong>that exist without application&rsquo;s request from them</strong>: incoming network connections, event streams, etc&hellip;</li>
-<li></li>
 </ul>
 
 
 
-  
+
   
 
-
-<a  href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/03-channels"   target="_blank" rel="noopener"  class="book-btn">
+<a  href="/PPS-22-direct-style-experiments/docs/03-channels/"   class="book-btn">
   <strong>Previous</strong>: Channels as a communication primitive
 </a>
 
 
 
 
-  
+
   
 
-
-<a  href="https://tassiluca.github.io/PPS-22-direct-style-experiments/PPS-22-direct-style-experiments/docs/05-conclusions"   target="_blank" rel="noopener"  class="book-btn">
+<a  href="/PPS-22-direct-style-experiments/docs/05-conclusions/"   class="book-btn">
   <strong>Next</strong>: Conclusions
 </a>
 
@@ -755,7 +754,7 @@ This could offer (in some cases and where necessary) a way to use the full power
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/7a77702ad9fad2340a958cd8ad5a89c99bfc5294" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/20dfdd862e74d2235aaa27918880138a43b71025" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
       <span>March 4, 2024</span>
     </a>

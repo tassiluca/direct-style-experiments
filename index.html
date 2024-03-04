@@ -17,9 +17,9 @@ However, we are assisting to the increase in adoption of continuation and corout
 <link rel="manifest" href="/PPS-22-direct-style-experiments/manifest.json">
 <link rel="icon" href="/PPS-22-direct-style-experiments/favicon.png" >
 <link rel="canonical" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/">
-<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.3079c33e46bf5b308bdbfa938bf6043ba270f82b73e2ada92c1da0aacca6df5c.css" integrity="sha256-MHnDPka/WzCL2/qTi/YEO6Jw&#43;Ctz4q2pLB2gqsym31w=" crossorigin="anonymous">
+<link rel="stylesheet" href="/PPS-22-direct-style-experiments/book.min.42504dd4648e8da78376617fd32b73c3ae6afbe9f805c36868bc831b07002332.css" integrity="sha256-QlBN1GSOjaeDdmF/0ytzw65q&#43;&#43;n4BcNoaLyDGwcAIzI=" crossorigin="anonymous">
   <script defer src="/PPS-22-direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/PPS-22-direct-style-experiments/en.search.min.7a116cc67b7551be7d8aef10321ace3563e766b49af7377987d400daa542b9aa.js" integrity="sha256-ehFsxnt1Ub59iu8QMhrONWPnZrSa9zd5h9QA2qVCuao=" crossorigin="anonymous"></script>
+  <script defer src="/PPS-22-direct-style-experiments/en.search.min.19d8f85e12429745e6f1107a6dff3b5cfe2a5c515d78e329be453ad6790c6ab3.js" integrity="sha256-Gdj4XhJCl0Xm8RB6bf87XP4qXFFdeOMpvkU61nkMarM=" crossorigin="anonymous"></script>
 <link rel="alternate" type="application/rss+xml" href="https://tassiluca.github.io/PPS-22-direct-style-experiments/index.xml" title="PPS-22-direct-style-experiments" />
 <!--
 Made with Book Theme
@@ -229,7 +229,32 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="./docs/04-rears">Reactivity in direct style</a></li>
 <li><a href="./docs/05-going-further">Conclusions</a></li>
 </ol>
-<p>Code has been organized in Gradle submodules, one for each version of the examples (current monadic futures, Scala Gears, Kotlin Coroutines):</p>
+<p>Code has been organized in Gradle submodules, one for each version of the examples (current monadic futures, Scala Gears, Kotlin Coroutines).
+Here an overview of the project folder structure:</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-plaintext" data-lang="plaintext"><span style="display:flex;"><span>direct-style-experiments
+</span></span><span style="display:flex;"><span>├── analyzer-commons         # common code for analyzers (UI, controller, ...)
+</span></span><span style="display:flex;"><span>├── analyzer-direct          # analyzer example using Scala Gears
+</span></span><span style="display:flex;"><span>├── analyzer-direct-kt       # analyzer example using Kotlin Coroutines
+</span></span><span style="display:flex;"><span>├── analyzer-monadic         # analyzer example using current Futures
+</span></span><span style="display:flex;"><span>├── blog-ws-commons          # common code for the blog service example
+</span></span><span style="display:flex;"><span>├── blog-ws-direct           # blog service example using Scala Gears
+</span></span><span style="display:flex;"><span>├── blog-ws-direct-kt        # blog service example using Kotlin Coroutines
+</span></span><span style="display:flex;"><span>├── blog-ws-monadic          # blog service example using current Futures
+</span></span><span style="display:flex;"><span>├── commons/                 # modules with common code for entire project
+</span></span><span style="display:flex;"><span>│   ├─ src/
+</span></span><span style="display:flex;"><span>│   │  └─ main/
+</span></span><span style="display:flex;"><span>│   │     └─ scala/
+</span></span><span style="display:flex;"><span>│   │        ├─ boundaries   # `boundary` and `break` implementations
+</span></span><span style="display:flex;"><span>│   │        ├─ examples     # some common examples
+</span></span><span style="display:flex;"><span>│   │        └─ pimping      # proposed extensions to the Scala Gears library
+</span></span><span style="display:flex;"><span>│   └─ test                  # general tests (cancellation, structured concurrency, ...)
+</span></span><span style="display:flex;"><span>├── rears                    # extensions to the Scala Gears library for Rx
+</span></span><span style="display:flex;"><span>├── smart-hub-direct         # smart hub example using Scala Gears
+</span></span><span style="display:flex;"><span>└── smart-hub-direct-kt      # smart hub example using Kotlin Coroutines
+</span></span></code></pre></div><p>Generally speaking, the runnable examples can be run by simply executing the <code>run</code> Gradle task in the respective submodule, like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./gradlew :analyzer-direct:run
+</span></span></code></pre></div><p>Detailed instructions follows in the specific sections.</p>
+<p><strong>Examples works with a version of the JDK &gt; 21</strong> (Virtual Threads are needed!).</p>
 </article>
  
       
@@ -239,7 +264,7 @@ https://github.com/alex-shpak/hugo-book
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/7a77702ad9fad2340a958cd8ad5a89c99bfc5294" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/commit/20dfdd862e74d2235aaa27918880138a43b71025" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
       <img src="/PPS-22-direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
       <span>March 4, 2024</span>
     </a>
