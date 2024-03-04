@@ -13,7 +13,7 @@ Lack of referential transparency; Lack of cancellation mechanisms and structured
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/direct-style-experiments/docs/02-basics/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-03-04T20:10:46+01:00" />
+<meta property="article:modified_time" content="2024-03-04T23:03:38+01:00" />
 
 <title>02 Basics | direct-style-experiments</title>
 <link rel="manifest" href="/direct-style-experiments/manifest.json">
@@ -21,7 +21,7 @@ Lack of referential transparency; Lack of cancellation mechanisms and structured
 <link rel="canonical" href="https://tassiluca.github.io/direct-style-experiments/docs/02-basics/">
 <link rel="stylesheet" href="/direct-style-experiments/book.min.42504dd4648e8da78376617fd32b73c3ae6afbe9f805c36868bc831b07002332.css" integrity="sha256-QlBN1GSOjaeDdmF/0ytzw65q&#43;&#43;n4BcNoaLyDGwcAIzI=" crossorigin="anonymous">
   <script defer src="/direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/direct-style-experiments/en.search.min.213b39f02b255d5bf0731f7103753f16f28f6c74d0701bf0f379b7854888a824.js" integrity="sha256-ITs58CslXVvwcx9xA3U/FvKPbHTQcBvw83m3hUiIqCQ=" crossorigin="anonymous"></script>
+  <script defer src="/direct-style-experiments/en.search.min.8935f64af2d10bb414befcb98b90f2f565209b74692b91161cd5f7fa3b499db6.js" integrity="sha256-iTX2SvLRC7QUvvy5i5Dy9WUgm3RpK5EWHNX3&#43;jtJnbY=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -283,7 +283,7 @@ https://github.com/alex-shpak/hugo-book
 <li><code>PostsServiceComponent</code>
 <ul>
 <li>is the component exposing the <code>Service</code> interface.</li>
-<li>it would be called by the controller of the ReSTful web service.</li>
+<li>it could be called by the controller of the ReSTful web service.</li>
 </ul>
 </li>
 </ul>
@@ -292,7 +292,7 @@ https://github.com/alex-shpak/hugo-book
   Current monadic <code>Future</code>
   <a class="anchor" href="#current-monadic-future">#</a>
 </h3>
-<p>The interface of the repository and services component of the monadic version are presented hereafter and their complete implementation is available <a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/blog-ws-monadic/src/main/scala/io/github/tassiLuca/dse/blog">here</a>.</p>
+<p>The interface of the repository and services component of the monadic version are presented hereafter and their complete implementation is available <a href="https://github.com/tassiLuca/direct-style-experiments/tree/master/blog-ws-monadic/src/main/scala/io/github/tassiLuca/dse/blog">here</a>.</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** The component exposing blog posts repositories. */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">PostsRepositoryComponent</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#d20f39">context:</span> <span style="color:#d20f39">PostsModel</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span>
@@ -336,7 +336,7 @@ https://github.com/alex-shpak/hugo-book
 <p>What&rsquo;s important to delve into is the implementation of the service, and, more precisely, of the <code>create</code> method. As already mentioned, before saving the post two checks need to be performed:</p>
 <ol>
 <li>the post author must have permission to publish a post and their information needs to be retrieved (supposing they are managed by another service);</li>
-<li>the content of the post is analyzed in order to prevent the storage and publication of offensive or inappropriate content.</li>
+<li>the content of the post is analyzed in order to prevent the storage and publication of inappropriate content.</li>
 </ol>
 <p>Since these operations are independent from each other they can be spawned and run in parallel.</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">override</span> <span style="color:#8839ef">def</span> create<span style="color:#04a5e5;font-weight:bold">(</span>authorId<span style="color:#8839ef">:</span> <span style="color:#d20f39">AuthorId</span><span style="color:#04a5e5;font-weight:bold">,</span> title<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Body</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">ExecutionContext</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span>
@@ -506,7 +506,7 @@ classDiagram
 
 </p>
 
-<p>Going back to our example, the interface of both the repository and service components becomes (<a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/blog-ws-direct/src/main/scala/io/github/tassiLuca/dse/blog">here</a> you can find the complete sources):</p>
+<p>Going back to our example, the interface of both the repository and service components becomes (<a href="https://github.com/tassiLuca/direct-style-experiments/tree/master/blog-ws-direct/src/main/scala/io/github/tassiLuca/dse/blog">here</a> you can find the complete sources):</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** The component exposing blog posts repositories. */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">PostsRepositoryComponent</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#d20f39">context:</span> <span style="color:#d20f39">PostsModel</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span>
@@ -561,7 +561,7 @@ classDiagram
 <p>When you cancel a future using the <code>cancel()</code> method, it promptly sets its value to <code>Failure(CancellationException)</code>. Additionally, if it&rsquo;s a runnable future, the thread associated with it is interrupted using <code>Thread.interrupt()</code>.</p>
 </li>
 <li>
-<p>to avoid immediate cancellation, deferring the cancellation after some block is possible using <code>uninterruptible</code> function:</p>
+<p>to avoid immediate cancellation, deferring the cancellation after some block, is possible using <code>uninterruptible</code> function:</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">val</span> f <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Future</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">// this can be interrupted
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>  uninterruptible<span style="color:#8839ef">:</span>
@@ -578,7 +578,7 @@ classDiagram
 </ul>
 </li>
 </ul>
-<p>The implementation of the <code>create</code> function with direct style in gears looks like this:</p>
+<p>The implementation of the <code>create</code> function with direct style in Gears looks like this:</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">override</span> <span style="color:#8839ef">def</span> create<span style="color:#04a5e5;font-weight:bold">(</span>authorId<span style="color:#8839ef">:</span> <span style="color:#d20f39">AuthorId</span><span style="color:#04a5e5;font-weight:bold">,</span> title<span style="color:#8839ef">:</span> <span style="color:#d20f39">Title</span><span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#8839ef">:</span> <span style="color:#d20f39">Body</span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">String</span>, <span style="color:#d20f39">Post</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> 
 </span></span><span style="display:flex;"><span>  either<span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#d20f39">if</span> <span style="color:#d20f39">context.repository.exists</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#d20f39">title</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#d20f39">.?</span> <span style="color:#d20f39">then</span> <span style="color:#d20f39">left</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#d20f39">s</span><span style="color:#d20f39">&#34;</span><span style="color:#d20f39">A</span> <span style="color:#d20f39">post</span> <span style="color:#d20f39">entitled</span> <span style="color:#d20f39">$title</span> <span style="color:#d20f39">already</span> <span style="color:#d20f39">exists</span><span style="color:#d20f39">&#34;</span><span style="color:#04a5e5;font-weight:bold">)</span>
@@ -615,8 +615,8 @@ classDiagram
 </ul>
 <p>👉🏻 To showcase the structured concurrency and cancellation mechanisms of Scala Gears tests have been prepared:</p>
 <ul>
-<li><a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/StructuredConcurrencyTest.scala"><code>StructuredConcurrencyTest</code></a></li>
-<li><a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/CancellationTest.scala"><code>CancellationTest</code></a></li>
+<li><a href="https://github.com/tassiLuca/direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/StructuredConcurrencyTest.scala"><code>StructuredConcurrencyTest</code></a></li>
+<li><a href="https://github.com/tassiLuca/direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/CancellationTest.scala"><code>CancellationTest</code></a></li>
 </ul>
 <p>Other combinator methods, available on <code>Future</code>s instance:</p>
 <table>
@@ -737,7 +737,7 @@ classDiagram
 <p>Coroutines follow the principle of structured concurrency: coroutines can be arranged into parent-child hierarchies where the cancellation of a parent leads to the immediate cancellation of all its children recursively. Failure of a child with an exception immediately cancels its parent and, consequently, all its other children.</p>
 </li>
 </ul>
-<p>Going back to our example, the interface of the service with Kotlin coroutines looks like this (<a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/blog-ws-direct-kt/src/main/kotlin/io/github/tassiLuca/dse/blog">here</a> you can find the complete sources):</p>
+<p>Going back to our example, the interface of the service with Kotlin coroutines looks like this (<a href="https://github.com/tassiLuca/direct-style-experiments/tree/master/blog-ws-direct-kt/src/main/kotlin/io/github/tassiLuca/dse/blog">here</a> you can find the complete sources):</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** The service exposing a set of functionalities to interact with blog posts. */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">interface</span> <span style="color:#df8e1d">PostsService</span> {
 </span></span><span style="display:flex;"><span>
@@ -768,12 +768,12 @@ classDiagram
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">private</span> <span style="color:#8839ef">suspend</span> <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">verifyContent</span>(title: String, body: String): PostContent { <span style="color:#04a5e5;font-weight:bold">..</span>. }
 </span></span></code></pre></div><ul>
 <li>a <code>coroutineScope</code> is a suspending function used to create a new coroutine scope: it suspends the execution of the current coroutine, releasing the underlying thread for other usages;</li>
-<li>As we said previously, the failure of a child with an exception immediately cancels its parent and, consequently, all its other children: this means that, for handling the cancellation of nested coroutines, we don&rsquo;t need to do anything special, it is already automatically handled by the library.
+<li>As we said previously, the failure of a child with an exception immediately cancels its parent and, consequently, all its other children: this means that, for handling the cancellation of nested coroutines, we don&rsquo;t need to do anything special
 <ul>
 <li>with <code>coroutineScope</code> no matter the order in which coroutines are awaited, if one of them fails with an exception it is propagated upwards, cancelling all other ones
 <ul>
 <li>this is not the case for <code>supervisorScope</code>, a coroutine builder ensuring that child coroutines can fail independently without affecting the parent coroutine.</li>
-<li>have a look to <a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/blog-ws-direct-kt/src/test/kotlin/io/github/tassiLuca/dse/CoroutinesCancellationTests.kt">this test</a></li>
+<li>have a look to <a href="https://github.com/tassiLuca/direct-style-experiments/blob/master/blog-ws-direct-kt/src/test/kotlin/io/github/tassiLuca/dse/CoroutinesCancellationTests.kt">this test</a></li>
 </ul>
 </li>
 <li>This is an advantage over the Scala Gears, where operators like <code>zip</code> and <code>altWithCancel</code> are necessary!</li>
@@ -788,7 +788,7 @@ classDiagram
 <ul>
 <li>Scala Gears offers, despite the syntactical differences, very similar concepts to Kotlin Coroutines, with structured concurrency and cancellation mechanisms;</li>
 <li>Kotlin Coroutines handles the cancellation of nested coroutines more easily than Scala Gears, where special attention is required;</li>
-<li>As <a href="https://github.com/lampepfl/gears/issues/19#issuecomment-1732586362">stated by M. Odersky</a> the <code>Async</code> capability is better than <code>suspend</code> in Kotlin because let defines functions that work for synchronous as well as asynchronous function arguments.</li>
+<li>As <a href="https://github.com/lampepfl/gears/issues/19#issuecomment-1732586362">stated by M. Odersky</a> the <code>Async</code> capability is better than <code>suspend</code> because let defines functions that work for synchronous as well as asynchronous function arguments, while suspending functions in Kotlin requires to be called from a coroutine.</li>
 </ul>
 </blockquote>
 
@@ -820,7 +820,7 @@ classDiagram
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/direct-style-experiments/commit/20dfdd862e74d2235aaa27918880138a43b71025" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/direct-style-experiments/commit/53c376e6be3b85e6251a9e65605ef261019724a7" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
       <img src="/direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
       <span>March 4, 2024</span>
     </a>

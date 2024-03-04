@@ -13,7 +13,7 @@ Smart Hub example # Idea: in an IoT context, a multitude of sensors of different
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/direct-style-experiments/docs/04-rears/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-03-04T20:10:46+01:00" />
+<meta property="article:modified_time" content="2024-03-04T23:03:38+01:00" />
 
 <title>04 Rears | direct-style-experiments</title>
 <link rel="manifest" href="/direct-style-experiments/manifest.json">
@@ -21,7 +21,7 @@ Smart Hub example # Idea: in an IoT context, a multitude of sensors of different
 <link rel="canonical" href="https://tassiluca.github.io/direct-style-experiments/docs/04-rears/">
 <link rel="stylesheet" href="/direct-style-experiments/book.min.42504dd4648e8da78376617fd32b73c3ae6afbe9f805c36868bc831b07002332.css" integrity="sha256-QlBN1GSOjaeDdmF/0ytzw65q&#43;&#43;n4BcNoaLyDGwcAIzI=" crossorigin="anonymous">
   <script defer src="/direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/direct-style-experiments/en.search.min.213b39f02b255d5bf0731f7103753f16f28f6c74d0701bf0f379b7854888a824.js" integrity="sha256-ITs58CslXVvwcx9xA3U/FvKPbHTQcBvw83m3hUiIqCQ=" crossorigin="anonymous"></script>
+  <script defer src="/direct-style-experiments/en.search.min.8935f64af2d10bb414befcb98b90f2f565209b74692b91161cd5f7fa3b499db6.js" integrity="sha256-iTX2SvLRC7QUvvy5i5Dy9WUgm3RpK5EWHNX3&#43;jtJnbY=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -255,7 +255,7 @@ classDiagram
 </blockquote>
 
 <blockquote class="book-hint warning">
-  <strong>Warning</strong>: with high-order functions if we deal with repeated <code>Tasks</code>, in some cases an <code>Async ?=&gt;</code> label is required to not suspend the whole block, even if a suspending operation is performed: the code below <em>behaves differently</em> if the <code>Async ?=&gt;</code> label is present or not. Note: this may be an unintended effect of the library, yet to be investigated.
+  <strong>Warning</strong>: with high-order functions if we deal with repeated <code>Tasks</code>, in some cases an <code>Async ?=&gt;</code> label is required to not suspend the whole block, even if a suspending operation is performed: the code below <em>behaves differently</em> if the <code>Async ?=&gt;</code> label is present or not. Note: this may be an unintended effect of the library, yet to be investigated (sometimes on Ubuntu it doesn&rsquo;t work, suggesting to be a &ldquo;bug&rdquo;, see <a href="https://github.com/tassiLuca/direct-style-experiments/actions/runs/8147260065/job/22267570282?pr=24#step:4:434">here</a> vs. <a href="https://github.com/tassiLuca/direct-style-experiments/actions/runs/8147339495/job/22267819794#step:4:432">here</a>)
 </blockquote>
 
 <div class="book-columns flex flex-wrap">
@@ -304,7 +304,7 @@ classDiagram
 
 </div>
 
-<p>[<a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/TasksTest.scala#L27">See the tests for more details.</a>]</p>
+<p>[<a href="https://github.com/tassiLuca/direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/TasksTest.scala">See the tests for more details.</a>]</p>
 <ul>
 <li>To avoid the <em>work-stealing behavior</em> of channel consumers, a <code>ChannelMultiplexer</code> can be used. It is essentially a container of <code>Readable</code> and <code>Sendable</code> channels, which can be added and removed at runtime. Internally, it is implemented with a thread that continuously races the set of publishers and once it reads a value, it forwards it to each subscriber channel.
 <ul>
@@ -342,7 +342,7 @@ classDiagram
 
 <p>In the proposed strawman Scala Gears library, there are no other kinds of abstractions, nor a way to manipulate channels with functions inspired by Rx.</p>
 <p>The attempt, described in the following, has been to extend this framework adding first-class support for <code>Producer</code> and <code>Consumer</code>&rsquo;s concepts and implementing some of the most common Rx operators, completely leaving out performance concerns.</p>
-<p><a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/rears/src/main/scala/io/github/tassiLuca/rears">[Sources can be found in the <code>rears</code> submodule.]</a></p>
+<p><a href="https://github.com/tassiLuca/direct-style-experiments/tree/master/rears/src/main/scala/io/github/tassiLuca/rears">[Sources can be found in the <code>rears</code> submodule.]</a>.</p>
 <ul>
 <li>A <code>Producer</code> is a runnable entity, programmed with a <code>Task</code>, producing items on a channel. It exposes the <code>publishingChannel</code> method, which returns a <code>ReadableChannel</code> through which interested consumers can read produced items.</li>
 <li>A <code>Consumer</code> is a runnable entity devoted to consuming data from a channel, exposed by the <code>listeningChannel</code> method which returns a <code>SendableChannel</code> to send items to.
@@ -723,7 +723,9 @@ This could offer (in some cases and where necessary) a way to use the full power
   <a class="anchor" href="#takeaways">#</a>
 </h2>
 <ul>
-<li>Channels in Scala Gears are fine to model flow of data <strong>that exist without application&rsquo;s request from them</strong>: incoming network connections, event streams, etc&hellip;</li>
+<li>Channels in Scala Gears are good to model flow of data <strong>that exist without application&rsquo;s request from them</strong>: incoming network connections, event streams, etc&hellip;</li>
+<li>The scheduling mechanism of Task, along with the mutiplexer abstraction, despite having some stability issues, allows to implement flows of <strong>hot</strong> data which are listened by multiple consumers.</li>
+<li>Transformation operators inspired by the Reactive world could enhance the expressiveness of the framework, making it more suitable for modeling reactive event-based systems.</li>
 </ul>
 
 
@@ -754,7 +756,7 @@ This could offer (in some cases and where necessary) a way to use the full power
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/direct-style-experiments/commit/20dfdd862e74d2235aaa27918880138a43b71025" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/direct-style-experiments/commit/53c376e6be3b85e6251a9e65605ef261019724a7" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
       <img src="/direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
       <span>March 4, 2024</span>
     </a>

@@ -11,7 +11,7 @@
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/direct-style-experiments/docs/03-channels/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-03-04T20:10:46+01:00" />
+<meta property="article:modified_time" content="2024-03-04T23:03:38+01:00" />
 
 <title>03 Channels | direct-style-experiments</title>
 <link rel="manifest" href="/direct-style-experiments/manifest.json">
@@ -19,7 +19,7 @@
 <link rel="canonical" href="https://tassiluca.github.io/direct-style-experiments/docs/03-channels/">
 <link rel="stylesheet" href="/direct-style-experiments/book.min.42504dd4648e8da78376617fd32b73c3ae6afbe9f805c36868bc831b07002332.css" integrity="sha256-QlBN1GSOjaeDdmF/0ytzw65q&#43;&#43;n4BcNoaLyDGwcAIzI=" crossorigin="anonymous">
   <script defer src="/direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/direct-style-experiments/en.search.min.213b39f02b255d5bf0731f7103753f16f28f6c74d0701bf0f379b7854888a824.js" integrity="sha256-ITs58CslXVvwcx9xA3U/FvKPbHTQcBvw83m3hUiIqCQ=" crossorigin="anonymous"></script>
+  <script defer src="/direct-style-experiments/en.search.min.8935f64af2d10bb414befcb98b90f2f565209b74692b91161cd5f7fa3b499db6.js" integrity="sha256-iTX2SvLRC7QUvvy5i5Dy9WUgm3RpK5EWHNX3&#43;jtJnbY=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -277,7 +277,7 @@ This is not the case for Kotlin Coroutines where closing a channel indicates tha
   Similar behavior can be achieved also in Gears extending the framework with the concept of <strong><code>Terminable</code></strong> channel. After all, closing a channel in coroutines is a matter of sending a special token to it, allowing stop the iteration as soon as this token is received.
 </blockquote>
 
-<p>[<a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/main/scala/io/github/tassiLuca/pimping/TerminableChannel.scala">The full implementation can be found in <code>commons</code> submodule</a>.]</p>
+<p>[<a href="https://github.com/tassiLuca/direct-style-experiments/blob/master/commons/src/main/scala/io/github/tassiLuca/dse/pimping/TerminableChannel.scala">The full implementation can be found in <code>commons</code> submodule, <code>pimping</code> package</a>.]</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** A token to be sent to a channel to signal that it has been terminated. */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">case</span> <span style="color:#8839ef">object</span> <span style="color:#df8e1d">Terminated</span>
 </span></span><span style="display:flex;"><span>
@@ -333,14 +333,14 @@ This is not the case for Kotlin Coroutines where closing a channel indicates tha
 </span></span><span style="display:flex;"><span>      <span style="color:#9ca0b0;font-style:italic">// It happens only at the close of the channel due to the call (inside Gears 
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>      <span style="color:#9ca0b0;font-style:italic">// library) of a CellBuf.dequeue(channels.scala:239) which is empty!
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>      <span style="color:#8839ef">catch</span> <span style="color:#8839ef">case</span> <span style="color:#8839ef">_:</span> <span style="color:#d20f39">NoSuchElementException</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span> <span style="color:#04a5e5;font-weight:bold">()</span>
-</span></span></code></pre></div><p>Now, also in Scala with Gears is possible to write:</p>
+</span></span></code></pre></div><p>Now, thanks to this extension, also in Scala Gears is possible to write:</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">val</span> channel <span style="color:#8839ef">=</span> <span style="color:#df8e1d">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">.</span>ofUnbounded<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Int</span><span style="color:#04a5e5;font-weight:bold">]</span>
 </span></span><span style="display:flex;"><span><span style="color:#df8e1d">Future</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#d20f39">0</span> <span style="color:#d20f39">until</span> <span style="color:#d20f39">10</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#d20f39">.foreach</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#d20f39">channel.send</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#8839ef">_</span><span style="color:#04a5e5;font-weight:bold">))</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#d20f39">channel.terminate</span><span style="color:#04a5e5;font-weight:bold">()</span> <span style="color:#9ca0b0;font-style:italic">// we&#39;re done sending
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>channel<span style="color:#04a5e5;font-weight:bold">.</span>foreach<span style="color:#04a5e5;font-weight:bold">(</span>println<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#8839ef">_</span><span style="color:#04a5e5;font-weight:bold">))</span> <span style="color:#9ca0b0;font-style:italic">// blocks until channel is closed
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>println<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#40a02b">&#34;Done!&#34;</span><span style="color:#04a5e5;font-weight:bold">)</span>
-</span></span></code></pre></div><p>[<a href="">Other tests can be found in <code>TerminableChannelTest</code></a>.]</p>
+</span></span></code></pre></div><p>[<a href="https://github.com/tassiLuca/direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/pimping/TerminableChannelTest.scala">Other tests can be found in <code>TerminableChannelTest</code></a>.]</p>
 <p>On top of this new abstraction is possible to implement, for example, the <code>foreach</code> and <code>toSeq</code> methods, which can be useful to wait for all the items sent over the channel.</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">object</span> <span style="color:#df8e1d">TerminableChannelOps</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>
@@ -424,7 +424,7 @@ As usual, it has been implemented using monadic <code>Future</code>s, as well as
   Future monadic version
   <a class="anchor" href="#future-monadic-version">#</a>
 </h3>
-<p>[<a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/blog-ws-monadic/src/main/scala/io/github/tassiLuca/dse/blog">The sources are available inside the <code>analyzer-monadic</code> submodule</a>.]</p>
+<p>[<a href="https://github.com/tassiLuca/direct-style-experiments/tree/master/blog-ws-monadic/src/main/scala/io/github/tassiLuca/dse/blog">The sources are available inside the <code>analyzer-monadic</code> submodule</a>.]</p>
 <p>The entry point of the library is the <code>Analyzer</code> interface which takes in input the organization name and a function through which is possible to react to results while they are computed.</p>
 <p>Since we want to achieve cancellation, the monadic version leverages Monix <code>Task</code>, which is returned by the <code>analyze</code> method wrapped in an <code>EitherT</code> monad transformer to allow handling errors functionally.</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** A generic analyzer of organization/group/workspace repositories. */</span>
@@ -484,7 +484,7 @@ Whenever desired, the current computation can be stopped by canceling the Monix 
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  <span style="color:#d20f39">import</span> <span style="color:#d20f39">monix.execution.Scheduler.Implicits.global</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">private</span> <span style="color:#8839ef">val</span> view <span style="color:#8839ef">=</span> <span style="color:#df8e1d">AnalyzerView</span><span style="color:#04a5e5;font-weight:bold">.</span>gui<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#8839ef">this</span><span style="color:#04a5e5;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">private</span> <span style="color:#8839ef">val</span> analyzer <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Analyzer</span><span style="color:#04a5e5;font-weight:bold">.</span>ofGitHub<span style="color:#04a5e5;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">private</span> <span style="color:#8839ef">val</span> analyzer <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Analyzer</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">RepositoryService</span><span style="color:#04a5e5;font-weight:bold">.</span>ofGitHub<span style="color:#04a5e5;font-weight:bold">)</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#8839ef">private</span> <span style="color:#8839ef">var</span> currentComputation<span style="color:#8839ef">:</span> <span style="color:#d20f39">Option</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">CancelableFuture</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Unit</span><span style="color:#04a5e5;font-weight:bold">]]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">None</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  view<span style="color:#04a5e5;font-weight:bold">.</span>run<span style="color:#04a5e5;font-weight:bold">()</span>
@@ -502,7 +502,7 @@ Whenever desired, the current computation can be stopped by canceling the Monix 
   Scala Gears version
   <a class="anchor" href="#scala-gears-version">#</a>
 </h3>
-<p>[<a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/analyzer-direct/src/main/scala/io/github/tassiLuca/analyzer">The sources are available inside the <code>analyzer-direct</code> submodule</a>.]</p>
+<p>[<a href="https://github.com/tassiLuca/direct-style-experiments/tree/master/analyzer-direct/src/main/scala/io/github/tassiLuca/analyzer">The sources are available inside the <code>analyzer-direct</code> submodule</a>.]</p>
 <p>The interfaces of the Direct Style with Gears differ from the monadic one by their return type, which is a simpler <code>Either</code> data type, and by the fact they are <strong>suspendable functions</strong>, hence they require an Async context to be executed.
 This is the first important difference: the <code>analyze</code> method, differently from the monadic version, doesn&rsquo;t return immediately the control; instead, it suspends the execution of the client until the result is available (though offering the opportunity to react to each update).
 This obeys the principle of <strong>explicit asynchrony</strong>: if the client wants to perform this operation asynchronously, it has to opt in explicitly, using a <code>Future</code>.</p>
@@ -629,7 +629,7 @@ It would be desirable, instead, to start performing the analysis as soon as one 
   Kotlin Coroutines version
   <a class="anchor" href="#kotlin-coroutines-version">#</a>
 </h3>
-<p>[<a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/analyzer-direct-kt/src/main/kotlin/io/github/tassiLuca/analyzer">The sources are available inside the <code>analyzer-direct-kt</code> submodule</a>.]</p>
+<p>[<a href="https://github.com/tassiLuca/direct-style-experiments/tree/master/analyzer-direct-kt/src/main/kotlin/io/github/tassiLuca/analyzer">The sources are available inside the <code>analyzer-direct-kt</code> submodule</a>.]</p>
 <p>The analyzer interface reflects the Scala Gears one: a <code>Result</code> is used in place of <code>Either</code>, and the suspendable function <code>udateResults</code> is marked with the <code>suspend</code> keyword in place of the <code>using Async</code> context.</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#8839ef">interface</span> <span style="color:#df8e1d">Analyzer</span> {
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">suspend</span> <span style="color:#8839ef">fun</span> <span style="color:#1e66f5">analyze</span>(
@@ -700,7 +700,7 @@ It would be desirable, instead, to start performing the analysis as soon as one 
 <li><code>map</code> to transform the values;</li>
 <li><code>transform</code> to implement more complex transformations (possibly involving suspending operations);</li>
 <li><code>take</code> and its variant (e.g. <code>takeWhile</code>) to limit the number of values emitted;</li>
-<li><code>onEach</code> to perform side-effects for each value emitted;</li>
+<li><code>onEach</code> to perform side-effects for each value emitted.</li>
 </ul>
   </div>
 
@@ -710,7 +710,7 @@ It would be desirable, instead, to start performing the analysis as soon as one 
 <li>conversions to various collection types, like <code>toList</code>, <code>toSet</code>;</li>
 <li><code>first</code>, <code>last</code>, <code>single</code> to retrieve the first, last or single value emitted;</li>
 <li><code>reduce</code> to perform some kind of operation over all items, reducing them to a single one;</li>
-<li><code>fold</code> to perform some kind of operation over all items, starting from an initial value, accumulating a result;</li>
+<li><code>fold</code> to perform some kind of operation over all items, starting from an initial value, accumulating a result.</li>
 </ul>
   </div>
 
@@ -718,9 +718,8 @@ It would be desirable, instead, to start performing the analysis as soon as one 
     <p><em>Flows combining operators</em>:</p>
 <ul>
 <li><code>merge</code> to combine multiple flows into a single one, emitting values from all of them;</li>
-<li><code>zip</code></li>
-<li><code>combine</code></li>
-<li><code>flatMapConcat</code> / <code>flatMapMerge</code> to transform each value into a flow and then concatenate/merge them;</li>
+<li><code>zip</code> combines the corresponding values of two flows;</li>
+<li><code>flatMapConcat</code> / <code>flatMapMerge</code> to transform each value into a flow and then concatenate/merge them.</li>
 </ul>
   </div>
 
@@ -748,6 +747,21 @@ It would be desirable, instead, to start performing the analysis as soon as one 
 </span></span><span style="display:flex;"><span>        allReports
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Concerning flows, an important thing to note is that they are just asynchronous generators that run some suspending code when you collect them. Thus, per se, they don&rsquo;t introduce new coroutines or concurrency mechanism.
+To achieve concurrency, for example emitting values concurrently by multiple coroutines, is necessary to use a <code>channelFlow</code>, a pre-cooked way to inject a <code>coroutineContext</code> and a <code>Channel</code> through which is possible to pass the values to be emitted from a background coroutines back to the main control flow:</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-kotlin" data-lang="kotlin"><span style="display:flex;"><span><span style="color:#8839ef">fun</span> <span style="color:#1e66f5">analyzeAll</span>(repositories: List&lt;Repository&gt;): Flow&lt;RepositoryReport&gt; = channelFlow {
+</span></span><span style="display:flex;"><span>    repositories.forEach { repository <span style="color:#04a5e5;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>        launch {
+</span></span><span style="display:flex;"><span>            <span style="color:#8839ef">val</span> <span style="color:#fe640b">release</span> = async {
+</span></span><span style="display:flex;"><span>               provider.lastReleaseOf(repository.organization, repository.name).getOrThrow()
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            provider.flowingContributorsOf(repository.organization, repository.name).toList().forEach {
+</span></span><span style="display:flex;"><span>                <span style="color:#9ca0b0;font-style:italic">// emit this value
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>                send(RepositoryReport(repository.name, repository.issues, repository.stars, <span style="color:#8839ef">it</span>, release.await()))
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="introducing-flows-in-gears">
   Introducing <code>Flow</code>s in Gears
   <a class="anchor" href="#introducing-flows-in-gears">#</a>
@@ -766,7 +780,7 @@ The following section describes the attempt made to implement it and what has be
 </li>
 <li>Once the task has finished, the channel is terminated.</li>
 </ul>
-<p>[<a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/main/scala/io/github/tassiLuca/pimping/Flow.scala">Source code can be found in <code>commons</code> submodule, <code>pimpimg</code> package</a>.]</p>
+<p>[<a href="https://github.com/tassiLuca/direct-style-experiments/blob/master/commons/src/main/scala/io/github/tassiLuca/dse/pimping/Flow.scala">Source code can be found in <code>commons</code> submodule, <code>pimpimg</code> package</a>.]</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">/** An asynchronous cold data stream that emits values, inspired to Kotlin Flows. */</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">trait</span> <span style="color:#df8e1d">Flow</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">+T</span><span style="color:#04a5e5;font-weight:bold">]</span><span style="color:#df8e1d">:</span>
 </span></span><span style="display:flex;"><span>
@@ -810,7 +824,7 @@ The following section describes the attempt made to implement it and what has be
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>        <span style="color:#9ca0b0;font-style:italic">// with the correct channel instance.
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>        sync<span style="color:#04a5e5;font-weight:bold">.</span>acquire<span style="color:#04a5e5;font-weight:bold">()</span>
 </span></span><span style="display:flex;"><span>      myChannel<span style="color:#04a5e5;font-weight:bold">.</span>foreach<span style="color:#04a5e5;font-weight:bold">(</span>t <span style="color:#8839ef">=&gt;</span> collector<span style="color:#04a5e5;font-weight:bold">(</span>t<span style="color:#04a5e5;font-weight:bold">))</span>
-</span></span></code></pre></div><p><code>map</code> and <code>flatMap</code> have been implemented on top of <code>Flow</code>:</p>
+</span></span></code></pre></div><p><code>map</code> and <code>flatMap</code> combinators have been implemented on top of <code>Flow</code>:</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">object</span> <span style="color:#df8e1d">FlowOps</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  <span style="color:#d20f39">extension</span> <span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>flow<span style="color:#8839ef">:</span> <span style="color:#d20f39">Flow</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">])</span>
@@ -832,7 +846,7 @@ The following section describes the attempt made to implement it and what has be
   Showcasing <code>Flow</code>s
   <a class="anchor" href="#showcasing-flows">#</a>
 </h3>
-<p>Library use cases:</p>
+<p>Library use case:</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">type</span> <span style="color:#d20f39">Name</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#df8e1d">String</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">type</span> <span style="color:#d20f39">WriterId</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#df8e1d">Int</span>
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">type</span> <span style="color:#d20f39">Writer</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Name</span><span style="color:#04a5e5;font-weight:bold">,</span> <span style="color:#df8e1d">WriterId</span><span style="color:#04a5e5;font-weight:bold">)</span>
@@ -918,7 +932,7 @@ For example:</p>
 
 </div>
 
-<p>👉🏻 <a href="https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/pimping/FlowTest.scala">More tests on <code>Flows</code> can be found in <code>commons</code>, <code>pimping</code> pakcage</a>.</p>
+<p>👉🏻 <a href="https://github.com/tassiLuca/direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/pimping/FlowTest.scala">More tests on <code>Flows</code> can be found in <code>commons</code>, <code>pimping</code> pakcage</a>.</p>
 <h2 id="takeaways">
   Takeaways
   <a class="anchor" href="#takeaways">#</a>
@@ -930,7 +944,7 @@ For example:</p>
 <li>Scala Gears support for <code>Terminable</code> channels or a review of the closing mechanism should be considered.</li>
 </ul>
 </li>
-<li>The <code>Flow</code> abstraction in Kotlin Coroutines is a powerful tool for handling cold streams of data, and it is a perfect fit for functions that need to return a stream of asynchronously computed values <strong>by request</strong>.
+<li>The <code>Flow</code> abstraction in Kotlin Coroutines is a powerful tool for handling cold streams of data, and it is a perfect fit for functions that need to return a stream of asynchronously computed values <em>upon request</em>.
 <ul>
 <li>A similar abstraction can be implemented in Scala Gears leveraging <code>Task</code>s and <code>TerminableChannel</code>s, enabling improved support for an asynchronous flow of data also in Gears, which is currently lacking.</li>
 </ul>
@@ -966,7 +980,7 @@ For example:</p>
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/direct-style-experiments/commit/20dfdd862e74d2235aaa27918880138a43b71025" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/direct-style-experiments/commit/53c376e6be3b85e6251a9e65605ef261019724a7" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
       <img src="/direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
       <span>March 4, 2024</span>
     </a>
