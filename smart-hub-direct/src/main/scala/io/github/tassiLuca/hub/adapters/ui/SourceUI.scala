@@ -1,8 +1,8 @@
 package io.github.tassiLuca.hub.adapters.ui
 
-import io.github.tassiLuca.pimping.ScalaSwingFacade.createPanel
-import io.github.tassiLuca.pimping.ScalaSwingFacade.addWithRepaint
-import io.github.tassiLuca.pimping.ScalaSwingFacade.given
+import io.github.tassiLuca.dse.pimping.ScalaSwingFacade.createPanel
+import io.github.tassiLuca.dse.pimping.ScalaSwingFacade.addWithRepaint
+import io.github.tassiLuca.dse.pimping.ScalaSwingFacade.given
 
 import java.awt.{BorderLayout, Component, Dimension}
 import javax.swing.*

@@ -2,7 +2,7 @@
 bookToc: false
 ---
 
-# On the reactivity
+# Reactivity in direct style
 
 So far, we've explored the basics of asynchronous abstraction mechanisms provided by the direct style of the Scala Gears and Kotlin Coroutines frameworks.
 The goal of this last example is to investigate, using a simple example, whether these two frameworks offer sufficient idiomatic abstractions to deal with event-based reactive systems.

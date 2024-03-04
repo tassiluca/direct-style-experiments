@@ -1,7 +1,7 @@
 package io.github.tassiLuca.analyzer.commons.client
 
 import io.github.tassiLuca.analyzer.commons.client.ui.MainFrame
-import io.github.tassiLuca.pimping.ScalaSwingFacade.display
+import io.github.tassiLuca.dse.pimping.ScalaSwingFacade.display
 
 import javax.swing.SwingUtilities
 

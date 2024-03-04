@@ -1,4 +1,4 @@
-package io.github.tassiLuca
+package io.github.tassiLuca.dse
 
 import gears.async.default.given
 import gears.async.{Async, AsyncOperations, Future}
@@ -6,7 +6,6 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 import java.util.concurrent.CancellationException
-import scala.util.Failure
 
 class CancellationTest extends AnyFunSpec with Matchers {
 

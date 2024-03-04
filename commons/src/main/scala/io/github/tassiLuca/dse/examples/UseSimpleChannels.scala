@@ -1,4 +1,4 @@
-package io.github.tassiLuca.examples
+package io.github.tassiLuca.dse.examples
 
 import gears.async.*
 import gears.async.AsyncOperations.sleep

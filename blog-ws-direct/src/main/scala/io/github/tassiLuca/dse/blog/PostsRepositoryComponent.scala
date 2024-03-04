@@ -1,9 +1,9 @@
 package io.github.tassiLuca.dse.blog
 
 import gears.async.Async
-import io.github.tassiLuca.boundaries.either
-import io.github.tassiLuca.boundaries.either.{?, left}
 import io.github.tassiLuca.dse.blog.core.{PostsModel, simulates}
+import io.github.tassiLuca.dse.boundaries.either
+import io.github.tassiLuca.dse.boundaries.either.{?, left}
 
 /** The component exposing blog posts repositories. */
 trait PostsRepositoryComponent:

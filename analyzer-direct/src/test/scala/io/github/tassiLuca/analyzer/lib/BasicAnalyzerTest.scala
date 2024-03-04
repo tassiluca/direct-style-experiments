@@ -5,7 +5,6 @@ import eu.monniot.scala3mock.scalatest.MockFactory
 import gears.async.Async
 import gears.async.default.given
 import io.github.tassiLuca.analyzer.commons.lib.{Contribution, Release, Repository, RepositoryReport}
-import io.github.tassiLuca.analyzer.lib.{Analyzer, RepositoryService}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

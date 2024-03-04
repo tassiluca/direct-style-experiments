@@ -1,4 +1,4 @@
-package io.github.tassiLuca.pimping
+package io.github.tassiLuca.dse.pimping
 
 import gears.async.Async.Source
 import gears.async.{Channel, ChannelClosedException, Listener}

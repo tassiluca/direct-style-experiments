@@ -1,6 +1,6 @@
 package io.github.tassiLuca.hub.adapters
 
-import io.github.tassiLuca.pimping.ScalaSwingFacade.display
+import io.github.tassiLuca.dse.pimping.ScalaSwingFacade.display
 
 import gears.async.{Async, Future, Task}
 import io.github.tassiLuca.hub.adapters.ui.SourceUI

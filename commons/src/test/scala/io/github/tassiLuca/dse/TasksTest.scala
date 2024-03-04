@@ -1,23 +1,13 @@
-package io.github.tassiLuca
+package io.github.tassiLuca.dse
 
 import gears.async.TaskSchedule.RepeatUntilFailure
 import gears.async.default.given
-import gears.async.{
-  Async,
-  AsyncOperations,
-  Future,
-  ReadableChannel,
-  SendableChannel,
-  Task,
-  TaskSchedule,
-  Timer,
-  UnboundedChannel,
-}
+import gears.async.{Async, AsyncOperations, Future, ReadableChannel, SendableChannel, Task, TaskSchedule, Timer, UnboundedChannel}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-import scala.language.postfixOps
 import scala.concurrent.duration.DurationInt
+import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
 class TasksTest extends AnyFunSpec with Matchers {

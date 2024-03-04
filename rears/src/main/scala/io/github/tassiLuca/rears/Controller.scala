@@ -2,7 +2,7 @@ package io.github.tassiLuca.rears
 
 import gears.async.TaskSchedule.RepeatUntilFailure
 import gears.async.{Async, ChannelMultiplexer, ReadableChannel, Task}
-import io.github.tassiLuca.pimping.ChannelConversions.given
+import io.github.tassiLuca.dse.pimping.ChannelConversions.given
 
 object Controller:
 

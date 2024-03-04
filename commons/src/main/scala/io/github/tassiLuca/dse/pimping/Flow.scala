@@ -1,8 +1,9 @@
-package io.github.tassiLuca.pimping
+package io.github.tassiLuca.dse.pimping
 
 import gears.async.{Async, AsyncOperations, Task}
-import io.github.tassiLuca.pimping.TerminableChannelOps.foreach
-import io.github.tassiLuca.pimping.ListenerConversions.given
+import io.github.tassiLuca.dse.pimping.ListenerConversions.given
+import io.github.tassiLuca.dse.pimping.TerminableChannelOps.foreach
+
 import java.util.concurrent.Semaphore
 import scala.compiletime.uninitialized
 import scala.reflect.ClassTag

@@ -1,10 +1,10 @@
-package io.github.tassiLuca
+package io.github.tassiLuca.dse
 
 import gears.async.*
 import gears.async.Channel.Closed
 import gears.async.TaskSchedule.{Every, RepeatUntilFailure}
 import gears.async.default.given
-import io.github.tassiLuca.pimping.asTry
+import io.github.tassiLuca.dse.pimping.asTry
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 

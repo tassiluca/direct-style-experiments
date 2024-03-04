@@ -1,7 +1,7 @@
-package io.github.tassiLuca.pimping
+package io.github.tassiLuca.dse.pimping
 
 import gears.async.Channel.Closed
-import gears.async.{Async, BufferedChannel, Channel, SyncChannel, UnboundedChannel, uninterruptible}
+import gears.async.{Async, BufferedChannel, Channel, SyncChannel, UnboundedChannel}
 
 import scala.annotation.tailrec
 import scala.language.postfixOps

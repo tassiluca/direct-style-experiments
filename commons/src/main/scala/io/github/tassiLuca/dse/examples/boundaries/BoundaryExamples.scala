@@ -1,7 +1,7 @@
-package io.github.tassiLuca.boundaries.examples
+package io.github.tassiLuca.dse.examples.boundaries
 
-import io.github.tassiLuca.boundaries.optional
-import io.github.tassiLuca.boundaries.optional.?
+import io.github.tassiLuca.dse.boundaries.optional.?
+import io.github.tassiLuca.dse.boundaries.optional
 
 import scala.util.boundary
 import scala.util.boundary.break

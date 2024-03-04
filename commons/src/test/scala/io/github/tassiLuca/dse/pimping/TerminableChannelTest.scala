@@ -1,9 +1,10 @@
-package io.github.tassiLuca.pimping
+package io.github.tassiLuca.dse.pimping
 
 import gears.async.TaskSchedule.Every
 import gears.async.default.given
 import gears.async.{Async, AsyncOperations, Channel, Listener, Task}
-import io.github.tassiLuca.pimping.TerminableChannelOps.{foreach, toSeq}
+import io.github.tassiLuca.dse.pimping.{ChannelTerminatedException, TerminableChannel}
+import io.github.tassiLuca.dse.pimping.TerminableChannelOps.{foreach, toSeq}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 

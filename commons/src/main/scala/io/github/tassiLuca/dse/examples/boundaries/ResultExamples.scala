@@ -1,7 +1,7 @@
-package io.github.tassiLuca.boundaries.examples
+package io.github.tassiLuca.dse.examples.boundaries
 
-import io.github.tassiLuca.boundaries.resultant
-import io.github.tassiLuca.boundaries.resultant.{Error, Ok, Result}
+import io.github.tassiLuca.dse.boundaries.resultant.{Error, Ok, Result}
+import io.github.tassiLuca.dse.boundaries.resultant
 
 object ResultExamples extends App:
 

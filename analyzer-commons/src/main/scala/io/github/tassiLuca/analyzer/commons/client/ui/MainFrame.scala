@@ -1,8 +1,7 @@
 package io.github.tassiLuca.analyzer.commons.client.ui
 
 import io.github.tassiLuca.analyzer.commons.client.AppController
-import io.github.tassiLuca.pimping.ScalaSwingFacade.createPanel
-import io.github.tassiLuca.pimping.ScalaSwingFacade.given
+import io.github.tassiLuca.dse.pimping.ScalaSwingFacade.{createPanel, given}
 
 import java.awt.{BorderLayout, Dimension}
 import javax.swing.*

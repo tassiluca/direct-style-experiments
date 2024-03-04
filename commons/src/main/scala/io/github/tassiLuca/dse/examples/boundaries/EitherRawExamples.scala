@@ -1,4 +1,4 @@
-package io.github.tassiLuca.boundaries.examples
+package io.github.tassiLuca.dse.examples.boundaries
 
 import scala.util.boundary
 import scala.util.boundary.{Label, break}

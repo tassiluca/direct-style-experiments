@@ -4,7 +4,7 @@ import gears.async.Channel.{Closed, Res}
 import gears.async.TaskSchedule.RepeatUntilFailure
 import gears.async.default.given
 import gears.async.{Async, Channel, Future, ReadableChannel, SendableChannel, Task, Timer, UnboundedChannel}
-import io.github.tassiLuca.pimping.ChannelConversions.given
+import io.github.tassiLuca.dse.pimping.ChannelConversions.given
 
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.language.postfixOps

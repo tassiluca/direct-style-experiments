@@ -3,9 +3,9 @@ package io.github.tassiLuca.analyzer.lib
 import gears.async.Async
 import gears.async.default.given
 import io.github.tassiLuca.analyzer.commons.lib.Repository
+import io.github.tassiLuca.dse.pimping.TerminableChannelOps.toSeq
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import io.github.tassiLuca.pimping.TerminableChannelOps.toSeq
 
 class GitHubServiceTest extends AnyFunSpec with Matchers {
 

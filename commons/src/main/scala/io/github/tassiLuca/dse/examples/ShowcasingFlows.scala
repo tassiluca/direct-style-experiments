@@ -1,13 +1,10 @@
-package io.github.tassiLuca.examples
+package io.github.tassiLuca.dse.examples
 
+import gears.async.AsyncOperations.sleep
 import gears.async.default.given
 import gears.async.{Async, AsyncOperations}
-import gears.async.AsyncOperations.sleep
-import io.github.tassiLuca.pimping.Flow
-import io.github.tassiLuca.pimping.FlowOps.map
-import io.github.tassiLuca.pimping.FlowOps.flatMap
-
-import scala.util.Random
+import io.github.tassiLuca.dse.pimping.Flow
+import io.github.tassiLuca.dse.pimping.FlowOps.{flatMap, map}
 
 object ShowcasingFlows:
 

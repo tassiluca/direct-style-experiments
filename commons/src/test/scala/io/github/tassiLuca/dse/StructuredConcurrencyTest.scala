@@ -1,10 +1,11 @@
-package io.github.tassiLuca
+package io.github.tassiLuca.dse
 
 import gears.async.AsyncOperations.sleep
 import gears.async.default.given
 import gears.async.{Async, Future}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+
 import scala.language.postfixOps
 
 class StructuredConcurrencyTest extends AnyFunSpec with Matchers {

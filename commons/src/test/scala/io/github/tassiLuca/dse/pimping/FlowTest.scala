@@ -1,14 +1,15 @@
-package io.github.tassiLuca.pimping
+package io.github.tassiLuca.dse.pimping
 
 import gears.async.default.given
 import gears.async.{Async, AsyncOperations, Future}
+import io.github.tassiLuca.dse.pimping.Flow
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import io.github.tassiLuca.pimping.FlowOps.{map, flatMap}
+import io.github.tassiLuca.dse.pimping.FlowOps.{flatMap, map}
 
 import scala.collection
 import scala.collection.immutable
-import scala.util.{Try, Success}
+import scala.util.{Success, Try}
 
 class FlowTest extends AnyFunSpec with Matchers:
 

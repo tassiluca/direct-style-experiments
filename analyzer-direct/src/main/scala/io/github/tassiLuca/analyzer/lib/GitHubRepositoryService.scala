@@ -2,7 +2,7 @@ package io.github.tassiLuca.analyzer.lib
 
 import gears.async.{Async, Future, Listener, ReadableChannel, UnboundedChannel}
 import io.github.tassiLuca.analyzer.commons.lib.{Contribution, Release, Repository}
-import io.github.tassiLuca.pimping.{TerminableChannel, Terminated}
+import io.github.tassiLuca.dse.pimping.{TerminableChannel, Terminated}
 
 import scala.annotation.tailrec
 

@@ -1,7 +1,7 @@
-package io.github.tassiLuca
+package io.github.tassiLuca.dse
 
-import gears.async.default.given
 import gears.async.*
+import gears.async.default.given
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

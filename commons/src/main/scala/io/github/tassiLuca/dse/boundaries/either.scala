@@ -1,4 +1,4 @@
-package io.github.tassiLuca.boundaries
+package io.github.tassiLuca.dse.boundaries
 
 import scala.util.{Failure, Success, Try, boundary}
 import scala.util.boundary.{Label, break}

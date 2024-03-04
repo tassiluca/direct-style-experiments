@@ -3,11 +3,11 @@ package io.github.tassiLuca.analyzer.lib
 import gears.async.Future.Collector
 import gears.async.{Async, AsyncOperations, Future, Task}
 import io.github.tassiLuca.analyzer.commons.lib.{Repository, RepositoryReport}
-import io.github.tassiLuca.boundaries.EitherConversions.given
-import io.github.tassiLuca.boundaries.either
-import io.github.tassiLuca.boundaries.either.?
-import io.github.tassiLuca.pimping.TerminableChannelOps.foreach
-import io.github.tassiLuca.pimping.asTry
+import io.github.tassiLuca.dse.boundaries.EitherConversions.given
+import io.github.tassiLuca.dse.boundaries.either
+import io.github.tassiLuca.dse.boundaries.either.?
+import io.github.tassiLuca.dse.pimping.TerminableChannelOps.foreach
+import io.github.tassiLuca.dse.pimping.asTry
 
 import scala.util.boundary.Label
 
