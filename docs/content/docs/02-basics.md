@@ -4,6 +4,15 @@ bookToc: false
 
 # Basic asynchronous constructs
 
+- [Basic asynchronous constructs](#basic-asynchronous-constructs)
+  - [The need for a new `Future` construct](#the-need-for-a-new-future-construct)
+  - [Example: a blog posts service](#example-a-blog-posts-service)
+    - [Structure](#structure)
+    - [Current monadic `Future`](#current-monadic-future)
+    - [Direct style: Scala version with `gears`](#direct-style-scala-version-with-gears)
+    - [Kotlin Coroutines](#kotlin-coroutines)
+  - [Takeaways](#takeaways)
+
 ## The need for a new `Future` construct
 
 The current implementation of the `Future` monadic construct suffers the following main cons:
@@ -499,10 +508,11 @@ private suspend fun verifyContent(title: String, body: String): PostContent { ..
 
 - a `coroutineScope` is a suspending function used to create a new coroutine scope: it suspends the execution of the current coroutine, releasing the underlying thread for other usages;
 - As we said previously, the failure of a child with an exception immediately cancels its parent and, consequently, all its other children: this means that, for handling the cancellation of nested coroutines, we don't need to do anything special, it is already automatically handled by the library.
-  - This is an advantage over the Scala Gears, where operators like `zip` and `altWithCancel` are necessary
+  - [No matter the order in which coroutines are awaited, if one of them fails all the others get cancelled](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/kotlin/io/github/tassiLuca/dse/CancellationTest.kt)
+  - This is an advantage over the Scala Gears, where operators like `zip` and `altWithCancel` are necessary!
 
 ## Takeaways
 
-- Scala Gears offers, despite the syntactical differences, very similar concepts to Kotlin Coroutines, with structured concurrency and cancellation mechanisms;
-- Kotlin Coroutines handles the cancellation of nested coroutines more easily than Scala Gears, where special attention is required;
-- As [stated by M. Odersky](https://github.com/lampepfl/gears/issues/19#issuecomment-1732586362) the `Async` capability is better than `suspend` in Kotlin because let defines functions that work for synchronous as well as asynchronous function arguments.
+> - Scala Gears offers, despite the syntactical differences, very similar concepts to Kotlin Coroutines, with structured concurrency and cancellation mechanisms;
+> - Kotlin Coroutines handles the cancellation of nested coroutines more easily than Scala Gears, where special attention is required;
+> - As [stated by M. Odersky](https://github.com/lampepfl/gears/issues/19#issuecomment-1732586362) the `Async` capability is better than `suspend` in Kotlin because let defines functions that work for synchronous as well as asynchronous function arguments.

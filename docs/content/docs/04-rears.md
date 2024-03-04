@@ -499,7 +499,7 @@ interface SensorSource<out E : SensorEvent> {
 }
 ```
 
-Like all flows, they have all the kinds of operators presented in the previous example. Despite this, they do not support, at the moment, all the operators that Rx offers, like `debounce`, `groupBy`, etc... (even if some PR are open to adding them in the framework).
+Like all flows, they have all the kinds of operators presented in the previous example. Despite this, they do not support, at the moment, all the operators that Rx offers, like `groupBy`, `buffer` (in the Rx conception), etc... (even if some proposals are pending to add them in the framework).
 
 For this reason, the consumer of events has been implemented manually, using a loop that, every `samplingWindow` time, reacts to the data received, updating the state of the system. 
 By the way, if this solution appears to be less elegant, since `Flow`s are, de facto, the porting of Rx's `Observable's` into the Coroutines world, [libraries exists to convert them to `Observable` and vice versa](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-rx2/).

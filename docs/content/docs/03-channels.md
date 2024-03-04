@@ -4,6 +4,18 @@ bookToc: false
 
 # Channels as a communication primitive
 
+- [Channels as a communication primitive](#channels-as-a-communication-primitive)
+  - [Introduction](#introduction)
+  - [Analyzer example](#analyzer-example)
+    - [Future monadic version](#future-monadic-version)
+    - [Scala Gears version](#scala-gears-version)
+    - [Kotlin Coroutines version](#kotlin-coroutines-version)
+  - [Introducing `Flow`s in Gears](#introducing-flows-in-gears)
+    - [Showcasing `Flow`s](#showcasing-flows)
+  - [Takeaways](#takeaways)
+
+## Introduction
+
 The fourth, yet not mentioned, abstraction of both Kotlin Coroutines and Scala Gears is the **channel**.
 Channels represent the **primitive communication and coordination means** to exchange `Future` (or coroutines in the case of Kotlin) results. They are, at least conceptually, very similar to a queue where it is possible to send (and receive) data -- basically, exploiting the ***producer-consumer*** pattern.
 
@@ -124,7 +136,7 @@ object TerminableChannel:
       try send(Terminated)
       // It happens only at the close of the channel due to the call (inside Gears 
       // library) of a CellBuf.dequeue(channels.scala:239) which is empty!
-      catch case e: NoSuchElementException => e.printStackTrace()
+      catch case _: NoSuchElementException => ()
 ```
 
 Now, also in Scala with Gears is possible to write:
@@ -132,7 +144,7 @@ Now, also in Scala with Gears is possible to write:
 ```scala
 val channel = TerminableChannel.ofUnbounded[Int]
 Future:
-  (0 until 10).foreach(x => channel.send(x))
+  (0 until 10).foreach(channel.send(_))
   channel.terminate() // we're done sending
 channel.foreach(println(_)) // blocks until channel is closed
 println("Done!")
@@ -206,12 +218,20 @@ As usual, it has been implemented using monadic `Future`s, as well as using Scal
 
 ### Future monadic version
 
+[[The sources are available inside the `analyzer-monadic` submodule](https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/blog-ws-monadic/src/main/scala/io/github/tassiLuca/dse/blogv).]
+
 The entry point of the library is the `Analyzer` interface which takes in input the organization name and a function through which is possible to react to results while they are computed.
 
 Since we want to achieve cancellation, the monadic version leverages Monix `Task`, which is returned by the `analyze` method wrapped in an `EitherT` monad transformer to allow handling errors functionally.
 
 ```scala
+/** A generic analyzer of organization/group/workspace repositories. */
 trait Analyzer:
+
+  /** @return a [[EitherT]] encapsulating a [[Task]] that performs the analysis of the
+    * [[organizationName]]'s repositories, providing the results incrementally to the
+    * [[updateResults]] function.
+    */
   def analyze(organizationName: String)(
       updateResult: RepositoryReport => Unit,
   ): EitherT[Task, String, Seq[RepositoryReport]]
@@ -220,16 +240,29 @@ trait Analyzer:
 To retrieve data from GitHub, a `RepositoryService` interface has been created, following the same pattern:
 
 ```scala
+/** A service exposing functions to retrieve data from a central hosting repository service. */
 trait RepositoryService:
+
+  /** @return a [[EitherT]] encapsulating a [[Task]] which get all the repositories
+    *         owned by [[organizationName]].
+    */
   def repositoriesOf(organizationName: String): EitherT[Task, String, Seq[Repository]]
+
+  /** @return a [[EitherT]] encapsulating a [[Task]] which get all the contributors
+    *         of [[repositoryName]] owned by [[organizationName]].
+    */
   def contributorsOf(organizationName: String, repositoryName: String): EitherT[Task, String, Seq[Contribution]]
+
+  /** @return a [[EitherT]] encapsulating a [[Task]] which get the last release
+    *         of [[repositoryName]] owned by [[organizationName]].
+    */
   def lastReleaseOf(organizationName: String, repositoryName: String): EitherT[Task, String, Release]
 ```
 
 The implementation of the `Analyzer` is shown in the following code snippet and performs the following steps:
 
 1. first, the list of repositories is retrieved;
-2. if no error occurred, the analysis of each repository is performed concurrently, thanks to the `Traverse` functor offered by Cats;
+2. if no error occurs, the analysis of each repository is performed concurrently, thanks to the `parTraverse` operator;
 3. the analysis of each repository consists of retrieving the contributors and the last release of the repository and then updating the result through the `updateResult` function. Since both the contributors and last release retrieval are independent of each other, they are performed concurrently, thanks to `Task.parZip2`.
 
 ```scala
@@ -237,14 +270,14 @@ override def analyze(organizationName: String)(
     updateResult: RepositoryReport => Unit,
 ): EitherT[Task, String, Seq[RepositoryReport]] =
   for
-    repositories <- gitHubService.repositoriesOf(organizationName) // 1
-    reports <- repositories.traverse(r => EitherT.right(r.performAnalysis(updateResult))) // 2
+    repositories <- repositoryService.repositoriesOf(organizationName)
+    reports <- repositories.parTraverse(r => EitherT.right(r.performAnalysis(updateResult)))
   yield reports
 
 extension (r: Repository)
   private def performAnalysis(updateResult: RepositoryReport => Unit): Task[RepositoryReport] =
-    val contributorsTask = gitHubService.contributorsOf(r.organization, r.name).value
-    val releaseTask = gitHubService.lastReleaseOf(r.organization, r.name).value
+    val contributorsTask = repositoryService.contributorsOf(r.organization, r.name).value
+    val releaseTask = repositoryService.lastReleaseOf(r.organization, r.name).value
     for
       result <- Task.parZip2(contributorsTask, releaseTask)
       report = RepositoryReport(r.name, r.issues, r.stars, result._1.getOrElse(Seq.empty), result._2.toOption)
@@ -270,7 +303,7 @@ class MonadicAppController extends AppController:
     val f = analyzer.analyze(organizationName) { report =>
       organizationReport = organizationReport.mergeWith(report)
       view.update(organizationReport)
-    }.value.runToFuture.map { case Left(value) => view.error(value); case _ => view.endComputation() }
+    }.value.runToFuture.map { case Left(value) => view.error(value); case Right(_) => view.endComputation() }
     currentComputation = Some(f)
 
   override def stopSession(): Unit = currentComputation foreach (_.cancel())
@@ -278,52 +311,82 @@ class MonadicAppController extends AppController:
 
 ### Scala Gears version
 
+[[The sources are available inside the `analyzer-direct` submodule](https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/analyzer-direct/src/main/scala/io/github/tassiLuca/analyzer).]
+
 The interfaces of the Direct Style with Gears differ from the monadic one by their return type, which is a simpler `Either` data type, and by the fact they are **suspendable functions**, hence they require an Async context to be executed.
 This is the first important difference: the `analyze` method, differently from the monadic version, doesn't return immediately the control; instead, it suspends the execution of the client until the result is available (though offering the opportunity to react to each update).
 This obeys the principle of **explicit asynchrony**: if the client wants to perform this operation asynchronously, it has to opt in explicitly, using a `Future`.
 
 ```scala
+/** A generic analyzer of organization/group/workspace repositories. */
 trait Analyzer:
+
+  /** Performs a **suspending** analysis of the [[organizationName]]'s repositories,
+    * providing the results incrementally to the [[updateResults]] function.
+    * @return [[Right]] with the overall results of the analysis or [[Left]] with 
+    *         an error message in case of failure.
+    */
   def analyze(organizationName: String)(
       updateResults: RepositoryReport => Unit,
-  )(using Async): Either[String, Seq[RepositoryReport]]
+  )(using Async, AsyncOperations): Either[String, Seq[RepositoryReport]]
 ```
 
 ```scala
+/** A service exposing functions to retrieve data from a central hosting repository service. */
 trait RepositoryService:
+
+  /** @return [[Right]] with the [[Seq]]uence of [[Repository]] owned by the given
+    *         [[organizationName]] or a [[Left]] with a explanatory message in case of errors.
+    */
   def repositoriesOf(organizationName: String)(using Async): Either[String, Seq[Repository]]
+
+  /** @return [[Right]] with the [[Seq]]uence of [[Contribution]] for the given 
+    *       [[repositoryName]] owned by the given [[organizationName]] or a [[Left]] with an 
+    *       explanatory message in case of errors.
+    */
   def contributorsOf(
     organizationName: String, 
     repositoryName: String
   )(using Async): Either[String, Seq[Contribution]]
-  def lastReleaseOf(organizationName: String, repositoryName: String)(using Async): Either[String, Release]
+
+  /** @return a [[Right]] with the last [[Release]] of the given [[repositoryName]] owned 
+    *         by [[organizationName]] if it exists, or a [[Left]] with a explanatory message
+    *         in case of errors.
+    */
+  def lastReleaseOf(
+    organizationName: String, 
+    repositoryName: String
+  )(using Async): Either[String, Release]
 ```
 
 The implementation of the `Analyzer` leverages Channels to perform the concurrent analysis of the repositories:
 
 ```scala
 override def analyze(organizationName: String)(
-      updateResults: RepositoryReport => Unit,
-  )(using Async): Either[String, Seq[RepositoryReport]] = either:
-    val reposInfo = repositoryService.repositoriesOf(organizationName).? // 1
-      .map(_.performAnalysis) // 2
-    val collector = Collector[RepositoryReport](reposInfo.toList*) // 3
-    for _ <- reposInfo.indices do 
-      updateResults(collector.results.read().?.awaitResult.?) // 4
-    reposInfo.map(_.await)
+    updateResults: RepositoryReport => Unit,
+)(using Async, AsyncOperations): Either[String, Seq[RepositoryReport]] = either:
+  val reposInfo = repositoryService.repositoriesOf(organizationName).? // 1
+    .map(_.performAnalysis.run) // 2
+  val collector = Collector[RepositoryReport](reposInfo.toList*) // 3
+  reposInfo.foreach(_ => 
+    updateResults(collector.results.read().asTry.?.awaitResult.?) // 4
+  )
+  reposInfo.awaitAll // 5
 
-  extension (r: Repository)
-    private def performAnalysis(using Async): Future[RepositoryReport] = Future:
-      val contributions = Future { repositoryService.contributorsOf(r.organization, r.name) } // concurrent
-      val release = repositoryService.lastReleaseOf(r.organization, r.name)
-      RepositoryReport(r.name, r.issues, r.stars, contributions.await.getOrElse(Seq()), release.toOption)
+extension (r: Repository)
+  protected def performAnalysis(using Async): Task[RepositoryReport] = Task:
+    val contributions = Future: // concurrent!
+      repositoryService.contributorsOf(r.organization, r.name)
+    val release = repositoryService.lastReleaseOf(r.organization, r.name)
+    RepositoryReport(r.name, r.issues, r.stars, contributions.await.getOrElse(Seq()), release.toOption)
 ```
 
 1. first, we get all the repositories of the requested organization
 2. for each of them, the contributors and the last release are retrieved concurrently, starting a `Future`
-3. `Future` results are gathered inside a **`Collector`** allowing to collect a list of futures into a channel of futures, arriving as they finish.
+3. `Future` results are gathered inside a **`Collector`** allowing to collect a list of futures into a channel of futures, **arriving as they finish**.
    * the retrieval of the contributors and the last release are performed in parallel
 4. read results from the channel as they come, calling the `updateResult` reaction function.
+5. Overall results are returned to the client.
 
 Although it works, the proposed solution suffers from a performance issue when the organization we want to analyze has a large number of repositories.
 Indeed, the GitHub API, like many ReSTful APIs, implements _pagination_: if the response includes many results, they are paginated, returning a subset of them; it is the responsibility of the client to request more data (pages).
@@ -334,10 +397,16 @@ To do so, the interface of the `RepositoryService` has been extended with new me
 
 ```scala
 trait RepositoryService:
+  /** @return a [[Terminable]] [[ReadableChannel]] with the [[Repository]] owned by the given
+    *         [[organizationName]], wrapped inside a [[Either]] for errors management.
+    */
   def incrementalRepositoriesOf(
       organizationName: String,
   )(using Async): TerminableChannel[Either[String, Repository]]
 
+  /** @return a [[Terminable]] [[ReadableChannel]] with the [[Contribution]] made by users to the
+    *         given [[repositoryName]] owned by [[organizationName]], wrapped inside a [[Either]].
+    */
   def incrementalContributorsOf(
       organizationName: String,
       repositoryName: String,
@@ -378,6 +447,18 @@ To start the application:
 ```bash
 ./gradlew analyzer-direct:run
 ```
+
+{{< hint warning >}}
+
+In order to use the application you need to place inside the `analyzer-commons` module a `.env` file containing [your personal GitHub access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens), like:
+
+```env
+GH_TOKEN=....
+```
+
+or having set an environment variable named `GH_TOKEN`.
+
+{{< /hint >}}
 
 ---
 
@@ -460,7 +541,6 @@ class GitHubRepositoryProvider {
 
 As already mentioned, the `Flow` is a **cold stream**, meaning that it is **not** started until it is **`collect`ed**. Once the `collect` method is called a new stream is created and data starts to "flow".
 
-
 They offer several useful operators for transforming and combining them functionally (not a complete list):
 
 {{< columns >}}
@@ -493,7 +573,11 @@ They offer several useful operators for transforming and combining them function
 
 {{< /columns >}}
 
-Moreover, like in Rx, it is possible to control the context in which the flow is executed using the `flowOn` operator, which changes the context for all the steps above it (so it is typically used as the last step in a function).
+
+Moreover, like in Rx:
+
+- it is possible to control the context in which the flow is executed using the `flowOn` operator, which changes the context for all the steps above it (so it is typically used as the last step in a function);
+- some backpressure strategies are supported, which are used to handle the situation when the producer is emitting values faster than the consumer can process them. In Kotlin Coroutines, the backpressure is managed by the `buffer` (and its variant, like `conflated`, `sample`, `debounce`) operator, which allows to buffer a certain number of values before the consumer starts to process them.
 
 ```kotlin
 override suspend fun analyze(
@@ -599,9 +683,130 @@ object FlowOps:
           flow.collect(item => f(item.get).collect(x => collector(Success(x.get))))
 ```
 
-## Conclusions
+### Showcasing `Flow`s
+
+Library use cases:
+
+```scala
+type Name = String
+type WriterId = Int
+type Writer = (Name, WriterId)
+type Book = String
+
+object LibraryService:
+  private val users: Set[Writer] = Set(("Alice", 987), ("Bob", 123), ("Charlie", 342))
+  private val books: Map[WriterId, Set[Book]] = Map(
+    987 -> Set("Alice's Adventures in Wonderland", "Through the Looking-Glass"),
+    123 -> Set("The Shining"),
+    342 -> Set("The Raven", "The Tell-Tale Heart"),
+  )
+
+  def allWriters(using Async): Flow[Writer] = Flow:
+    users.foreach { u =>
+      sleep(2_000)
+      it.emit(u)
+    }
+
+  def booksByWriter(writer: WriterId)(using Async): Flow[Book] = Flow:
+    books(writer).foreach(it.emit)
+```
+
+{{< columns >}}
+
+**Flows are cold**
+
+```scala
+@main def useSimple(): Unit = Async.blocking:
+  val service = LibraryService
+  val writers = service.allWriters
+  log(s"Not collecting yet!")
+  sleep(1_000) // something meaningful
+  log("Starting collecting users...")
+  writers.collect(u => log(s"User: $u"))
+  println("Done")
+```
+
+What we get is something like:
+
+```plaintext
+[1709559932492] Not collecting yet!
+[1709559933500] Starting collecting users...
+[1709559935532] User: Success((Alice,987))
+[1709559937536] User: Success((Bob,123))
+[1709559939541] User: Success((Charlie,342))
+Done
+```
+
+If something goes wrong during the task execution, a `Failure` is emitted and the task terminates (no more values are emitted).
+For example:
+
+```scala
+def failingWriters(using Async): Flow[Writer] = Flow:
+  throw IllegalStateException("Library is closed")
+  it.emit(users.head)
+
+@main def useFailingFlow(): Unit = Async.blocking:
+  val service = LibraryService
+  val writers = service.failingWriters
+  writers.collect(println)
+```
+
+Results in:
+
+```plaintext
+Failure(java.lang.IllegalStateException: 
+  The library is closed)
+```
+
+<--->
+
+**Flows can be transformed**
+
+`map`ping `Writer`s to their identifier:
+
+```scala
+@main def useWithMapping(): Unit = Async.blocking:
+  val service = LibraryService
+  val writersId = service.allWriters.map(_._2)
+  writersId.collect(a => println(s"Id: $a"))
+```
+
+Result:
+
+```plaintext
+Id: Success(987)
+Id: Success(123)
+Id: Success(342)
+```
+
+`flatMap`ping to get all the books:
+
+```scala
+@main def useWithFlatMap(): Unit = Async.blocking:
+  val service = LibraryService
+  val allBooks = service.allWriters.flatMap(w => 
+    service.booksByWriter(w._2)
+  )
+  allBooks.collect(println)
+```
+
+Result:
+
+```plaintext
+Success(Alice's Adventures in Wonderland)
+Success(Through the Looking-Glass)
+Success(The Shining)
+Success(The Raven)
+Success(The Tell-Tale Heart)
+```
+
+{{< /columns >}}
+
+[More tests on `Flows` can be found in `commons`, `pimping` pakcage](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/pimping/FlowTest.scala).
+
+## Takeaways
 
 > - `Channel`s are the basic communication and synchronization primitive for exchanging data between `Future`s/`Coroutine`s.
 >   - Scala Gears support for `Terminable` channels or a review of the closing mechanism should be considered.
 > - The `Flow` abstraction in Kotlin Coroutines is a powerful tool for handling cold streams of data, and it is a perfect fit for functions that need to return a stream of asynchronously computed values **by request**.
-> 
+>   - A similar abstraction can be implemented in Scala Gears leveraging `Task`s and `TerminableChannel`s, enabling improved support for an asynchronous flow of data also in Gears, which is currently lacking.
