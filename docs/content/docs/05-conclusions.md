@@ -2,16 +2,13 @@
 bookToc: false
 ---
 
-# Going further and conclusions
+# Conclusions and Final Considerations
 
-## Recap
+In conclusion, this project analyzed the main direct asynchronous programming abstractions offered by Kotlin's Coroutines and Scala's new, still entirely experimental library proposal, Gears.
+During the analysis, input was also provided for its possible extension where it was deemed lacking compared to the Kotlin Coroutines framework.
 
-- `Channel`s are the basic communication primitive for exchanging data between `Future`s/`Coroutines` and they are primarily used to model data sources that are *intrinsically hot*, i.e. 
-- `Flow`s are control structures, containing executable code. When we call the `collect` method we invoke the code inside the flow, like executing function's code by calling it. 
+Despite being a very young project, created for experimenting with direct style in Scala, it already offers a good set of abstractions for asynchronous programming, and seems to be promising for the future.
 
-## Conclusions and Final Considerations
-
-To conclude, in this project, the main direct-style asynchronous programming abstractions offered by the Kotlin Coroutines and Scala's new, still entirely experimental library proposal, Gears, were analyzed.
-During the analysis, input was also provided for its possible extension where it was deemed lacking compared to the Kotlin framework.
+In general, the direct style is a very interesting approach and it is worth exploring further in the context of asynchronous programming, where it can offer a more natural and intuitive way to handle concurrency with respect to monadic transformations, which require a more complex model to be fully understood and grasped.
 
 {{< button relref="/" >}} **Home** {{< /button >}}

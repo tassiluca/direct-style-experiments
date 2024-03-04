@@ -51,7 +51,7 @@ classDiagram
 
 {{< hint warning >}}
 
-**Warning**: with high-order functions if we deal with repeated `Tasks`, in some cases an `Async ?=>` label is required to not suspend the whole block, even if a suspending operation is performed: the code below *behaves differently* if the `Async ?=>` label is present or not. Note: this may be an unintended effect of the library, yet to be investigated.
+**Warning**: with high-order functions if we deal with repeated `Tasks`, in some cases an `Async ?=>` label is required to not suspend the whole block, even if a suspending operation is performed: the code below *behaves differently* if the `Async ?=>` label is present or not. Note: this may be an unintended effect of the library, yet to be investigated (sometimes on Ubuntu it doesn't work, suggesting to be a "bug", see [here](https://github.com/tassiLuca/direct-style-experiments/actions/runs/8147260065/job/22267570282?pr=24#step:4:434) vs. [here](https://github.com/tassiLuca/direct-style-experiments/actions/runs/8147339495/job/22267819794#step:4:432))
 
 {{< /hint >}}
 
@@ -103,7 +103,7 @@ def produceWithLabel[T](
 
 {{< /columns >}}
 
-[[See the tests for more details.](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/TasksTest.scala#L27)]
+[[See the tests for more details.](https://github.com/tassiLuca/direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/TasksTest.scala)]
 
 - To avoid the _work-stealing behavior_ of channel consumers, a `ChannelMultiplexer` can be used. It is essentially a container of `Readable` and `Sendable` channels, which can be added and removed at runtime. Internally, it is implemented with a thread that continuously races the set of publishers and once it reads a value, it forwards it to each subscriber channel.
   - Order is guaranteed only per producer;
@@ -135,7 +135,7 @@ In the proposed strawman Scala Gears library, there are no other kinds of abstra
 
 The attempt, described in the following, has been to extend this framework adding first-class support for `Producer` and `Consumer`'s concepts and implementing some of the most common Rx operators, completely leaving out performance concerns.
 
-[[Sources can be found in the `rears` submodule.]](https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/rears/src/main/scala/io/github/tassiLuca/rears)
+[[Sources can be found in the `rears` submodule.]](https://github.com/tassiLuca/direct-style-experiments/tree/master/rears/src/main/scala/io/github/tassiLuca/rears).
 
 - A `Producer` is a runnable entity, programmed with a `Task`, producing items on a channel. It exposes the `publishingChannel` method, which returns a `ReadableChannel` through which interested consumers can read produced items.
 - A `Consumer` is a runnable entity devoted to consuming data from a channel, exposed by the `listeningChannel` method which returns a `SendableChannel` to send items to.
@@ -554,8 +554,9 @@ suspend fun run(sensorSource: Flow<TemperatureEntry>) {
 
 ## Takeaways
 
-- Channels in Scala Gears are fine to model flow of data **that exist without application's request from them**: incoming network connections, event streams, etc...
-
+- Channels in Scala Gears are good to model flow of data **that exist without application's request from them**: incoming network connections, event streams, etc...
+- The scheduling mechanism of Task, along with the mutiplexer abstraction, despite having some stability issues, allows to implement flows of **hot** data which are listened by multiple consumers.
+- Transformation operators inspired by the Reactive world could enhance the expressiveness of the framework, making it more suitable for modeling reactive event-based systems.
 
 {{< button relref="/03-channels" >}} **Previous**: Channels as a communication primitive{{< /button >}}
 

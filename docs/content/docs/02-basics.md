@@ -89,13 +89,13 @@ To implement the service two components have been conceived, following the Cake 
   - mocks a DB technology with an in-memory collection.
 - `PostsServiceComponent`
   - is the component exposing the `Service` interface.
-  - it would be called by the controller of the ReSTful web service.  
+  - it could be called by the controller of the ReSTful web service.  
 
 Both must be designed in an async way.
 
 ### Current monadic `Future`
 
-The interface of the repository and services component of the monadic version are presented hereafter and their complete implementation is available [here](https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/blog-ws-monadic/src/main/scala/io/github/tassiLuca/dse/blog).
+The interface of the repository and services component of the monadic version are presented hereafter and their complete implementation is available [here](https://github.com/tassiLuca/direct-style-experiments/tree/master/blog-ws-monadic/src/main/scala/io/github/tassiLuca/dse/blog).
 
 ```scala
 /** The component exposing blog posts repositories. */
@@ -147,7 +147,7 @@ All the exposed functions, since they are asynchronous, return an instance of `F
 What's important to delve into is the implementation of the service, and, more precisely, of the `create` method. As already mentioned, before saving the post two checks need to be performed:
 
 1. the post author must have permission to publish a post and their information needs to be retrieved (supposing they are managed by another service);
-2. the content of the post is analyzed in order to prevent the storage and publication of offensive or inappropriate content.
+2. the content of the post is analyzed in order to prevent the storage and publication of inappropriate content.
 
 Since these operations are independent from each other they can be spawned and run in parallel.
 
@@ -294,7 +294,7 @@ classDiagram
 
 {{< /mermaid >}}
 
-Going back to our example, the interface of both the repository and service components becomes ([here](https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/blog-ws-direct/src/main/scala/io/github/tassiLuca/dse/blog) you can find the complete sources):
+Going back to our example, the interface of both the repository and service components becomes ([here](https://github.com/tassiLuca/direct-style-experiments/tree/master/blog-ws-direct/src/main/scala/io/github/tassiLuca/dse/blog) you can find the complete sources):
 
 ```scala
 /** The component exposing blog posts repositories. */
@@ -353,7 +353,7 @@ The other important key feature of the library is the support for **structured c
 
 - `Future`s are `Cancellable` instances;
   - When you cancel a future using the `cancel()` method, it promptly sets its value to `Failure(CancellationException)`. Additionally, if it's a runnable future, the thread associated with it is interrupted using `Thread.interrupt()`.
-  - to avoid immediate cancellation, deferring the cancellation after some block is possible using `uninterruptible` function:
+  - to avoid immediate cancellation, deferring the cancellation after some block, is possible using `uninterruptible` function:
 
     ```scala
     val f = Future:
@@ -367,7 +367,7 @@ The other important key feature of the library is the support for **structured c
   - The group is accessible through `Async.current.group`;
   - A cancellable object can be included inside the cancellation group of the async context using the `link` method; this is what the [implementation of the `Future` does, under the hood](https://github.com/lampepfl/gears/blob/07989ffdae153b2fe11ac1ece53ce9dd1dbd18ef/shared/src/main/scala/async/futures.scala#L140).
 
-The implementation of the `create` function with direct style in gears looks like this:
+The implementation of the `create` function with direct style in Gears looks like this:
 
 ```scala
 override def create(authorId: AuthorId, title: Title, body: Body)(using Async): Either[String, Post] = 
@@ -404,8 +404,8 @@ Some remarks:
 
 👉🏻 To showcase the structured concurrency and cancellation mechanisms of Scala Gears tests have been prepared:
 
-- [`StructuredConcurrencyTest`](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/StructuredConcurrencyTest.scala)
-- [`CancellationTest`](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/CancellationTest.scala)
+- [`StructuredConcurrencyTest`](https://github.com/tassiLuca/direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/StructuredConcurrencyTest.scala)
+- [`CancellationTest`](https://github.com/tassiLuca/direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/CancellationTest.scala)
 
 Other combinator methods, available on `Future`s instance:
 
@@ -471,7 +471,7 @@ Other combinator methods, available on `Future`s instance:
 
 - Coroutines follow the principle of structured concurrency: coroutines can be arranged into parent-child hierarchies where the cancellation of a parent leads to the immediate cancellation of all its children recursively. Failure of a child with an exception immediately cancels its parent and, consequently, all its other children.
 
-Going back to our example, the interface of the service with Kotlin coroutines looks like this ([here](https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/blog-ws-direct-kt/src/main/kotlin/io/github/tassiLuca/dse/blog) you can find the complete sources):
+Going back to our example, the interface of the service with Kotlin coroutines looks like this ([here](https://github.com/tassiLuca/direct-style-experiments/tree/master/blog-ws-direct-kt/src/main/kotlin/io/github/tassiLuca/dse/blog) you can find the complete sources):
 
 ```kotlin
 /** The service exposing a set of functionalities to interact with blog posts. */
@@ -509,17 +509,17 @@ private suspend fun verifyContent(title: String, body: String): PostContent { ..
 ```
 
 - a `coroutineScope` is a suspending function used to create a new coroutine scope: it suspends the execution of the current coroutine, releasing the underlying thread for other usages;
-- As we said previously, the failure of a child with an exception immediately cancels its parent and, consequently, all its other children: this means that, for handling the cancellation of nested coroutines, we don't need to do anything special, it is already automatically handled by the library.
+- As we said previously, the failure of a child with an exception immediately cancels its parent and, consequently, all its other children: this means that, for handling the cancellation of nested coroutines, we don't need to do anything special
   - with `coroutineScope` no matter the order in which coroutines are awaited, if one of them fails with an exception it is propagated upwards, cancelling all other ones
     - this is not the case for `supervisorScope`, a coroutine builder ensuring that child coroutines can fail independently without affecting the parent coroutine.
-    - have a look to [this test](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/blog-ws-direct-kt/src/test/kotlin/io/github/tassiLuca/dse/CoroutinesCancellationTests.kt)
+    - have a look to [this test](https://github.com/tassiLuca/direct-style-experiments/blob/master/blog-ws-direct-kt/src/test/kotlin/io/github/tassiLuca/dse/CoroutinesCancellationTests.kt)
   - This is an advantage over the Scala Gears, where operators like `zip` and `altWithCancel` are necessary!
 
 ## Takeaways
 
 > - Scala Gears offers, despite the syntactical differences, very similar concepts to Kotlin Coroutines, with structured concurrency and cancellation mechanisms;
 > - Kotlin Coroutines handles the cancellation of nested coroutines more easily than Scala Gears, where special attention is required;
-> - As [stated by M. Odersky](https://github.com/lampepfl/gears/issues/19#issuecomment-1732586362) the `Async` capability is better than `suspend` in Kotlin because let defines functions that work for synchronous as well as asynchronous function arguments.
+> - As [stated by M. Odersky](https://github.com/lampepfl/gears/issues/19#issuecomment-1732586362) the `Async` capability is better than `suspend` because let defines functions that work for synchronous as well as asynchronous function arguments, while suspending functions in Kotlin requires to be called from a coroutine.
 
 {{< button relref="/01-boundaries" >}} **Previous**: boundary & break{{< /button >}}
 

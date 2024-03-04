@@ -40,6 +40,8 @@ But, most importantly, they **lay the foundations** (along with a **`resume` mec
 
 ## Modeling error handling data types with non-local breaks
 
+[[Here you can find the full source](https://github.com/tassiLuca/direct-style-experiments/tree/master/commons/src/main/scala/io/github/tassiLuca/dse/boundaries).]
+
 In the following section are presented two data types that can be used to handle errors, both leveraging the `boundary` and `break` mechanism.
 The first (`optional`) has been presented in the [Scalar conference by M. Odersky](https://www.google.com/search?client=safari&rls=en&q=direct+style+odersky&ie=UTF-8&oe=UTF-8), while the second has been implemented to apply the same style also to `Either` data type.
 
@@ -63,8 +65,6 @@ object optional:
 ```
 
 ### `Either` + `?`
-
-[[Here you can find the full source]()]
 
 ```scala
 /** Represents a computation that will hopefully return a [[Right]] value but might fail with a [[Left]] one.*/

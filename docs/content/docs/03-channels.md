@@ -79,7 +79,7 @@ Similar behavior can be achieved also in Gears extending the framework with the 
 
 {{< /hint >}}
 
-[[The full implementation can be found in `commons` submodule](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/main/scala/io/github/tassiLuca/pimping/TerminableChannel.scala).]
+[[The full implementation can be found in `commons` submodule, `pimping` package](https://github.com/tassiLuca/direct-style-experiments/blob/master/commons/src/main/scala/io/github/tassiLuca/dse/pimping/TerminableChannel.scala).]
 
 ```scala
 /** A token to be sent to a channel to signal that it has been terminated. */
@@ -139,7 +139,7 @@ object TerminableChannel:
       catch case _: NoSuchElementException => ()
 ```
 
-Now, also in Scala with Gears is possible to write:
+Now, thanks to this extension, also in Scala Gears is possible to write:
 
 ```scala
 val channel = TerminableChannel.ofUnbounded[Int]
@@ -150,7 +150,7 @@ channel.foreach(println(_)) // blocks until channel is closed
 println("Done!")
 ```
 
-[[Other tests can be found in `TerminableChannelTest`]().]
+[[Other tests can be found in `TerminableChannelTest`](https://github.com/tassiLuca/direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/pimping/TerminableChannelTest.scala).]
 
 On top of this new abstraction is possible to implement, for example, the `foreach` and `toSeq` methods, which can be useful to wait for all the items sent over the channel.
 
@@ -218,7 +218,7 @@ As usual, it has been implemented using monadic `Future`s, as well as using Scal
 
 ### Future monadic version
 
-[[The sources are available inside the `analyzer-monadic` submodule](https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/blog-ws-monadic/src/main/scala/io/github/tassiLuca/dse/blog).]
+[[The sources are available inside the `analyzer-monadic` submodule](https://github.com/tassiLuca/direct-style-experiments/tree/master/blog-ws-monadic/src/main/scala/io/github/tassiLuca/dse/blog).]
 
 The entry point of the library is the `Analyzer` interface which takes in input the organization name and a function through which is possible to react to results while they are computed.
 
@@ -293,7 +293,7 @@ class MonadicAppController extends AppController:
 
   import monix.execution.Scheduler.Implicits.global
   private val view = AnalyzerView.gui(this)
-  private val analyzer = Analyzer.ofGitHub()
+  private val analyzer = Analyzer(RepositoryService.ofGitHub)
   private var currentComputation: Option[CancelableFuture[Unit]] = None
 
   view.run()
@@ -311,7 +311,7 @@ class MonadicAppController extends AppController:
 
 ### Scala Gears version
 
-[[The sources are available inside the `analyzer-direct` submodule](https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/analyzer-direct/src/main/scala/io/github/tassiLuca/analyzer).]
+[[The sources are available inside the `analyzer-direct` submodule](https://github.com/tassiLuca/direct-style-experiments/tree/master/analyzer-direct/src/main/scala/io/github/tassiLuca/analyzer).]
 
 The interfaces of the Direct Style with Gears differ from the monadic one by their return type, which is a simpler `Either` data type, and by the fact they are **suspendable functions**, hence they require an Async context to be executed.
 This is the first important difference: the `analyze` method, differently from the monadic version, doesn't return immediately the control; instead, it suspends the execution of the client until the result is available (though offering the opportunity to react to each update).
@@ -464,7 +464,7 @@ or having set an environment variable named `GH_TOKEN`.
 
 ### Kotlin Coroutines version
 
-[[The sources are available inside the `analyzer-direct-kt` submodule](https://github.com/tassiLuca/PPS-22-direct-style-experiments/tree/master/analyzer-direct-kt/src/main/kotlin/io/github/tassiLuca/analyzer).]
+[[The sources are available inside the `analyzer-direct-kt` submodule](https://github.com/tassiLuca/direct-style-experiments/tree/master/analyzer-direct-kt/src/main/kotlin/io/github/tassiLuca/analyzer).]
 
 The analyzer interface reflects the Scala Gears one: a `Result` is used in place of `Either`, and the suspendable function `udateResults` is marked with the `suspend` keyword in place of the `using Async` context.
 
@@ -553,7 +553,7 @@ They offer several useful operators for transforming and combining them function
 - `map` to transform the values;
 - `transform` to implement more complex transformations (possibly involving suspending operations);
 - `take` and its variant (e.g. `takeWhile`) to limit the number of values emitted;
-- `onEach` to perform side-effects for each value emitted;
+- `onEach` to perform side-effects for each value emitted.
 
 <--->
 
@@ -562,16 +562,15 @@ They offer several useful operators for transforming and combining them function
 - conversions to various collection types, like `toList`, `toSet`;
 - `first`, `last`, `single` to retrieve the first, last or single value emitted;
 - `reduce` to perform some kind of operation over all items, reducing them to a single one;
-- `fold` to perform some kind of operation over all items, starting from an initial value, accumulating a result;
+- `fold` to perform some kind of operation over all items, starting from an initial value, accumulating a result.
 
 <--->
 
 *Flows combining operators*:
 
 - `merge` to combine multiple flows into a single one, emitting values from all of them;
-- `zip` 
-- `combine` 
-- `flatMapConcat` / `flatMapMerge` to transform each value into a flow and then concatenate/merge them;
+- `zip` combines the corresponding values of two flows;
+- `flatMapConcat` / `flatMapMerge` to transform each value into a flow and then concatenate/merge them.
 
 {{< /columns >}}
 
@@ -601,6 +600,25 @@ override suspend fun analyze(
 }
 ```
 
+Concerning flows, an important thing to note is that they are just asynchronous generators that run some suspending code when you collect them. Thus, per se, they don't introduce new coroutines or concurrency mechanism.
+To achieve concurrency, for example emitting values concurrently by multiple coroutines, is necessary to use a `channelFlow`, a pre-cooked way to inject a `coroutineContext` and a `Channel` through which is possible to pass the values to be emitted from a background coroutines back to the main control flow:
+
+```kotlin
+fun analyzeAll(repositories: List<Repository>): Flow<RepositoryReport> = channelFlow {
+    repositories.forEach { repository ->
+        launch {
+            val release = async {
+               provider.lastReleaseOf(repository.organization, repository.name).getOrThrow()
+            }
+            provider.flowingContributorsOf(repository.organization, repository.name).toList().forEach {
+                // emit this value
+                send(RepositoryReport(repository.name, repository.issues, repository.stars, it, release.await()))
+            }
+        }
+    }
+}
+```
+
 ## Introducing `Flow`s in Gears
 
 {{< hint info >}}
@@ -615,7 +633,7 @@ The following section describes the attempt made to implement it and what has be
   - the behavior of the `emit` method is defined inside the `apply` method of `Flow` and injected inside caller code via the context parameter `(it: FlowCollector[T]) ?=>`.
 - Once the task has finished, the channel is terminated.
 
-[[Source code can be found in `commons` submodule, `pimpimg` package](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/main/scala/io/github/tassiLuca/pimping/Flow.scala).]
+[[Source code can be found in `commons` submodule, `pimpimg` package](https://github.com/tassiLuca/direct-style-experiments/blob/master/commons/src/main/scala/io/github/tassiLuca/dse/pimping/Flow.scala).]
 
 ```scala
 /** An asynchronous cold data stream that emits values, inspired to Kotlin Flows. */
@@ -663,7 +681,7 @@ object Flow:
       myChannel.foreach(t => collector(t))
 ```
 
-`map` and `flatMap` have been implemented on top of `Flow`:
+`map` and `flatMap` combinators have been implemented on top of `Flow`:
 
 ```scala
 object FlowOps:
@@ -687,7 +705,7 @@ object FlowOps:
 
 ### Showcasing `Flow`s
 
-Library use cases:
+Library use case:
 
 ```scala
 type Name = String
@@ -804,13 +822,13 @@ Success(The Tell-Tale Heart)
 
 {{< /columns >}}
 
-👉🏻 [More tests on `Flows` can be found in `commons`, `pimping` pakcage](https://github.com/tassiLuca/PPS-22-direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/pimping/FlowTest.scala).
+👉🏻 [More tests on `Flows` can be found in `commons`, `pimping` pakcage](https://github.com/tassiLuca/direct-style-experiments/blob/master/commons/src/test/scala/io/github/tassiLuca/dse/pimping/FlowTest.scala).
 
 ## Takeaways
 
 > - `Channel`s are the basic communication and synchronization primitive for exchanging data between `Future`s/`Coroutine`s.
 >   - Scala Gears support for `Terminable` channels or a review of the closing mechanism should be considered.
-> - The `Flow` abstraction in Kotlin Coroutines is a powerful tool for handling cold streams of data, and it is a perfect fit for functions that need to return a stream of asynchronously computed values **by request**.
+> - The `Flow` abstraction in Kotlin Coroutines is a powerful tool for handling cold streams of data, and it is a perfect fit for functions that need to return a stream of asynchronously computed values *upon request*.
 >   - A similar abstraction can be implemented in Scala Gears leveraging `Task`s and `TerminableChannel`s, enabling improved support for an asynchronous flow of data also in Gears, which is currently lacking.
 
 {{< button relref="/02-basics" >}} **Previous**: Basic asynchronous constructs{{< /button >}}
