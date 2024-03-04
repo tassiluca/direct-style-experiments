@@ -2,7 +2,7 @@
 
 ## Goals of the project
 
-> In the realm of asynchronous programming, the Scala ecosystem offers a set of solid monads constructs to tackle complex task functionally with elegance and efficiency, like [Monix Tasks](https://monix.io/docs/current/eval/task.html) and [Cats Effect](https://typelevel.org/cats-effect/).
+> In the realm of asynchronous programming, the Scala ecosystem offers a set of solid monads constructs and libraries to tackle complex task functionally with elegance and efficiency, like [Monix Tasks](https://monix.io/docs/current/eval/task.html) and [Cats Effect](https://typelevel.org/cats-effect/).
 >
 > However, we are assisting to the increase in adoption of continuation and coroutines in modern runtimes, either exploiting some kind of fibers support, like the project Loom with Virtual Threads, or via code generation, like Kotlin Coroutines.
 >
