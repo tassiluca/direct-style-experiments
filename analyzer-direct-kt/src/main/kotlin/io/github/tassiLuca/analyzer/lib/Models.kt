@@ -22,7 +22,7 @@ data class Repository(
     val name: String = fullName.substringAfter('/')
 }
 
-/** A GitHub repository contribution. */
+/** A repository contribution. */
 @Serializable
 data class Contribution(
     /** The login name of the contributor. */
@@ -31,7 +31,7 @@ data class Contribution(
     val contributions: Long,
 )
 
-/** A GitHub release. */
+/** A release, with its info. */
 @Serializable
 data class Release(
     /** The tag name of the release. */
@@ -40,7 +40,7 @@ data class Release(
     @SerialName("published_at") val date: String,
 )
 
-/** A report for a GitHub repository. */
+/** A repository report, i.e. all its significant information. */
 data class RepositoryReport(
     /** The name of the repository. */
     val name: String,
