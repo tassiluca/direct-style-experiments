@@ -4,13 +4,26 @@ import cats.data.EitherT
 import io.github.tassiLuca.analyzer.commons.lib.{Contribution, Release, Repository}
 import monix.eval.Task
 
+/** A service exposing functions to retrieve data from a central hosting repository service. */
 trait RepositoryService:
+
+  /** @return a [[EitherT]] encapsulating a [[Task]] which get all the repositories
+    *         owned by [[organizationName]].
+    */
   def repositoriesOf(organizationName: String): EitherT[Task, String, Seq[Repository]]
+
+  /** @return a [[EitherT]] encapsulating a [[Task]] which get all the contributors
+    *         of [[repositoryName]] owned by [[organizationName]].
+    */
   def contributorsOf(organizationName: String, repositoryName: String): EitherT[Task, String, Seq[Contribution]]
+
+  /** @return a [[EitherT]] encapsulating a [[Task]] which get the last release
+    *         of [[repositoryName]] owned by [[organizationName]].
+    */
   def lastReleaseOf(organizationName: String, repositoryName: String): EitherT[Task, String, Release]
 
 object RepositoryService:
-  def apply(): RepositoryService = GitHubServiceImpl()
+  def ofGitHub: RepositoryService = GitHubServiceImpl()
 
   private class GitHubServiceImpl extends RepositoryService:
     import sttp.client3.httpclient.monix.HttpClientMonixBackend

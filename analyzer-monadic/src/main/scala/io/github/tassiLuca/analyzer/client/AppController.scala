@@ -2,9 +2,10 @@ package io.github.tassiLuca.analyzer.client
 
 import io.github.tassiLuca.analyzer.commons.client.{AnalyzerView, AppController, OrganizationReport}
 import io.github.tassiLuca.analyzer.commons.lib.RepositoryReport
-import io.github.tassiLuca.analyzer.lib.Analyzer
+import io.github.tassiLuca.analyzer.lib.{Analyzer, RepositoryService}
 import monix.execution.CancelableFuture
 
+/** The application controller. */
 object AppController:
   def monadic: AppController = MonadicAppController()
 
@@ -12,7 +13,7 @@ object AppController:
 
     import monix.execution.Scheduler.Implicits.global
     private val view = AnalyzerView.gui(this)
-    private val analyzer = Analyzer.ofGitHub()
+    private val analyzer = Analyzer(RepositoryService.ofGitHub)
     private var currentComputation: Option[CancelableFuture[Unit]] = None
 
     view.run()
