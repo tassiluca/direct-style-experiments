@@ -38,7 +38,7 @@ class CancellationTest extends AnyFunSpec with Matchers {
         Async.current.group.isCancelled shouldBe true
         f.awaitResult.isFailure shouldBe true
         val now = System.currentTimeMillis()
-        (now - before) should (be > 1_000L and be < 5_000L)
+        (now - before) should (be >= 1_000L and be < 5_000L)
       terminated shouldBe false
     }
 
