@@ -30,15 +30,15 @@ trait TerminableChannel[T] extends Channel[Terminable[T]]:
 object TerminableChannel:
 
   /** Creates a [[TerminableChannel]] backed to [[SyncChannel]]. */
-  def ofSync[T: ClassTag]: TerminableChannel[T] = TerminableChannelImpl(SyncChannel())
+  def ofSync[T]: TerminableChannel[T] = TerminableChannelImpl(SyncChannel())
 
   /** Creates a [[TerminableChannel]] backed to [[BufferedChannel]]. */
-  def ofBuffered[T: ClassTag]: TerminableChannel[T] = TerminableChannelImpl(BufferedChannel())
+  def ofBuffered[T]: TerminableChannel[T] = TerminableChannelImpl(BufferedChannel())
 
   /** Creates a [[TerminableChannel]] backed to an [[UnboundedChannel]]. */
-  def ofUnbounded[T: ClassTag]: TerminableChannel[T] = TerminableChannelImpl(UnboundedChannel())
+  def ofUnbounded[T]: TerminableChannel[T] = TerminableChannelImpl(UnboundedChannel())
 
-  private class TerminableChannelImpl[T: ClassTag](c: Channel[Terminable[T]]) extends TerminableChannel[T]:
+  private class TerminableChannelImpl[T](c: Channel[Terminable[T]]) extends TerminableChannel[T]:
     opaque type Res[R] = Either[Channel.Closed, R]
 
     private var _terminated: Boolean = false
