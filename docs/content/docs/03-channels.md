@@ -443,18 +443,16 @@ Then, the implementation of the `analyze` method becomes:
 ```scala
 override def analyze(organizationName: String)(
     updateResults: RepositoryReport => Unit,
-)(using Async): Either[String, Seq[RepositoryReport]] = either:
+)(using Async, AsyncOperations): Either[String, Seq[RepositoryReport]] = either:
   val reposInfo = repositoryService.incrementalRepositoriesOf(organizationName) // 1
-  var allReports = Seq[RepositoryReport]()
-  var futures = Seq[Future[Unit]]()
+  var futures = Seq[Future[RepositoryReport]]()
   reposInfo.foreach { repository => // 2
     futures = futures :+ Future: // 3
-      val report = repository.?.performAnalysis.awaitResult.?
+      val report = repository.?.performAnalysis.run.awaitResult.?
       updateResults(report)
-      allReports = allReports :+ report
+      report
   }
-  futures.awaitAllOrCancel // 4
-  allReports
+  futures.awaitAllOrCancel
 ```
 
 1. we get the channel of repositories from the repository service;
