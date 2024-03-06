@@ -40,7 +40,7 @@ private class IncrementalAnalyzer(repositoryService: RepositoryService) extends 
     reposInfo.foreach { repository =>
       futures = futures :+ Future:
         val report = repository.?.performAnalysis.run.awaitResult.?
-        updateResults(report)
+        synchronized(updateResults(report))
         report
     }
-    futures.awaitAllOrCancel
+    futures.awaitAll
