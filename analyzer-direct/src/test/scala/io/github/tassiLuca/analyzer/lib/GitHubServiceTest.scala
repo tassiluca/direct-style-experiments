@@ -12,8 +12,8 @@ class GitHubServiceTest extends AnyFunSpec with Matchers {
   private val defaultNumberOfResultsPerPage = 30
   private val gitHubService: RepositoryService = RepositoryService.ofGitHub()
   private val nonExistingOrganization = "4315950311"
-  private val organization = "lampepfl"
-  private val repository = "dotty"
+  private val organization = "scala"
+  private val repository = "scala3"
   private val odersky = "odersky"
 
   describe("The GitHubService") {

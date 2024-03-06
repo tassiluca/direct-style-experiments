@@ -66,8 +66,8 @@ class GitHubRepositoryProviderTest : FreeSpec() {
 
     companion object {
         private const val DEFAULT_NUMBER_OF_RESULTS_PER_PAGE = 30
-        private const val ORGANIZATION = "lampepfl"
-        private const val REPOSITORY = "dotty"
+        private const val ORGANIZATION = "scala"
+        private const val REPOSITORY = "scala3"
         private const val ODERSKY = "odersky"
     }
 }
