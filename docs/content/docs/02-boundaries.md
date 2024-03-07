@@ -101,6 +101,6 @@ object EitherConversions:
 
 This kind of data type will be particularly useful in the next examples to quickly break in case of failures, returning the caller a meaningful error message, and simplifying the error-handling code.
 
-{{< button relref="/" >}} **Home** {{< /button >}}
+{{< button relref="/01-overview" >}} **Overview** {{< /button >}}
 
-{{< button relref="/02-basics" >}} **Next**: Basic asynchronous constructs {{< /button >}}
+{{< button relref="/03-basics" >}} **Next**: Basic asynchronous constructs {{< /button >}}

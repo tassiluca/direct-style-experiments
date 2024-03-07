@@ -558,6 +558,6 @@ suspend fun run(sensorSource: Flow<TemperatureEntry>) {
 - The scheduling mechanism of Task, along with the mutiplexer abstraction, despite having some stability issues, allows to implement flows of **hot** data which are listened by multiple consumers.
 - Transformation operators inspired by the Reactive world could enhance the expressiveness of the framework, making it more suitable for modeling reactive event-based systems.
 
-{{< button relref="/03-channels" >}} **Previous**: Channels as a communication primitive{{< /button >}}
+{{< button relref="/04-channels" >}} **Previous**: Channels as a communication primitive{{< /button >}}
 
-{{< button relref="/05-conclusions" >}} **Next**: Conclusions{{< /button >}}
+{{< button relref="/" >}} **Home**{{< /button >}}

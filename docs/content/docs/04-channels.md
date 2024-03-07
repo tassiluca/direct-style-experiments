@@ -105,15 +105,15 @@ trait TerminableChannel[T] extends Channel[Terminable[T]]:
 object TerminableChannel:
 
   /** Creates a [[TerminableChannel]] backed to [[SyncChannel]]. */
-  def ofSync[T: ClassTag]: TerminableChannel[T] = TerminableChannelImpl(SyncChannel())
+  def ofSync[T]: TerminableChannel[T] = TerminableChannelImpl(SyncChannel())
 
   /** Creates a [[TerminableChannel]] backed to [[BufferedChannel]]. */
-  def ofBuffered[T: ClassTag]: TerminableChannel[T] = TerminableChannelImpl(BufferedChannel())
+  def ofBuffered[T]: TerminableChannel[T] = TerminableChannelImpl(BufferedChannel())
 
   /** Creates a [[TerminableChannel]] backed to an [[UnboundedChannel]]. */
-  def ofUnbounded[T: ClassTag]: TerminableChannel[T] = TerminableChannelImpl(UnboundedChannel())
+  def ofUnbounded[T]: TerminableChannel[T] = TerminableChannelImpl(UnboundedChannel())
 
-  private class TerminableChannelImpl[T: ClassTag](c: Channel[Terminable[T]]) extends TerminableChannel[T]:
+  private class TerminableChannelImpl[T](c: Channel[Terminable[T]]) extends TerminableChannel[T]:
     opaque type Res[R] = Either[Channel.Closed, R]
 
     private var _terminated: Boolean = false
@@ -134,9 +134,9 @@ object TerminableChannel:
 
     override def terminate()(using Async): Unit =
       try send(Terminated)
-      // It happens only at the close of the channel due to the call (inside Gears 
-      // library) of a CellBuf.dequeue(channels.scala:239) which is empty!
-      catch case _: NoSuchElementException => ()
+      // It happens only at the close of the channel due to the call (inside Gears library) of
+      // a CellBuf.dequeue(channels.scala:239) which is empty!
+      catch case _: NoSuchElementException => () // e.printStackTrace()
 ```
 
 Now, thanks to this extension, also in Scala Gears is possible to write:
@@ -212,6 +212,8 @@ The final result is a GUI application that, given an organization name, starts t
 listing their information along with all their contributors as soon as they are computed. Moreover, the application allows the user to cancel the current computation at any point in time.
 
 ![expected result](../../res/img/analyzer-e2e.png)
+
+[This example has been inspired by [this](https://kotlinlang.org/docs/coroutines-and-channels.html) tutorial.]
 
 ---
 
@@ -829,6 +831,6 @@ Success(The Tell-Tale Heart)
 > - The `Flow` abstraction in Kotlin Coroutines is a powerful tool for handling cold streams of data, and it is a perfect fit for functions that need to return a stream of asynchronously computed values *upon request*.
 >   - A similar abstraction can be implemented in Scala Gears leveraging `Task`s and `TerminableChannel`s, enabling improved support for an asynchronous flow of data also in Gears, which is currently lacking.
 
-{{< button relref="/02-basics" >}} **Previous**: Basic asynchronous constructs{{< /button >}}
+{{< button relref="/03-basics" >}} **Previous**: Basic asynchronous constructs{{< /button >}}
 
-{{< button relref="/04-rears" >}} **Next**: Reactivity in direct style{{< /button >}}
+{{< button relref="/05-rears" >}} **Next**: Reactivity in direct style{{< /button >}}

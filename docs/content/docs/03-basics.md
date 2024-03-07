@@ -525,8 +525,8 @@ private suspend fun verifyContent(title: String, body: String): PostContent { ..
 
 > - Scala Gears offers, despite the syntactical differences, very similar concepts to Kotlin Coroutines, with structured concurrency and cancellation mechanisms;
 > - Kotlin Coroutines handles the cancellation of nested coroutines more easily than Scala Gears, where special attention is required;
-> - As [stated by M. Odersky](https://github.com/lampepfl/gears/issues/19#issuecomment-1732586362) the `Async` capability is better than `suspend` because let defines functions that work for synchronous as well as asynchronous function arguments, while suspending functions in Kotlin require to be called from a coroutine.
+> - As [stated by M. Odersky](https://github.com/lampepfl/gears/issues/19#issuecomment-1732586362) the `Async` capability is better than `suspend` because let defines functions that work for synchronous as well as asynchronous function arguments without changing anything, while in Kotlin suspendable functions passed as an argument in higher-order functions must be tagged with `suspend` keyword.
 
-{{< button relref="/01-boundaries" >}} **Previous**: boundary & break{{< /button >}}
+{{< button relref="/02-boundaries" >}} **Previous**: boundary & break{{< /button >}}
 
-{{< button relref="/03-channels" >}} **Next**: Channels as a communication primitive {{< /button >}}
+{{< button relref="/04-channels" >}} **Next**: Channels as a communication primitive {{< /button >}}
