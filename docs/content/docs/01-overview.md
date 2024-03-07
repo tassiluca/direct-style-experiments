@@ -26,8 +26,8 @@ The [second](../04-channels) introduces the main communication and synchronizati
 
 In this context, a contribution has been made by proposing the extension of the Scala Gears library with the following two abstractions, currently missing, inspired by those of the Kotlin Coroutines:
 
-- **terminable channels**, i.e. a channel that can be terminated, but whose values can still be read by consumers after its termination until all values are consumed;
-- **`Flow`s**, modeling a *cold* stream of asynchronously computed values which are particularly useful for implementing asynchronous functions that produce, not just a single, but a sequence of values.
+- *terminable channels*, i.e. a channel that can be terminated, but whose values can still be read by consumers after its termination until all values are consumed;
+- *`Flow`s*, modeling a *cold* stream of asynchronously computed values which are particularly useful for implementing asynchronous functions that produce, not just a single, but a sequence of values.
 
 The [last example](../05-rears) investigates how to implement a reactive-like event-based system using direct style, taking as a use case a small sensor control system in an IoT context that needs to react to events coming from different sensors.
 
@@ -39,13 +39,13 @@ The current implementation of monadic Futures present in the standard library is
 
 This leads to the adoption of effectful libraries that offer these and many other powerful abstractions, beautifully wrapped in monadic constructs.
 This is the main pro and con of the monadic approach: what makes monads remarkable is their capability to turn statements into programmable values and introduce constructs to transform and compose them functionally in a very elegant (and somehow "magical" for ones who are not familiar with them) way.
-Despite this idyllic beauty, monads and effectful libraries require relevant expertise in functional programming to be fully grasped and composed effectively.
+Despite this idyllic beauty, monads and effectful libraries require relevant expertise in functional programming to be fully grasped and effectively composed.
 
 Direct style frameworks are indeed arising as a more natural and intuitive way to handle concurrency, leveraging an imperative-like programming style that is familiar to all developers.
 
 In the JVM ecosystem, the most adopted and known direct-style library is the Kotlin Coroutines, which were introduced in 2018 by modifying the Kotlin language (rather than its runtime, like the project Loom has recently done with Virtual Thread) to support suspending functions.
 The main advantages of Kotlin Coroutines are that they provide suspension and cancellation mechanisms that are simple to understand and use, as well as a good ecosystem for channels and `Flow`s.
-Despite this, Coroutines are not still perfect: due to their design they partially suffer from the [colored functions problem](https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/) and we need to be aware we can not use the same synchronization concurrency abstractions that we would use in Java with threads (like locks, `synchronized`, ...) cause they are not designed to be used in the coroutines context.
+Despite this, Coroutines are not still perfect: due to their design, they partially suffer from the [colored functions problem](https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/) and we need to be aware we can not use the same synchronization concurrency abstractions that we would use in Java with threads (like locks, `synchronized`, ...) cause they are not designed to be used in the coroutines context.
 
 Scala Gears is an attempt to bring direct style into the Scala ecosystem.
 Its API design is inspired by Kotlin Coroutines and, despite the fact it achieves suspension, unlike Kotlin, leveraging Virtual Threads for JVM and delimited continuation for Scala Native, the majority of constructs can be mapped to the Kotlin Coroutines ones.
@@ -53,8 +53,8 @@ Despite being a very young project, it already offers a good set of abstractions
 
 - some design choices should be addressed:
   - closing a channel prevents any further reading, precluding the possibility of processing the remaining values (see [second](../04-channels) example);
-  - Task scheduling behavior has a strange behavior with higher-order functions (see [third](../05-rears) example);
-- missing abstractions: the library is still missing some important abstractions, like the proposed `Flow`s for handling a cold stream of asynchronously computed values and operators for functionally transforming them;
+  - Task scheduling behaves differently with higher-order functions depending on its signature and wither or not the function passed is suspendable (see [third](../05-rears) example);
+- the library is still missing some important abstractions, like the proposed `Flow` for handling a cold stream of asynchronously computed values, and operators for functionally transforming channels (and in a next future, hopefully, `Flow`s or equivalent abstraction);
 - performances: the project has been created for experimenting, thus performances have not been considered a priority so far, [even though a comparison in overheads of
 the core primitives has been published](https://github.com/lampepfl/gears/blob/main/docs/summary-2023-06.md#performance).
 
