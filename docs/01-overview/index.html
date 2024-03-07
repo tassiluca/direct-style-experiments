@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Overview of the project # Context # In the realm of asynchronous programming, the Scala ecosystem offers a set of solid and widely adopted monadic constructs and libraries to tackle complex tasks functionally with elegance and efficiency, like Monix Tasks and Cats Effecs, enabling a wide range of interesting and useful features, like composable error handling, cancellation mechanisms and structured concurrency that the standard library lacks. However, they also come with a cost: the pervasiveness of the flatMap operator to compose values makes the code harder to reason about and difficult and awkward to integrate with regular control structures.">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
+<meta property="og:description" content="Overview of the project # Context # In the realm of asynchronous programming, the Scala ecosystem offers a set of solid and widely adopted monadic constructs and libraries to tackle complex tasks functionally with elegance and efficiency, like Monix Tasks and Cats Effecs, enabling a wide range of interesting and useful features, like composable error handling, cancellation mechanisms and structured concurrency that the standard library lacks. However, they also come with a cost: the pervasiveness of the flatMap operator to compose values makes the code harder to reason about and difficult and awkward to integrate with regular control structures." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://tassiluca.github.io/direct-style-experiments/docs/01-overview/" /><meta property="article:section" content="docs" />
+
+<meta property="article:modified_time" content="2024-03-07T12:58:54+01:00" />
+
+<title>01 Overview | direct-style-experiments</title>
+<link rel="manifest" href="/direct-style-experiments/manifest.json">
+<link rel="icon" href="/direct-style-experiments/favicon.png" >
+<link rel="canonical" href="https://tassiluca.github.io/direct-style-experiments/docs/01-overview/">
+<link rel="stylesheet" href="/direct-style-experiments/book.min.42504dd4648e8da78376617fd32b73c3ae6afbe9f805c36868bc831b07002332.css" integrity="sha256-QlBN1GSOjaeDdmF/0ytzw65q&#43;&#43;n4BcNoaLyDGwcAIzI=" crossorigin="anonymous">
+  <script defer src="/direct-style-experiments/flexsearch.min.js"></script>
+  <script defer src="/direct-style-experiments/en.search.min.3f8b6945cd08ef775004f85d77654ec92ace96dfa5464784bf41f620c35ae240.js" integrity="sha256-P4tpRc0I73dQBPhdd2VOySrOlt&#43;lRkeEv0H2IMNa4kA=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/direct-style-experiments/"><span>direct-style-experiments</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/direct-style-experiments/docs/01-overview/" class="active">01 Overview</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/direct-style-experiments/docs/02-boundaries/" class="">02 Boundaries</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/direct-style-experiments/docs/03-basics/" class="">03 Basics</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/direct-style-experiments/docs/04-channels/" class="">04 Channels</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/direct-style-experiments/docs/05-rears/" class="">05 Rears</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/direct-style-experiments/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>01 Overview</strong>
+
+  <label for="toc-control">
+    
+    <img src="/direct-style-experiments/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#context">Context</a></li>
+    <li><a href="#goals">Goals</a></li>
+    <li><a href="#the-contribution">The contribution</a></li>
+    <li><a href="#conclusions">Conclusions</a></li>
+    <li><a href="#references">References</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><h1 id="overview-of-the-project">
+  Overview of the project
+  <a class="anchor" href="#overview-of-the-project">#</a>
+</h1>
+<h2 id="context">
+  Context
+  <a class="anchor" href="#context">#</a>
+</h2>
+<p>In the realm of asynchronous programming, the Scala ecosystem offers a set of solid and widely adopted monadic constructs and libraries to tackle complex tasks functionally with elegance and efficiency, like <a href="https://monix.io/docs/current/eval/task.html">Monix Tasks</a> and <a href="https://typelevel.org/cats-effect/">Cats Effecs</a>, enabling a wide range of interesting and useful features, like composable error handling, cancellation mechanisms and structured concurrency that the standard library lacks.
+However, they also come with a cost: the pervasiveness of the <code>flatMap</code> operator to compose values makes the code harder to reason about and difficult and awkward to integrate with regular control structures.</p>
+<p>In the last years, we have been assisting the increase in adoption of continuation and coroutines in modern runtimes, either exploiting some kind of fibers support, like the project Loom with Virtual Threads, or via code generation, like Kotlin Coroutines, aiming to capture the essence of effects more cleanly compared to monads.</p>
+<h2 id="goals">
+  Goals
+  <a class="anchor" href="#goals">#</a>
+</h2>
+<p>The goal of this project is to explore, mainly focusing on Scala, the direct style, developing a few examples (not too complex) leveraging the new strawman library <a href="https://github.com/lampepfl/gears">Gears</a>, comparing it with <a href="https://kotlinlang.org/docs/coroutines-overview.html">Kotlin Coroutines</a> and the current implementation of monadic Futures, seeking to analyze aspects such as:</p>
+<ul>
+<li>ergonomics of the two styles;</li>
+<li>which of the two approaches has a real advantage in adoption;</li>
+<li>pros and cons of the two styles;</li>
+<li>any limitations and difficulties encountered in using them.</li>
+</ul>
+<h2 id="the-contribution">
+  The contribution
+  <a class="anchor" href="#the-contribution">#</a>
+</h2>
+<p>The project is built around three small examples.</p>
+<p>The <a href="../03-basics">first</a> aims, through the implementation of the core of a small Web service, to introduce the basics of asynchronous programming in direct style, focusing on structured concurrency and cancellation.</p>
+<p>The <a href="../04-channels">second</a> introduces the main communication and synchronization primitive of direct style, channels, and how they can be used to exchange data between concurrent tasks (either <code>Future</code>s or coroutines).</p>
+<p>In this context, a contribution has been made by proposing the extension of the Scala Gears library with the following two abstractions, currently missing, inspired by those of the Kotlin Coroutines:</p>
+<ul>
+<li><strong>terminable channels</strong>, i.e. a channel that can be terminated, but whose values can still be read by consumers after its termination until all values are consumed;</li>
+<li><strong><code>Flow</code>s</strong>, modeling a <em>cold</em> stream of asynchronously computed values which are particularly useful for implementing asynchronous functions that produce, not just a single, but a sequence of values.</li>
+</ul>
+<p>The <a href="../05-rears">last example</a> investigates how to implement a reactive-like event-based system using direct style, taking as a use case a small sensor control system in an IoT context that needs to react to events coming from different sensors.</p>
+<p>To accomplish this, since Scala Gears lacks any kind of transforming operator, some have been introduced on top of channels (taking cues from Reactive frameworks) allowing them to be manipulated functionally.</p>
+<h2 id="conclusions">
+  Conclusions
+  <a class="anchor" href="#conclusions">#</a>
+</h2>
+<p>The current implementation of monadic Futures present in the standard library is insufficient to handle modern asynchronous programming in a structured and safe way: it lacks structured concurrency and cancellation mechanism, is not referential transparent and requires to be ugly mixed with direct style constructs to be used appropriately.</p>
+<p>This leads to the adoption of effectful libraries that offer these and many other powerful abstractions, beautifully wrapped in monadic constructs.
+This is the main pro and con of the monadic approach: what makes monads remarkable is their capability to turn statements into programmable values and introduce constructs to transform and compose them functionally in a very elegant (and somehow &ldquo;magical&rdquo; for ones who are not familiar with them) way.
+Despite this idyllic beauty, monads and effectful libraries require relevant expertise in functional programming to be fully grasped and composed effectively.</p>
+<p>Direct style frameworks are indeed arising as a more natural and intuitive way to handle concurrency, leveraging an imperative-like programming style that is familiar to all developers.</p>
+<p>In the JVM ecosystem, the most adopted and known direct-style library is the Kotlin Coroutines, which were introduced in 2018 by modifying the Kotlin language (rather than its runtime, like the project Loom has recently done with Virtual Thread) to support suspending functions.
+The main advantages of Kotlin Coroutines are that they provide suspension and cancellation mechanisms that are simple to understand and use, as well as a good ecosystem for channels and <code>Flow</code>s.
+Despite this, Coroutines are not still perfect: due to their design they partially suffer from the <a href="https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/">colored functions problem</a> and we need to be aware we can not use the same synchronization concurrency abstractions that we would use in Java with threads (like locks, <code>synchronized</code>, &hellip;) cause they are not designed to be used in the coroutines context.</p>
+<p>Scala Gears is an attempt to bring direct style into the Scala ecosystem.
+Its API design is inspired by Kotlin Coroutines and, despite the fact it achieves suspension, unlike Kotlin, leveraging Virtual Threads for JVM and delimited continuation for Scala Native, the majority of constructs can be mapped to the Kotlin Coroutines ones.
+Despite being a very young project, it already offers a good set of abstractions for asynchronous programming, although it cannot yet be considered a mature library ready to be used in a production environment:</p>
+<ul>
+<li>some design choices should be addressed:
+<ul>
+<li>closing a channel prevents any further reading, precluding the possibility of processing the remaining values (see <a href="../04-channels">second</a> example);</li>
+<li>Task scheduling behavior has a strange behavior with higher-order functions (see <a href="../05-rears">third</a> example);</li>
+</ul>
+</li>
+<li>missing abstractions: the library is still missing some important abstractions, like the proposed <code>Flow</code>s for handling a cold stream of asynchronously computed values and operators for functionally transforming them;</li>
+<li>performances: the project has been created for experimenting, thus performances have not been considered a priority so far, <a href="https://github.com/lampepfl/gears/blob/main/docs/summary-2023-06.md#performance">even though a comparison in overheads of
+the core primitives has been published</a>.</li>
+</ul>
+<p>In conclusion, Scala Gears is a promising project that could bring direct-style async programming into the Scala ecosystem, giving, together with boundary and break Scala 3 support, a nice alternative to the current monadic approach, simplifying the way we handle concurrency, making it more natural and intuitive.</p>
+<h2 id="references">
+  References
+  <a class="anchor" href="#references">#</a>
+</h2>
+<ul>
+<li><a href="https://github.com/lampepfl/gears/tree/main/docs">Scala Gears, Programming Methods Laboratory EPFL</a></li>
+<li><a href="https://medium.com/scala-3/scala-3-what-is-direct-style-d9c1bcb1f810#:~:text=Dean%20Wampler-,Scala%203,without%20the%20boilerplate%20of%20monads.">Scala 3: What Is &ldquo;Direct Style&rdquo; by D. Wampler</a></li>
+<li><a href="https://kotlinlang.org/docs/coroutines-overview.html">Kotlin Coroutines documentation</a></li>
+<li><a href="https://contributors.scala-lang.org/t/pre-sip-suspended-functions-and-continuations/5801/20?u=adamw">Pre-SIP: Suspended functions and continuations in Scala 3</a></li>
+<li><a href="https://www.youtube.com/watch?v=9I2xoQVzrhs">The Great Concurrency Smackdown: ZIO versus JDK by John A. De Goes</a></li>
+<li><a href="https://medium.com/geekculture/continuation-coroutine-continuation-generator-9a1af03a3bed">Continuaton, coroutine, and generator by A. Ber</a></li>
+<li><a href="https://www.youtube.com/watch?v=_hfBv0a09Jc">KotlinConf 2017 - Introduction to Coroutines by Roman Elizarov</a></li>
+<li><a href="https://www.youtube.com/watch?v=YrrUCSi72E8&amp;t=42s">KotlinConf 2017 - Deep Dive into Coroutines on JVM by Roman Elizarov</a></li>
+<li><a href="https://www.linkedin.com/pulse/kotlin-co-routine-scope-amit-nadiger#:~:text=CoroutineScope%20is%20an%20interface%20in,of%20the%20CoroutineScope%20have%20completed.">Kotlin Co-routine Scope by A. Nadiger</a></li>
+<li><a href="https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/">What Color is your function by B. Nystrom</a></li>
+<li><a href="https://kt.academy/article/cc-channel">Channel in Kotlin Coroutines</a></li>
+<li><a href="https://kt.academy/article/cc-sharedflow-stateflow">SharedFlow and StateFlow</a></li>
+<li><a href="https://betterprogramming.pub/demystifying-kotlins-channel-flows-b9007e1f773b">Demystifying Kotlin&rsquo;s Channel Flows by S. Cooper</a></li>
+</ul>
+
+
+
+
+  
+
+<a  href="/direct-style-experiments/"   class="book-btn">
+  <strong>Home</strong>
+</a>
+
+
+
+
+
+  
+
+<a  href="/direct-style-experiments/docs/02-boundaries/"   class="book-btn">
+  <strong>Next</strong>: boundary &amp; break
+</a>
+
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/direct-style-experiments/commit/e61044e3afd86718ea14d14cd1442f44e99a713e" title='Last modified by Luca Tassinari | March 7, 2024' target="_blank" rel="noopener">
+      <img src="/direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
+      <span>March 7, 2024</span>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#context">Context</a></li>
+    <li><a href="#goals">Goals</a></li>
+    <li><a href="#the-contribution">The contribution</a></li>
+    <li><a href="#conclusions">Conclusions</a></li>
+    <li><a href="#references">References</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

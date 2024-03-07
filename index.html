@@ -4,8 +4,9 @@
 	<meta name="generator" content="Hugo 0.123.7">
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Direct style for Functional Reactive Programming: an analysis in Scala &amp; Kotlin # Goals of the project # In the realm of asynchronous programming, the Scala ecosystem offers a set of solid monads constructs and libraries to tackle complex task functionally with elegance and efficiency, like Monix Tasks and Cats Effect.
-However, we are assisting to the increase in adoption of continuation and coroutines in modern runtimes, either exploiting some kind of fibers support, like the project Loom with Virtual Threads, or via code generation, like Kotlin Coroutines.">
+<meta name="description" content="Direct style for Functional Reactive Programming: an analysis in Scala &amp; Kotlin # The project is built around three main examples, delving from the fundamentals of the direct style frameworks for simple asynchronous computation to more complex reactive-like systems.
+Here&rsquo;s the outline of the conducted analysis:
+Overview of the project: goals, contribution, and conclusions Boundary and break Basic asynchronous constructs Channels as a communication primitive Reactivity in direct style Code has been organized in Gradle submodules, one for each version of the examples (current monadic futures, Scala Gears, Kotlin Coroutines).">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
@@ -19,7 +20,7 @@ However, we are assisting to the increase in adoption of continuation and corout
 <link rel="canonical" href="https://tassiluca.github.io/direct-style-experiments/">
 <link rel="stylesheet" href="/direct-style-experiments/book.min.42504dd4648e8da78376617fd32b73c3ae6afbe9f805c36868bc831b07002332.css" integrity="sha256-QlBN1GSOjaeDdmF/0ytzw65q&#43;&#43;n4BcNoaLyDGwcAIzI=" crossorigin="anonymous">
   <script defer src="/direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/direct-style-experiments/en.search.min.103fe240c64dfac838151e2076d9e47f9cf5e03187ec7af6348c675d1835a82e.js" integrity="sha256-ED/iQMZN&#43;sg4FR4gdtnkf5z14DGH7Hr2NIxnXRg1qC4=" crossorigin="anonymous"></script>
+  <script defer src="/direct-style-experiments/en.search.min.3f8b6945cd08ef775004f85d77654ec92ace96dfa5464784bf41f620c35ae240.js" integrity="sha256-P4tpRc0I73dQBPhdd2VOySrOlt&#43;lRkeEv0H2IMNa4kA=" crossorigin="anonymous"></script>
 <link rel="alternate" type="application/rss+xml" href="https://tassiluca.github.io/direct-style-experiments/index.xml" title="direct-style-experiments" />
 <!--
 Made with Book Theme
@@ -72,7 +73,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/direct-style-experiments/docs/01-boundaries/" class="">01 Boundaries</a>
+    <a href="/direct-style-experiments/docs/01-overview/" class="">01 Overview</a>
   
 
         </li>
@@ -85,7 +86,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/direct-style-experiments/docs/02-basics/" class="">02 Basics</a>
+    <a href="/direct-style-experiments/docs/02-boundaries/" class="">02 Boundaries</a>
   
 
         </li>
@@ -98,7 +99,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/direct-style-experiments/docs/03-channels/" class="">03 Channels</a>
+    <a href="/direct-style-experiments/docs/03-basics/" class="">03 Basics</a>
   
 
         </li>
@@ -111,7 +112,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/direct-style-experiments/docs/04-rears/" class="">04 Rears</a>
+    <a href="/direct-style-experiments/docs/04-channels/" class="">04 Channels</a>
   
 
         </li>
@@ -124,7 +125,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/direct-style-experiments/docs/05-conclusions/" class="">05 Conclusions</a>
+    <a href="/direct-style-experiments/docs/05-rears/" class="">05 Rears</a>
   
 
         </li>
@@ -180,12 +181,7 @@ https://github.com/alex-shpak/hugo-book
   <aside class="hidden clearfix">
     
   
-<nav id="TableOfContents">
-  <ul>
-    <li><a href="#goals-of-the-project">Goals of the project</a></li>
-    <li><a href="#overview">Overview</a></li>
-  </ul>
-</nav>
+<nav id="TableOfContents"></nav>
 
 
 
@@ -200,33 +196,14 @@ https://github.com/alex-shpak/hugo-book
   Direct style for Functional Reactive Programming: an analysis in Scala &amp; Kotlin
   <a class="anchor" href="#direct-style-for-functional-reactive-programming-an-analysis-in-scala--kotlin">#</a>
 </h1>
-<h2 id="goals-of-the-project">
-  Goals of the project
-  <a class="anchor" href="#goals-of-the-project">#</a>
-</h2>
-<blockquote>
-<p>In the realm of asynchronous programming, the Scala ecosystem offers a set of solid monads constructs and libraries to tackle complex task functionally with elegance and efficiency, like <a href="https://monix.io/docs/current/eval/task.html">Monix Tasks</a> and <a href="https://typelevel.org/cats-effect/">Cats Effect</a>.</p>
-<p>However, we are assisting to the increase in adoption of continuation and coroutines in modern runtimes, either exploiting some kind of fibers support, like the project Loom with Virtual Threads, or via code generation, like Kotlin Coroutines.</p>
-<p>The goal of this project is to delve into this field through the lens of direct style, developing few examples (not too complex) leveraging the new <em>strawman</em> library <a href="https://github.com/lampepfl/gears">Scala Gears</a>, comparing it with Kotlin&rsquo;s Coroutines and the current implementation of monadic Futures, seeking to analyze aspects such as:</p>
-<ul>
-<li>ergonomics of the two styles (which one results more thoughtful and/or verbose);</li>
-<li>which of the two approaches has a real advantage in adoption;</li>
-<li>pros and cons of the two styles;</li>
-<li>any limitations and difficulties encountered in using them.</li>
-</ul>
-</blockquote>
-<h2 id="overview">
-  Overview
-  <a class="anchor" href="#overview">#</a>
-</h2>
 <p>The project is built around three main examples, delving from the fundamentals of the direct style frameworks for simple asynchronous computation to more complex reactive-like systems.</p>
 <p>Here&rsquo;s the outline of the conducted analysis:</p>
 <ol>
-<li><a href="./docs/01-boundaries"><code>Boundary</code> and <code>break</code></a></li>
-<li><a href="./docs/02-basics">Basic asynchronous constructs</a></li>
-<li><a href="./docs/03-channels">Channels as a communication primitive</a></li>
-<li><a href="./docs/04-rears">Reactivity in direct style</a></li>
-<li><a href="./docs/05-going-further">Conclusions</a></li>
+<li><a href="./docs/01-overview">Overview of the project: goals, contribution, and conclusions</a></li>
+<li><a href="./docs/02-boundaries"><code>Boundary</code> and <code>break</code></a></li>
+<li><a href="./docs/03-basics">Basic asynchronous constructs</a></li>
+<li><a href="./docs/04-channels">Channels as a communication primitive</a></li>
+<li><a href="./docs/05-rears">Reactivity in direct style</a></li>
 </ol>
 <p>Code has been organized in Gradle submodules, one for each version of the examples (current monadic futures, Scala Gears, Kotlin Coroutines).
 Here an overview of the project folder structure:</p>
@@ -265,9 +242,9 @@ Here an overview of the project folder structure:</p>
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/direct-style-experiments/commit/64e8e0a8750f2e185b5567d9f8c59e2ed7870adf" title='Last modified by Luca Tassinari | March 4, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/direct-style-experiments/commit/e61044e3afd86718ea14d14cd1442f44e99a713e" title='Last modified by Luca Tassinari | March 7, 2024' target="_blank" rel="noopener">
       <img src="/direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>March 4, 2024</span>
+      <span>March 7, 2024</span>
     </a>
   </div>
 
@@ -301,12 +278,7 @@ Here an overview of the project folder structure:</p>
       <div class="book-toc-content">
         
   
-<nav id="TableOfContents">
-  <ul>
-    <li><a href="#goals-of-the-project">Goals of the project</a></li>
-    <li><a href="#overview">Overview</a></li>
-  </ul>
-</nav>
+<nav id="TableOfContents"></nav>
 
 
  

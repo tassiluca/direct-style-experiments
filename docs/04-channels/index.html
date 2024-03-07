@@ -9,17 +9,17 @@
 <meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
 <meta property="og:description" content="Channels as a communication primitive # Channels as a communication primitive Introduction Analyzer example Future monadic version Scala Gears version Kotlin Coroutines version Introducing Flows in Gears Showcasing Flows Takeaways Introduction # The fourth, yet not mentioned, abstraction of both Kotlin Coroutines and Scala Gears is the channel. Channels represent the primitive communication and coordination means to exchange Future (or coroutines in the case of Kotlin) results. They are, at least conceptually, very similar to a queue where it is possible to send (and receive) data &ndash; basically, exploiting the producer-consumer pattern." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://tassiluca.github.io/direct-style-experiments/docs/03-channels/" /><meta property="article:section" content="docs" />
+<meta property="og:url" content="https://tassiluca.github.io/direct-style-experiments/docs/04-channels/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-03-06T23:01:41+01:00" />
+<meta property="article:modified_time" content="2024-03-07T12:58:54+01:00" />
 
-<title>03 Channels | direct-style-experiments</title>
+<title>04 Channels | direct-style-experiments</title>
 <link rel="manifest" href="/direct-style-experiments/manifest.json">
 <link rel="icon" href="/direct-style-experiments/favicon.png" >
-<link rel="canonical" href="https://tassiluca.github.io/direct-style-experiments/docs/03-channels/">
+<link rel="canonical" href="https://tassiluca.github.io/direct-style-experiments/docs/04-channels/">
 <link rel="stylesheet" href="/direct-style-experiments/book.min.42504dd4648e8da78376617fd32b73c3ae6afbe9f805c36868bc831b07002332.css" integrity="sha256-QlBN1GSOjaeDdmF/0ytzw65q&#43;&#43;n4BcNoaLyDGwcAIzI=" crossorigin="anonymous">
   <script defer src="/direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/direct-style-experiments/en.search.min.103fe240c64dfac838151e2076d9e47f9cf5e03187ec7af6348c675d1835a82e.js" integrity="sha256-ED/iQMZN&#43;sg4FR4gdtnkf5z14DGH7Hr2NIxnXRg1qC4=" crossorigin="anonymous"></script>
+  <script defer src="/direct-style-experiments/en.search.min.3f8b6945cd08ef775004f85d77654ec92ace96dfa5464784bf41f620c35ae240.js" integrity="sha256-P4tpRc0I73dQBPhdd2VOySrOlt&#43;lRkeEv0H2IMNa4kA=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -71,7 +71,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/direct-style-experiments/docs/01-boundaries/" class="">01 Boundaries</a>
+    <a href="/direct-style-experiments/docs/01-overview/" class="">01 Overview</a>
   
 
         </li>
@@ -84,7 +84,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/direct-style-experiments/docs/02-basics/" class="">02 Basics</a>
+    <a href="/direct-style-experiments/docs/02-boundaries/" class="">02 Boundaries</a>
   
 
         </li>
@@ -97,7 +97,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/direct-style-experiments/docs/03-channels/" class="active">03 Channels</a>
+    <a href="/direct-style-experiments/docs/03-basics/" class="">03 Basics</a>
   
 
         </li>
@@ -110,7 +110,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/direct-style-experiments/docs/04-rears/" class="">04 Rears</a>
+    <a href="/direct-style-experiments/docs/04-channels/" class="active">04 Channels</a>
   
 
         </li>
@@ -123,7 +123,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="/direct-style-experiments/docs/05-conclusions/" class="">05 Conclusions</a>
+    <a href="/direct-style-experiments/docs/05-rears/" class="">05 Rears</a>
   
 
         </li>
@@ -165,7 +165,7 @@ https://github.com/alex-shpak/hugo-book
     <img src="/direct-style-experiments/svg/menu.svg" class="book-icon" alt="Menu" />
   </label>
 
-  <strong>03 Channels</strong>
+  <strong>04 Channels</strong>
 
   <label for="toc-control">
     
@@ -301,15 +301,15 @@ This is not the case for Kotlin Coroutines where closing a channel indicates tha
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">object</span> <span style="color:#df8e1d">TerminableChannel</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  <span style="color:#d20f39">/**</span> <span style="color:#d20f39">Creates</span> <span style="color:#d20f39">a</span> <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">]]</span> backed to <span style="color:#04a5e5;font-weight:bold">[[</span><span style="color:#d20f39">SyncChannel</span><span style="color:#04a5e5;font-weight:bold">]].</span> <span style="color:#04a5e5;font-weight:bold">*/</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">def</span> ofSync<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T:</span> <span style="color:#d20f39">ClassTag</span><span style="color:#04a5e5;font-weight:bold">]</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">TerminableChannelImpl</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">SyncChannel</span><span style="color:#04a5e5;font-weight:bold">())</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">def</span> ofSync<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">TerminableChannelImpl</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">SyncChannel</span><span style="color:#04a5e5;font-weight:bold">())</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** Creates a [[TerminableChannel]] backed to [[BufferedChannel]]. */</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">def</span> ofBuffered<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T:</span> <span style="color:#d20f39">ClassTag</span><span style="color:#04a5e5;font-weight:bold">]</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">TerminableChannelImpl</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">BufferedChannel</span><span style="color:#04a5e5;font-weight:bold">())</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">def</span> ofBuffered<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">TerminableChannelImpl</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">BufferedChannel</span><span style="color:#04a5e5;font-weight:bold">())</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  <span style="color:#9ca0b0;font-style:italic">/** Creates a [[TerminableChannel]] backed to an [[UnboundedChannel]]. */</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">def</span> ofUnbounded<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T:</span> <span style="color:#d20f39">ClassTag</span><span style="color:#04a5e5;font-weight:bold">]</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">TerminableChannelImpl</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">UnboundedChannel</span><span style="color:#04a5e5;font-weight:bold">())</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">def</span> ofUnbounded<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">TerminableChannelImpl</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">UnboundedChannel</span><span style="color:#04a5e5;font-weight:bold">())</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">private</span> <span style="color:#8839ef">class</span> <span style="color:#df8e1d">TerminableChannelImpl</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T:</span> <span style="color:#d20f39">ClassTag</span><span style="color:#04a5e5;font-weight:bold">](</span>c<span style="color:#8839ef">:</span> <span style="color:#d20f39">Channel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Terminable</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]])</span> <span style="color:#8839ef">extends</span> <span style="color:#df8e1d">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span><span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">private</span> <span style="color:#8839ef">class</span> <span style="color:#df8e1d">TerminableChannelImpl</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>c<span style="color:#8839ef">:</span> <span style="color:#d20f39">Channel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Terminable</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]])</span> <span style="color:#8839ef">extends</span> <span style="color:#df8e1d">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#d20f39">opaque</span> <span style="color:#8839ef">type</span> <span style="color:#d20f39">Res</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Channel.Closed</span>, <span style="color:#d20f39">R</span><span style="color:#04a5e5;font-weight:bold">]</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">private</span> <span style="color:#8839ef">var</span> <span style="color:#df8e1d">_terminated</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Boolean</span> <span style="color:#04a5e5;font-weight:bold">=</span> <span style="color:#fe640b">false</span>
@@ -330,10 +330,10 @@ This is not the case for Kotlin Coroutines where closing a channel indicates tha
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#8839ef">override</span> <span style="color:#8839ef">def</span> terminate<span style="color:#04a5e5;font-weight:bold">()(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Unit</span> <span style="color:#04a5e5;font-weight:bold">=</span>
 </span></span><span style="display:flex;"><span>      <span style="color:#8839ef">try</span> send<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Terminated</span><span style="color:#04a5e5;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#9ca0b0;font-style:italic">// It happens only at the close of the channel due to the call (inside Gears 
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>      <span style="color:#9ca0b0;font-style:italic">// library) of a CellBuf.dequeue(channels.scala:239) which is empty!
-</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>      <span style="color:#8839ef">catch</span> <span style="color:#8839ef">case</span> <span style="color:#8839ef">_:</span> <span style="color:#d20f39">NoSuchElementException</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span> <span style="color:#04a5e5;font-weight:bold">()</span>
-</span></span></code></pre></div><p>Now, thanks to this extension, also in Scala Gears is possible to write:</p>
+</span></span><span style="display:flex;"><span>      <span style="color:#9ca0b0;font-style:italic">// It happens only at the close of the channel due to the call (inside Gears library) of
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>      <span style="color:#9ca0b0;font-style:italic">// a CellBuf.dequeue(channels.scala:239) which is empty!
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>      <span style="color:#8839ef">catch</span> <span style="color:#8839ef">case</span> <span style="color:#8839ef">_:</span> <span style="color:#d20f39">NoSuchElementException</span> <span style="color:#04a5e5;font-weight:bold">=&gt;</span> <span style="color:#04a5e5;font-weight:bold">()</span> <span style="color:#9ca0b0;font-style:italic">// e.printStackTrace()
+</span></span></span></code></pre></div><p>Now, thanks to this extension, also in Scala Gears is possible to write:</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">val</span> channel <span style="color:#8839ef">=</span> <span style="color:#df8e1d">TerminableChannel</span><span style="color:#04a5e5;font-weight:bold">.</span>ofUnbounded<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Int</span><span style="color:#04a5e5;font-weight:bold">]</span>
 </span></span><span style="display:flex;"><span><span style="color:#df8e1d">Future</span><span style="color:#8839ef">:</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#d20f39">0</span> <span style="color:#d20f39">until</span> <span style="color:#d20f39">10</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#d20f39">.foreach</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#d20f39">channel.send</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#8839ef">_</span><span style="color:#04a5e5;font-weight:bold">))</span>
@@ -418,6 +418,7 @@ This is not the case for Kotlin Coroutines where closing a channel indicates tha
 <p>The final result is a GUI application that, given an organization name, starts the analysis of all its repositories,
 listing their information along with all their contributors as soon as they are computed. Moreover, the application allows the user to cancel the current computation at any point in time.</p>
 <p><img src="../../res/img/analyzer-e2e.png" alt="expected result" /></p>
+<p>[This example has been inspired by <a href="https://kotlinlang.org/docs/coroutines-and-channels.html">this</a> tutorial.]</p>
 <hr>
 <p>To start the application:</p>
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./gradlew analyzer-&lt;direct | direct-kt | monadic&gt;:run
@@ -955,7 +956,7 @@ For example:</p>
 
   
 
-<a  href="/direct-style-experiments/docs/02-basics/"   class="book-btn">
+<a  href="/direct-style-experiments/docs/03-basics/"   class="book-btn">
   <strong>Previous</strong>: Basic asynchronous constructs
 </a>
 
@@ -965,7 +966,7 @@ For example:</p>
 
   
 
-<a  href="/direct-style-experiments/docs/04-rears/"   class="book-btn">
+<a  href="/direct-style-experiments/docs/05-rears/"   class="book-btn">
   <strong>Next</strong>: Reactivity in direct style
 </a>
 
@@ -978,9 +979,9 @@ For example:</p>
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/direct-style-experiments/commit/fbe14f05a9b7b30ce482ecdb4aa7d6120943c89b" title='Last modified by Luca Tassinari | March 6, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/direct-style-experiments/commit/e61044e3afd86718ea14d14cd1442f44e99a713e" title='Last modified by Luca Tassinari | March 7, 2024' target="_blank" rel="noopener">
       <img src="/direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>March 6, 2024</span>
+      <span>March 7, 2024</span>
     </a>
   </div>
 
