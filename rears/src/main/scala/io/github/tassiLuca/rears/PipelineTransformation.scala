@@ -135,14 +135,11 @@ extension [T](r: ReadableChannel[T])(using Async)
       Future { timer.run() }
       val value = Async.raceWithOrigin(r.readSource, timer.src).awaitResult
       timer.cancel()
-      if value._2 == timer.src then
+      if value._2 != timer.src then
+        buffer = buffer :+ value._1.asInstanceOf[Either[Closed, T]].get
+      if value._2 == timer.src || buffer.size == n then
         emitter.send(buffer)
         buffer = List.empty
-      else
-        buffer = buffer :+ value._1.asInstanceOf[Either[Closed, T]].get
-        if buffer.size == n then
-          emitter.send(buffer)
-          buffer = List.empty
     }
 
   /** @return a new [[ReadableChannel]] whose elements are buffered in a [[List]] of items
