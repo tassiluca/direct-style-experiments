@@ -49,7 +49,7 @@ class StructuredConcurrencyTest extends AnyFunSpec with Matchers {
             f2.await + " " + f1.await // note the inverted order w.r.t. the previous case
           f.awaitResult.isFailure shouldBe true
           val now = System.currentTimeMillis()
-          now - before should be > 2_000L
+          now - before should be >= 2_000L
           stillAlive shouldBe true
       }
 
@@ -78,7 +78,7 @@ class StructuredConcurrencyTest extends AnyFunSpec with Matchers {
         val f2 = Future { sleep(2_000); stillAlive = true }
         val result = f1.altWithCancel(f2).awaitResult
         val now = System.currentTimeMillis()
-        now - before should (be > 1_000L and be < 5_000L)
+        now - before should (be >= 1_000L and be < 2_000L)
         result.isSuccess shouldBe true
         result.get shouldBe "faster won"
         sleep(3_000)
