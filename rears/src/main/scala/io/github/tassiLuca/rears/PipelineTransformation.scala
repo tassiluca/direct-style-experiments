@@ -135,8 +135,7 @@ extension [T](r: ReadableChannel[T])(using Async)
       Future { timer.run() }
       val value = Async.raceWithOrigin(r.readSource, timer.src).awaitResult
       timer.cancel()
-      if value._2 != timer.src then
-        buffer = buffer :+ value._1.asInstanceOf[Either[Closed, T]].get
+      if value._2 != timer.src then buffer = buffer :+ value._1.asInstanceOf[Either[Closed, T]].get
       if value._2 == timer.src || buffer.size == n then
         emitter.send(buffer)
         buffer = List.empty
@@ -163,13 +162,12 @@ extension [T](r: ReadableChannel[T])(using Async)
       val timer = Timer(timespan)
       buffer = buffer :+ r.read().get
       Future { timer.run() }
-      val f = Future:
+      Async.group:
         val tf = Future { timer.src.awaitResult }
         val tr = Task {
           buffer = buffer :+ r.read().get
         }.schedule(RepeatUntilFailure()).run
         tr.altWithCancel(tf).awaitResult
-      f.awaitResult
       emitter.send(buffer)
       buffer = List.empty
       timer.cancel()
