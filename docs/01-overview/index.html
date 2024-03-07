@@ -11,7 +11,7 @@
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/direct-style-experiments/docs/01-overview/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-03-07T12:58:54+01:00" />
+<meta property="article:modified_time" content="2024-03-07T13:31:46+01:00" />
 
 <title>01 Overview | direct-style-experiments</title>
 <link rel="manifest" href="/direct-style-experiments/manifest.json">
@@ -19,7 +19,7 @@
 <link rel="canonical" href="https://tassiluca.github.io/direct-style-experiments/docs/01-overview/">
 <link rel="stylesheet" href="/direct-style-experiments/book.min.42504dd4648e8da78376617fd32b73c3ae6afbe9f805c36868bc831b07002332.css" integrity="sha256-QlBN1GSOjaeDdmF/0ytzw65q&#43;&#43;n4BcNoaLyDGwcAIzI=" crossorigin="anonymous">
   <script defer src="/direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/direct-style-experiments/en.search.min.3f8b6945cd08ef775004f85d77654ec92ace96dfa5464784bf41f620c35ae240.js" integrity="sha256-P4tpRc0I73dQBPhdd2VOySrOlt&#43;lRkeEv0H2IMNa4kA=" crossorigin="anonymous"></script>
+  <script defer src="/direct-style-experiments/en.search.min.bf3e6c4047a74032e851536a446a84e22354d1e9cd8c7448337ec5431e8104e4.js" integrity="sha256-vz5sQEenQDLoUVNqRGqE4iNU0enNjHRIM37FQx6BBOQ=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -229,8 +229,8 @@ However, they also come with a cost: the pervasiveness of the <code>flatMap</cod
 <p>The <a href="../04-channels">second</a> introduces the main communication and synchronization primitive of direct style, channels, and how they can be used to exchange data between concurrent tasks (either <code>Future</code>s or coroutines).</p>
 <p>In this context, a contribution has been made by proposing the extension of the Scala Gears library with the following two abstractions, currently missing, inspired by those of the Kotlin Coroutines:</p>
 <ul>
-<li><strong>terminable channels</strong>, i.e. a channel that can be terminated, but whose values can still be read by consumers after its termination until all values are consumed;</li>
-<li><strong><code>Flow</code>s</strong>, modeling a <em>cold</em> stream of asynchronously computed values which are particularly useful for implementing asynchronous functions that produce, not just a single, but a sequence of values.</li>
+<li><em>terminable channels</em>, i.e. a channel that can be terminated, but whose values can still be read by consumers after its termination until all values are consumed;</li>
+<li><em><code>Flow</code>s</em>, modeling a <em>cold</em> stream of asynchronously computed values which are particularly useful for implementing asynchronous functions that produce, not just a single, but a sequence of values.</li>
 </ul>
 <p>The <a href="../05-rears">last example</a> investigates how to implement a reactive-like event-based system using direct style, taking as a use case a small sensor control system in an IoT context that needs to react to events coming from different sensors.</p>
 <p>To accomplish this, since Scala Gears lacks any kind of transforming operator, some have been introduced on top of channels (taking cues from Reactive frameworks) allowing them to be manipulated functionally.</p>
@@ -241,11 +241,11 @@ However, they also come with a cost: the pervasiveness of the <code>flatMap</cod
 <p>The current implementation of monadic Futures present in the standard library is insufficient to handle modern asynchronous programming in a structured and safe way: it lacks structured concurrency and cancellation mechanism, is not referential transparent and requires to be ugly mixed with direct style constructs to be used appropriately.</p>
 <p>This leads to the adoption of effectful libraries that offer these and many other powerful abstractions, beautifully wrapped in monadic constructs.
 This is the main pro and con of the monadic approach: what makes monads remarkable is their capability to turn statements into programmable values and introduce constructs to transform and compose them functionally in a very elegant (and somehow &ldquo;magical&rdquo; for ones who are not familiar with them) way.
-Despite this idyllic beauty, monads and effectful libraries require relevant expertise in functional programming to be fully grasped and composed effectively.</p>
+Despite this idyllic beauty, monads and effectful libraries require relevant expertise in functional programming to be fully grasped and effectively composed.</p>
 <p>Direct style frameworks are indeed arising as a more natural and intuitive way to handle concurrency, leveraging an imperative-like programming style that is familiar to all developers.</p>
 <p>In the JVM ecosystem, the most adopted and known direct-style library is the Kotlin Coroutines, which were introduced in 2018 by modifying the Kotlin language (rather than its runtime, like the project Loom has recently done with Virtual Thread) to support suspending functions.
 The main advantages of Kotlin Coroutines are that they provide suspension and cancellation mechanisms that are simple to understand and use, as well as a good ecosystem for channels and <code>Flow</code>s.
-Despite this, Coroutines are not still perfect: due to their design they partially suffer from the <a href="https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/">colored functions problem</a> and we need to be aware we can not use the same synchronization concurrency abstractions that we would use in Java with threads (like locks, <code>synchronized</code>, &hellip;) cause they are not designed to be used in the coroutines context.</p>
+Despite this, Coroutines are not still perfect: due to their design, they partially suffer from the <a href="https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/">colored functions problem</a> and we need to be aware we can not use the same synchronization concurrency abstractions that we would use in Java with threads (like locks, <code>synchronized</code>, &hellip;) cause they are not designed to be used in the coroutines context.</p>
 <p>Scala Gears is an attempt to bring direct style into the Scala ecosystem.
 Its API design is inspired by Kotlin Coroutines and, despite the fact it achieves suspension, unlike Kotlin, leveraging Virtual Threads for JVM and delimited continuation for Scala Native, the majority of constructs can be mapped to the Kotlin Coroutines ones.
 Despite being a very young project, it already offers a good set of abstractions for asynchronous programming, although it cannot yet be considered a mature library ready to be used in a production environment:</p>
@@ -253,10 +253,10 @@ Despite being a very young project, it already offers a good set of abstractions
 <li>some design choices should be addressed:
 <ul>
 <li>closing a channel prevents any further reading, precluding the possibility of processing the remaining values (see <a href="../04-channels">second</a> example);</li>
-<li>Task scheduling behavior has a strange behavior with higher-order functions (see <a href="../05-rears">third</a> example);</li>
+<li>Task scheduling behaves differently with higher-order functions depending on its signature and wither or not the function passed is suspendable (see <a href="../05-rears">third</a> example);</li>
 </ul>
 </li>
-<li>missing abstractions: the library is still missing some important abstractions, like the proposed <code>Flow</code>s for handling a cold stream of asynchronously computed values and operators for functionally transforming them;</li>
+<li>the library is still missing some important abstractions, like the proposed <code>Flow</code> for handling a cold stream of asynchronously computed values, and operators for functionally transforming channels (and in a next future, hopefully, <code>Flow</code>s or equivalent abstraction);</li>
 <li>performances: the project has been created for experimenting, thus performances have not been considered a priority so far, <a href="https://github.com/lampepfl/gears/blob/main/docs/summary-2023-06.md#performance">even though a comparison in overheads of
 the core primitives has been published</a>.</li>
 </ul>
@@ -309,7 +309,7 @@ the core primitives has been published</a>.</li>
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/direct-style-experiments/commit/e61044e3afd86718ea14d14cd1442f44e99a713e" title='Last modified by Luca Tassinari | March 7, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/direct-style-experiments/commit/38b3128e4598ddef38be0e451a3c02576e4eb470" title='Last modified by Luca Tassinari | March 7, 2024' target="_blank" rel="noopener">
       <img src="/direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
       <span>March 7, 2024</span>
     </a>
