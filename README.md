@@ -16,14 +16,7 @@ The goal of this project is to delve into this field through the lens of direct 
 ## Overview
 
 The project is built around three main examples, delving from the fundamentals of the direct style frameworks for simple asynchronous computation to more complex reactive-like systems.
-
-Here's the outline of the conducted analysis:
-
-1. [`Boundary` and `break`](./docs/01-boundaries)
-2. [Basic asynchronous constructs](./docs/02-basics)
-3. [Channels as a communication primitive](./docs/03-channels)
-4. [Reactivity in direct style](./docs/04-rears)
-5. [Conclusions](./docs/05-going-further)
+The full discussion of these examples can be found in the [documentation](https://tassiluca.github.io/direct-style-experiments/).
 
 Code has been organized in Gradle submodules, one for each version of the examples (current monadic futures, Scala Gears, Kotlin Coroutines).
 Here an overview of the project folder structure:
