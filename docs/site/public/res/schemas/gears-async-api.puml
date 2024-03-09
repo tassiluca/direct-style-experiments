@@ -1,0 +1,47 @@
+@startuml gears-async-api
+interface Cancellable {
+    +cancel()
+    +link(group: CompletionGroup)
+    +unlink()
+}
+
+interface Async {
+    +group: CompletionGroup
+    +await[T](src: Async.Source[T]): T
+    +withGroup(group: CompletionGroup): Async
+    +current(): Async
+    +blocking[T](body: Async ?=> T): T
+    +group[T](body: Async ?=> T): T
+}
+
+interface Source<-T> {
+    +poll(k: Listener[T]): Boolean
+    +poll(): Option[T]
+    +onComplete(k: Listener[T])
+    +dropListener(k: Listener[T])
+    +awaitResult(): T
+}
+
+Async *--> Source
+
+interface Listener<T> {
+    +lock: Listener.ListenerLock | Null
+    +complete(data: T, source: Async.Source[T])
+    +completeNow(data: T, source: Async.Source[T]): Boolean
+    +apply[T](consumer: (T, Source[T]) => Unit): Listener[T]
+}
+
+Source *--> Listener
+
+abstract class OriginalSource 
+OriginalSource --|> Async.Source
+
+class "Future[+T]" as Future {
+
+}
+class "Promise[+T]" as Promise {
+}
+Future --|> OriginalSource
+Promise --|> OriginalSource
+
+@enduml

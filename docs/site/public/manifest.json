@@ -1,0 +1,15 @@
+{
+  "name": "PPS-22-direct-style-experiments",
+  "short_name": "PPS-22-direct-style-experiments",
+  "start_url": "/PPS-22-direct-style-experiments/",
+  "scope": "/PPS-22-direct-style-experiments/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/PPS-22-direct-style-experiments/favicon.svg",
+      "sizes": "512x512"
+    }
+  ]
+}
