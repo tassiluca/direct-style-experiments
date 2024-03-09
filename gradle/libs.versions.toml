@@ -3,17 +3,22 @@ kotlin = "1.9.22"
 scala = "3.4.0"
 kotest = "5.8.0"
 mockito = "5.11.0"
+scalamock = "0.6.0"
 sttp = "3.9.3"
 retrofit = "2.9.0"
 coroutines = "1.8.0"
 
 [libraries]
 scala-stdlib = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
+monix = "io.monix:monix_3:3.4.1"
 sttp = { module = "com.softwaremill.sttp.client3:core_3", version.ref = "sttp" }
 sttp-upickle = { module = "com.softwaremill.sttp.client3:upickle_3", version.ref = "sttp" }
+sttp-backend-monix = { module = "com.softwaremill.sttp.client3:async-http-client-backend-monix_3", version.ref = "sttp" }
 cats-core = "org.typelevel:cats-core_3:2.10.0"
 scalatest = "org.scalatest:scalatest_3:3.2.17"
 flexmark = "com.vladsch.flexmark:flexmark-all:0.64.8"
+scalamock = { module = "eu.monniot:scala3mock_3", version.ref = "scalamock" }
+scalamock-test = { module = "eu.monniot:scala3mock-scalatest_3", version.ref = "scalamock" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotest-assertions-core-jvm = { module = "io.kotest:kotest-assertions-core-jvm", version.ref = "kotest" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref="coroutines" }
@@ -35,5 +40,6 @@ scalatest = "com.github.maiflai.scalatest:0.32"
 multiJvmTesting = "org.danilopianini.multi-jvm-test-plugin:0.5.8"
 dokka = "org.jetbrains.dokka:1.9.20"
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-qa = "org.danilopianini.gradle-kotlin-qa:0.60.3"
 shadowJar = "com.github.johnrengelman.shadow:8.1.1"
