@@ -1,0 +1,20 @@
+baseURL = 'https://tassiluca.github.io/direct-style-experiments/presentation/'
+languageCode = 'en-us'
+title = 'My New Hugo Site'
+theme = "github.com/dzello/reveal-hugo"
+
+[markup.goldmark.renderer]
+unsafe = true
+
+[outputFormats.Reveal]
+baseName = "index"
+mediaType = "text/html"
+isHTML = true
+
+[params.reveal_hugo]
+history = true
+theme = "white"
+highlight_theme = "default"
+slide_number = true
+transition = "slide"
+transition_speed = "fast"
