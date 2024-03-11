@@ -11,10 +11,25 @@ baseName = "index"
 mediaType = "text/html"
 isHTML = true
 
+[markup.highlight]
+codeFences = true 
+style = "catppuccin-latte"
+
 [params.reveal_hugo]
 history = true
-theme = "white"
-highlight_theme = "default"
+theme = "serif"
 slide_number = true
 transition = "slide"
-transition_speed = "fast"
+transition_speed = "normal"
+custom_theme = "custom-theme.scss"
+custom_theme_compile = true
+width = 1440
+height = 900
+
+[params.reveal_hugo.custom_theme_options]
+targetPath = "css/custom-theme.css"
+enableSourceMap = true
+
+[[params.reveal_hugo.mermaid]]
+startOnLoad = false
+theme = "default"
