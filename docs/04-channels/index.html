@@ -12,7 +12,6 @@
 <meta property="og:url" content="https://tassiluca.github.io/direct-style-experiments/docs/04-channels/" /><meta property="article:section" content="docs" />
 
 <meta property="article:modified_time" content="2024-03-09T16:35:50+01:00" />
-
 <title>04 Channels | direct-style-experiments</title>
 <link rel="manifest" href="/direct-style-experiments/manifest.json">
 <link rel="icon" href="/direct-style-experiments/favicon.png" >
@@ -210,7 +209,7 @@ https://github.com/alex-shpak/hugo-book
 <p>The fourth, yet not mentioned, abstraction of both Kotlin Coroutines and Scala Gears is the <strong>channel</strong>.
 Channels represent the <strong>primitive communication and coordination means</strong> to exchange <code>Future</code> (or coroutines in the case of Kotlin) results. They are, at least conceptually, very similar to a queue where it is possible to send (and receive) data &ndash; basically, exploiting the <em><strong>producer-consumer</strong></em> pattern.</p>
 <figure class="center"><img src="../../res/img/channel.svg"
-         alt="Channel"/>
+    alt="Channel">
 </figure>
 
 
@@ -364,7 +363,7 @@ This is not the case for Kotlin Coroutines where closing a channel indicates tha
 <ul>
 <li><strong>Synchronous Channels</strong>: links a <code>read</code> request with a <code>send</code> within a <em>rendezvous</em>
 <figure><img src="../../res/img/sync-channel.svg"
-           alt="synchronous channel"/>
+      alt="synchronous channel">
   </figure>
 
 <ul>
@@ -374,7 +373,7 @@ This is not the case for Kotlin Coroutines where closing a channel indicates tha
 </li>
 <li><strong>Buffered Channels</strong>: a version of a channel with an internal buffer of fixed size
 <figure><img src="../../res/img/buffered-channel.svg"
-           alt="buffered channel"/>
+      alt="buffered channel">
   </figure>
 
 <ul>
@@ -384,7 +383,7 @@ This is not the case for Kotlin Coroutines where closing a channel indicates tha
 </li>
 <li><strong>Unbounded Channels</strong>: a version of a channel with an unbounded buffer
 <figure><img src="../../res/img/unbounded-channel.svg"
-           alt="unbounded channel"/>
+      alt="unbounded channel">
   </figure>
 
 <ul>
