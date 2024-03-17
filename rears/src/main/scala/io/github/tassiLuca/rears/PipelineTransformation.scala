@@ -15,7 +15,7 @@ import scala.util.{Failure, Success, Try}
   */
 type PipelineTransformation[T, R] = ReadableChannel[T] => ReadableChannel[R]
 
-extension [T](r: ReadableChannel[T])(using Async)
+extension [T](r: ReadableChannel[T])(using Async.Spawn)
 
   /** @return a new [[ReadableChannel]] whose elements passes the given predicate [[p]].
     *
@@ -30,10 +30,10 @@ extension [T](r: ReadableChannel[T])(using Async)
     * --------2--------------4------6-------8--------10->
     * </pre>
     */
-  def filter(p: T => Boolean): ReadableChannel[T] = fromNew[T] { emitter =>
-    val value = r.read().get
-    if p(value) then emitter.send(value)
-  }
+  def filter(p: T => Boolean): ReadableChannel[T] =
+    fromNew[T]: emitter =>
+      val value = r.read().get
+      if p(value) then emitter.send(value)
 
   /** @return a new [[ReadableChannel]] whose values are transformed accordingly to the given function [[f]].
     *
@@ -48,9 +48,8 @@ extension [T](r: ReadableChannel[T])(using Async)
     * ----1---4-------9----16--25-----36-------49------->
     * </pre>
     */
-  def map[R](f: T => R): ReadableChannel[R] = fromNew[R] { emitter =>
+  def map[R](f: T => R): ReadableChannel[R] = fromNew[R]: emitter =>
     emitter.send(f(r.read().get))
-  }
 
   /** @return a new [[ReadableChannel]] whose elements are emitted only after
     *         the given [[timespan]] has elapsed since the last emission.
@@ -70,13 +69,12 @@ extension [T](r: ReadableChannel[T])(using Async)
     */
   def debounce(timespan: Duration): ReadableChannel[T] =
     var lastEmission: Option[Long] = None
-    fromNew[T] { emitter =>
+    fromNew[T]: emitter =>
       val value = r.read().get
       val now = System.currentTimeMillis()
       if lastEmission.isEmpty || now - lastEmission.get >= timespan.toMillis then
         emitter.send(value)
         lastEmission = Some(now)
-    }
 
   /** Groups the items emitted by a [[ReadableChannel]] according to the given [[keySelector]].
     * @return key-value pairs, where the keys are the set of results obtained from applying the
@@ -103,14 +101,13 @@ extension [T](r: ReadableChannel[T])(using Async)
     */
   def groupBy[K](keySelector: T => K): ReadableChannel[(K, ReadableChannel[T])] =
     var channels = Map[K, UnboundedChannel[T]]()
-    fromNew[(K, UnboundedChannel[T])] { emitter =>
+    fromNew[(K, UnboundedChannel[T])]: emitter =>
       val value = r.read().get
       val key = keySelector(value)
       if !channels.contains(key) then
         channels = channels + (key -> UnboundedChannel[T]())
         emitter.send(key -> channels(key))
       channels(key).send(value)
-    }
 
   /** @return a new [[ReadableChannel]] whose elements are buffered in a [[List]] of size [[n]].
     *         If [[timespan]] duration is elapsed since last read the list is emitted
@@ -130,16 +127,15 @@ extension [T](r: ReadableChannel[T])(using Async)
     */
   def buffer(n: Int, timespan: Duration = 5 seconds): ReadableChannel[List[T]] =
     var buffer = List[T]()
-    fromNew[List[T]] { emitter =>
+    fromNew[List[T]]: emitter =>
       val timer = Timer(timespan)
-      Future { timer.run() }
+      Future(timer.run())
       val value = Async.raceWithOrigin(r.readSource, timer.src).awaitResult
       timer.cancel()
       if value._2 != timer.src then buffer = buffer :+ value._1.asInstanceOf[Either[Closed, T]].get
       if value._2 == timer.src || buffer.size == n then
         emitter.send(buffer)
         buffer = List.empty
-    }
 
   /** @return a new [[ReadableChannel]] whose elements are buffered in a [[List]] of items
     *         if emitted within [[timespan]] duration after the first one (default: 5 seconds).
@@ -158,31 +154,27 @@ extension [T](r: ReadableChannel[T])(using Async)
     */
   def bufferWithin(timespan: Duration = 5 seconds): ReadableChannel[List[T]] =
     var buffer = List[T]()
-    fromNew[List[T]] { emitter =>
+    fromNew[List[T]]: emitter =>
       val timer = Timer(timespan)
       buffer = buffer :+ r.read().get
-      Future { timer.run() }
+      Future(timer.run())
       Async.group:
-        val tf = Future { timer.src.awaitResult }
-        val tr = Task {
+        val tf = Future(timer.src.awaitResult)
+        val tr = Task:
           buffer = buffer :+ r.read().get
-        }.schedule(RepeatUntilFailure()).run
-        tr.altWithCancel(tf).awaitResult
+        .schedule(RepeatUntilFailure()).start()
+        tr.orWithCancel(tf).awaitResult
       emitter.send(buffer)
       buffer = List.empty
       timer.cancel()
-    }
 
-// IMPORTANT REMARK: if Async ?=> is omitted the body of the task is intended to be **not**
-// suspendable, leading to the block of the context until the task fails!
-// See `TasksTest` in commons tests for more about the task scheduling behavior.
 private def fromNew[T](
-    transformation: Async ?=> SendableChannel[T] => Unit,
-)(using Async): ReadableChannel[T] =
+    transformation: Async.Spawn ?=> SendableChannel[T] => Unit,
+)(using Async.Spawn): ReadableChannel[T] =
   val channel = UnboundedChannel[T]()
-  Task {
+  Task:
     Try(transformation(channel.asSendable)) match
       case s @ Success(_) => s
       case f @ Failure(_) => channel.close(); f
-  }.schedule(RepeatUntilFailure()).run
+  .schedule(RepeatUntilFailure()).start()
   channel.asReadable

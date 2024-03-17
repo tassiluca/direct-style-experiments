@@ -40,7 +40,7 @@ class TerminableChannelTest extends AnyFunSpec with Matchers {
       Async.blocking:
         var collectedItems = Seq[Item]()
         val channel = TerminableChannel.ofUnbounded[Item]
-        produceOn(channel).run.onComplete(Listener((_, _) => channel.terminate()))
+        produceOn(channel).start().onComplete(Listener((_, _) => channel.terminate()))
         channel.foreach(res => collectedItems = collectedItems :+ res)
         collectedItems shouldBe Seq.range(0, itemsProduced)
     }
@@ -48,7 +48,7 @@ class TerminableChannelTest extends AnyFunSpec with Matchers {
     it("once closed should be possible to transform it into a Sequence") {
       Async.blocking:
         val channel = TerminableChannel.ofUnbounded[Item]
-        produceOn(channel).run.onComplete(Listener((_, _) => channel.terminate()))
+        produceOn(channel).start().onComplete(Listener((_, _) => channel.terminate()))
         channel.toSeq shouldBe Seq.range(0, itemsProduced)
     }
   }

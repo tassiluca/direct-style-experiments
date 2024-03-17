@@ -44,10 +44,9 @@ object TerminableChannel:
     private var _terminated: Boolean = false
 
     override val readSource: Async.Source[Res[Terminable[T]]] =
-      c.readSource.transformValuesWith {
+      c.readSource.transformValuesWith:
         case Right(Terminated) => c.close(); Left(Channel.Closed)
         case v @ _ => v
-      }
 
     override def sendSource(x: Terminable[T]): Async.Source[Res[Unit]] =
       synchronized:
@@ -67,7 +66,7 @@ object TerminableChannelOps:
 
   extension [T: ClassTag](c: TerminableChannel[T])
 
-    /** Blocking consume channel items, executing the given function [[f]] for each element. */
+    /** Consume channel items, executing the given function [[f]] for each element. This is a blocking operation. */
     @tailrec
     def foreach[U](f: T => U)(using Async): Unit = c.read() match
       case Left(Channel.Closed) => ()

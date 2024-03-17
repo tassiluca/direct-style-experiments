@@ -42,26 +42,23 @@ object UseChannelMultiplexer:
   def loopedConsumer(name: String): (Task[Unit], Channel[Try[Item]]) =
     val channel = BufferedChannel[Try[Item]](bufferSize)
     val consumingTask = Task:
-      while (true) {
+      while (true)
         println(s"[CONSUMER-$name - ${Thread.currentThread()} @ ${LocalTime.now()}] Waiting for a new item...")
         val item = channel.read() // blocking operation
         println(s"[CONSUMER-$name - ${Thread.currentThread()} @ ${LocalTime.now()}] received $item")
-      }
     (consumingTask, channel)
 
   @main def useMultiplexer(): Unit = Async.blocking:
     val multiplexer = ChannelMultiplexer[Item]()
-    Future {
-      // blocking call until the multiplexer is closed => needs to be called on a new thread
-      multiplexer.run()
-    }
+    Future:
+      multiplexer.run() // blocking call until the multiplexer is closed => needs to be called on a new thread
     for i <- 0 until producers do
       val (producer, producerChannel) = scheduledProducer(i.toString, Random.nextLong(4_000))
       multiplexer.addPublisher(producerChannel.asReadable)
-      producer.run
+      producer.start()
     Thread.sleep(10_000)
     for i <- 0 until consumers do
       val (consumer, consumerChannel) = loopedConsumer(i.toString)
       multiplexer.addSubscriber(consumerChannel.asSendable)
-      consumer.run
+      consumer.start()
     Thread.sleep(60_000)

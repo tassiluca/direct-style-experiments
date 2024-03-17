@@ -25,14 +25,14 @@ trait SensorHealthCheckerComponent[E <: SensorEvent]:
 
     private class SensorHealthCheckerImpl extends SensorHealthChecker with State[Seq[E], Seq[E]](Seq()):
 
-      override protected def react(e: Try[Seq[E]])(using Async): Seq[E] = e match
+      override protected def react(e: Try[Seq[E]])(using Async.Spawn): Seq[E] = e match
         case Success(current) =>
           val noMoreActive = state.map(_.name).toSet -- current.map(_.name).toSet
           if noMoreActive.nonEmpty then sendAlert(s"[$currentTime] ${noMoreActive.mkString(", ")} no more active!")
           current
         case Failure(es) => sendAlert(es.getMessage); Seq()
 
-      private def sendAlert(message: String)(using Async): Unit = Future:
+      private def sendAlert(message: String)(using Async.Spawn): Unit = Future:
         context.alertSystem.notify(message)
         context.dashboard.alertNotified(message)
 

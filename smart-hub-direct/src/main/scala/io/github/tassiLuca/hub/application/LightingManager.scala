@@ -14,10 +14,10 @@ trait LightingManager extends LightingSystemComponent with LampsComponent with D
   private val samplingWindow = 10 seconds
 
   /** Runs the manager, spawning a new controller consuming the given [[source]] of events. */
-  def run(source: ReadableChannel[LuminosityEntry])(using Async, AsyncOperations): Unit =
-    lightingSystem.asRunnable.run
+  def run(source: ReadableChannel[LuminosityEntry])(using Async.Spawn, AsyncOperations): Unit =
+    lightingSystem.asRunnable.start()
     Controller.oneToOne(
       publisherChannel = source,
       consumer = lightingSystem,
-      transformation = r => r.bufferWithin(samplingWindow),
-    ).run
+      transformation = _.bufferWithin(samplingWindow),
+    ).start()

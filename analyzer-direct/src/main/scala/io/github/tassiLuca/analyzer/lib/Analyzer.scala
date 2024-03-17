@@ -25,3 +25,5 @@ object Analyzer:
     *         making the computation faster when dealing with a high number of repositories.
     */
   def incremental(service: RepositoryService): Analyzer = IncrementalAnalyzer(service)
+
+  def flowing(service: RepositoryService): Analyzer = FlowingAnalyzer(service)

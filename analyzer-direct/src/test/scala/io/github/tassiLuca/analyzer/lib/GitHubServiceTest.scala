@@ -1,6 +1,7 @@
 package io.github.tassiLuca.analyzer.lib
 
 import gears.async.Async
+import gears.async.AsyncOperations.sleep
 import gears.async.default.given
 import io.github.tassiLuca.analyzer.commons.lib.Repository
 import io.github.tassiLuca.dse.pimping.TerminableChannelOps.toSeq
@@ -82,6 +83,45 @@ class GitHubServiceTest extends AnyFunSpec with Matchers {
       }
     }
 
+    describe("with flowing results"):
+      describe("when asked for repositories"):
+        it("of an existing organization should return all of them"):
+          var repos: Seq[Repository] = Seq.empty
+          Async.blocking:
+            val reposFlow = gitHubService.flowingRepositoriesOf(organization)
+            reposFlow.collect: r =>
+              r.isSuccess shouldBe true
+              repos = repos :+ r.get
+          repos.size should be > defaultNumberOfResultsPerPage
+          repos.foreach(_.organization shouldBe organization)
+          repos.count(_.name == repository) shouldBe 1
+
+        it("of a non-existing organization should fail"):
+          Async.blocking:
+            val reposFlow = gitHubService.flowingRepositoriesOf(nonExistingOrganization)
+            reposFlow.collect:
+              _.isFailure shouldBe true
+
+        it("for showcasing / 1") {
+          Async.blocking:
+            val reposFlow = gitHubService.flowingRepositoriesOf(organization)
+            log("Still not collecting...")
+            sleep(1000)
+            log("Starting collecting...")
+            reposFlow.collect(log)
+            log("Done!")
+        }
+
+        it("for showcasing / 2") {
+          Async.blocking:
+            val reposFlow = gitHubService.flowingRepositoriesOf(nonExistingOrganization)
+            log("Still not collecting...")
+            sleep(1000)
+            log("Starting collecting...")
+            reposFlow.collect(log)
+            log("Done!")
+        }
+
     describe("when asked for the last release of an existing repository") {
       it("should return it if it exists") {
         Async.blocking:
@@ -96,4 +136,6 @@ class GitHubServiceTest extends AnyFunSpec with Matchers {
       }
     }
   }
+
+  private def log(x: Any): Unit = println(s"[${System.currentTimeMillis()}] $x")
 }

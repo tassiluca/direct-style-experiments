@@ -7,7 +7,8 @@ import io.github.tassiLuca.dse.pimping.TerminableChannelOps.foreach
 import java.util.concurrent.Semaphore
 import scala.compiletime.uninitialized
 import scala.reflect.ClassTag
-import scala.util.{Failure, Success, Try}
+import scala.util.boundary.break
+import scala.util.{Failure, Success, Try, boundary}
 
 /** An asynchronous cold data stream that emits values, inspired to Kotlin Flows. */
 trait Flow[+T]:
@@ -15,7 +16,7 @@ trait Flow[+T]:
   /** Start the flowing of data which can be collected reacting through the given [[collector]] function. */
   def collect(collector: Try[T] => Unit)(using Async, AsyncOperations): Unit
 
-/** An interface modeling an entity capable of [[emit]]ting [[Flow]]s values. */
+/** An interface modeling an entity capable of [[emit]]ting [[Flow]]able values. */
 trait FlowCollector[-T]:
 
   /** Emits a value to the flow. */
@@ -32,9 +33,9 @@ object Flow:
     flow.task = Task:
       val channel = flow.channel
       flow.sync.release()
-      val collector: FlowCollector[T] = new FlowCollector[T]:
+      given FlowCollector[T] with
         override def emit(value: T)(using Async): Unit = channel.send(Success(value))
-      try body(using collector)
+      try body
       catch case e: Exception => channel.send(Failure(e))
     flow
 
@@ -43,11 +44,11 @@ object Flow:
     private[Flow] var channel: TerminableChannel[Try[T]] = uninitialized
     private[Flow] val sync = Semaphore(0)
 
-    override def collect(collector: Try[T] => Unit)(using Async, AsyncOperations): Unit =
+    override def collect(collector: Try[T] => Unit)(using Async, AsyncOperations): Unit = Async.group:
       val myChannel = TerminableChannel.ofUnbounded[Try[T]]
       synchronized:
         channel = myChannel
-        task.run.onComplete(() => myChannel.terminate())
+        task.start().onComplete(() => myChannel.terminate())
         // Ensure to leave the synchronized block after the task has been initialized
         // with the correct channel instance.
         sync.acquire()
@@ -70,6 +71,13 @@ object FlowOps:
       override def collect(collector: Try[R] => Unit)(using Async, AsyncOperations): Unit =
         catchFailure(collector):
           flow.collect(item => f(item.get).collect(x => collector(Success(x.get))))
+          
+    def toSeq(using Async, AsyncOperations): Try[Seq[T]] = boundary:
+      var result = Seq.empty[T]
+      flow.collect:
+        case Success(value) => result = result :+ value
+        case e => break(e.asInstanceOf[Try[Seq[T]]])
+      Success(result)
 
     private inline def catchFailure[X](collector: Try[X] => Unit)(inline body: => Unit): Unit =
       try body

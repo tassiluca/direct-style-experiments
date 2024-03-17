@@ -6,7 +6,7 @@ import gears.async.{Async, Future, Task}
 import io.github.tassiLuca.hub.adapters.ui.SourceUI
 import io.github.tassiLuca.hub.core.{LuminosityEntry, SensorSource, TemperatureEntry}
 
-class GraphicalSource(using Async) extends SensorSource:
+class GraphicalSource(using Async.Spawn) extends SensorSource:
 
   private val sources = Set(
     SourceUI("temperature", publishTemperatureEntry),

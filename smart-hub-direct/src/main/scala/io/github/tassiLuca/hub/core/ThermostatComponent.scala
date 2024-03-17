@@ -31,22 +31,22 @@ trait ThermostatComponent[T <: ThermostatScheduler]:
 
       private val hysteresis = 1.5
 
-      override protected def react(e: Try[Seq[TemperatureEntry]])(using Async): Option[Temperature] =
+      override protected def react(e: Try[Seq[TemperatureEntry]])(using Async.Spawn): Option[Temperature] =
         for
           averageTemperature <- e.map { entries => entries.map(_.temperature).sum / entries.size }.toOption
           _ = averageTemperature.evaluate()
         yield averageTemperature
 
       extension (t: Temperature)
-        private def evaluate()(using Async): Unit =
+        private def evaluate()(using Async.Spawn): Unit =
           val target = scheduler.currentTarget
           if t > target + hysteresis then offHeater() else if t < target then onHeater()
           context.dashboard.temperatureUpdated(t)
 
-        private def offHeater()(using Async): Unit = Future:
+        private def offHeater()(using Async.Spawn): Unit = Future:
           context.heater.off()
           context.dashboard.offHeaterNotified()
 
-        private def onHeater()(using Async): Unit = Future:
+        private def onHeater()(using Async.Spawn): Unit = Future:
           context.heater.on()
           context.dashboard.onHeaterNotified()

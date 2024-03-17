@@ -23,11 +23,9 @@ class ControllerTest extends AnyFlatSpec with Matchers:
       consumer(e => consumerBValues = consumerBValues :+ e),
     )
     Async.blocking:
-      Controller.oneToMany(producer.publishingChannel, consumers, identity).run
-      consumers.foreach(_.asRunnable.run)
-      producer.asRunnable.run.await
-      // TODO: improve with an extension method that wait for a certain amount of time,
-      //        at the expiration of which the channel are closed and stop blocking!
+      Controller.oneToMany(producer.publishingChannel, consumers, identity).start()
+      consumers.foreach(_.asRunnable.start())
+      producer.asRunnable.start().await
       AsyncOperations.sleep(2_000) // Ensure consumers have completed their reaction to publisher's events
     consumerAValues shouldEqual consumerBValues
     consumerAValues shouldBe Seq.range(0, items).map(Success(_))
@@ -43,4 +41,4 @@ class ControllerTest extends AnyFlatSpec with Matchers:
 
   def consumer(action: Try[Item] => Unit): Consumer[Int, Unit] = new Consumer[Int, Unit]:
     override val listeningChannel: SendableChannel[Try[Item]] = UnboundedChannel[Try[Int]]()
-    override def react(e: Try[Item])(using Async): Unit = action(e)
+    override def react(e: Try[Item])(using Async.Spawn): Unit = action(e)

@@ -9,7 +9,7 @@ import io.github.tassiLuca.rears.groupBy
 import scala.language.postfixOps
 
 /** A concrete hub manager, mocking sources with graphical views. */
-class MockedHubManager(using Async, AsyncOperations):
+class MockedHubManager(using Async.Spawn, AsyncOperations):
 
   private val ui = DashboardUI()
   private val sensorsSource = GraphicalSource()
@@ -21,12 +21,12 @@ class MockedHubManager(using Async, AsyncOperations):
       thermostatManager.thermostat.scheduler.schedule.map((d, t) => (s"${d._1}", s"${d._2}") -> s"$t"),
     )
     val channelBySensor = sensorsSource.publishingChannel.groupBy(_.getClass)
-    Task {
+    Task:
       channelBySensor.read() match
         case Right((clazz, c)) if clazz == classOf[TemperatureEntry] =>
           thermostatManager.run(c.asInstanceOf[ReadableChannel[TemperatureEntry]])
         case Right((clazz, c)) if clazz == classOf[LuminosityEntry] =>
           lightingManager.run(c.asInstanceOf[ReadableChannel[LuminosityEntry]])
         case _ => ()
-    }.schedule(RepeatUntilFailure()).run
-    sensorsSource.asRunnable.run.await
+    .schedule(RepeatUntilFailure()).start()
+    sensorsSource.asRunnable.start().await

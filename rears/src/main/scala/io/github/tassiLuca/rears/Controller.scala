@@ -15,9 +15,9 @@ object Controller:
       transformation: PipelineTransformation[T, R] = identity,
   ): Task[Unit] =
     val transformedChannel = transformation(publisherChannel)
-    Task {
+    Task:
       consumer.listeningChannel.send(transformedChannel.read())
-    }.schedule(RepeatUntilFailure())
+    .schedule(RepeatUntilFailure())
 
   /** Creates a runnable [[Task]] forwarding the items read from the [[publisherChannel]] to
     * all consumers' channels, after having it transformed with the given [[transformation]].

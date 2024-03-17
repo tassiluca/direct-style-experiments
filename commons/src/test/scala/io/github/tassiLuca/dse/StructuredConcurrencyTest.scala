@@ -14,13 +14,27 @@ class StructuredConcurrencyTest extends AnyFunSpec with Matchers {
     it("ensure all nested computations are contained within the lifetime of the enclosing one") {
       Async.blocking:
         val before = System.currentTimeMillis()
-        val f = Future:
+        val result = Async.group:
           val f1 = Future { "hello" }
           val f2 = Future { sleep(2_000); "gears!" }
           f1.await + " " + f2.await
-        f.await shouldBe "hello gears!"
+        result shouldBe "hello gears!"
         val now = System.currentTimeMillis()
         now - before should be > 2_000L
+    }
+    
+    describe("Async.group") {
+      it("test") {
+        Async.blocking:
+          val before = System.currentTimeMillis()
+          Async.group:
+            Future { println("hello") }
+            Future { sleep(2_000); println("gears!") }
+          val now = System.currentTimeMillis()
+          println(now - before)
+          sleep(5_000)
+          println("done")
+      }
     }
 
     describe("in case of failures") {
@@ -76,7 +90,7 @@ class StructuredConcurrencyTest extends AnyFunSpec with Matchers {
         val before = System.currentTimeMillis()
         val f1 = Future { sleep(1_000); "faster won" }
         val f2 = Future { sleep(2_000); stillAlive = true }
-        val result = f1.altWithCancel(f2).awaitResult
+        val result = f1.orWithCancel(f2).awaitResult
         val now = System.currentTimeMillis()
         now - before should (be >= 1_000L and be < 2_000L)
         result.isSuccess shouldBe true

@@ -6,9 +6,9 @@ import io.github.tassiLuca.analyzer.commons.lib.RepositoryReport
 import io.github.tassiLuca.analyzer.lib.{Analyzer, RepositoryService}
 
 object AppController:
-  def direct(using Async, AsyncOperations): AppController = DirectAppController()
+  def direct(using Async.Spawn, AsyncOperations): AppController = DirectAppController()
 
-  private class DirectAppController(using Async, AsyncOperations) extends AppController:
+  private class DirectAppController(using Async.Spawn, AsyncOperations) extends AppController:
     private val view = AnalyzerView.gui(this)
     private val analyzer = Analyzer.incremental(RepositoryService.ofGitHub())
     private var currentComputation: Option[Future[Unit]] = None
@@ -18,10 +18,10 @@ object AppController:
     override def runSession(organizationName: String): Unit =
       var organizationReport: OrganizationReport = (Map(), Set())
       val f = Future:
-        analyzer.analyze(organizationName) { report =>
+        analyzer.analyze(organizationName): report =>
           organizationReport = organizationReport.mergeWith(report)
           view.update(organizationReport)
-        } match { case Left(e) => view.error(e); case _ => view.endComputation() }
+        match { case Left(e) => view.error(e); case _ => view.endComputation() }
       currentComputation = Some(f)
 
     override def stopSession(): Unit = currentComputation.foreach(_.cancel())

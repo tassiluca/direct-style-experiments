@@ -5,7 +5,7 @@ import gears.async.{Async, Future, Task}
 import io.github.tassiLuca.dse.blog.core.{PostsModel, simulates}
 import io.github.tassiLuca.dse.boundaries.EitherConversions.given
 import io.github.tassiLuca.dse.boundaries.either
-import io.github.tassiLuca.dse.boundaries.either.{?, left}
+import io.github.tassiLuca.dse.boundaries.either.{?, leave}
 
 import java.util.Date
 import scala.util.{Failure, Try}
@@ -40,12 +40,11 @@ trait PostsServiceComponent:
     ) extends PostsService:
 
       override def create(authorId: AuthorId, title: Title, body: Body)(using Async): Either[String, Post] = either:
-        if context.repository.exists(title).? then left(s"A post entitled $title already exists")
-        val f = Future:
-          val content = verifyContent(title, body).run
-          val author = authorBy(authorId).run
-          content.zip(author).await
-        val (post, author) = f.awaitResult.?
+        if context.repository.exists(title).? then leave(s"A post entitled $title already exists")
+        val (post, author) = Async.group:
+          val content = verifyContent(title, body).start()
+          val author = authorBy(authorId).start()
+          content.zip(author).awaitResult.?
         context.repository.save(Post(author.?, post.?._1, post.?._2, Date())).?
 
       /* Pretending to make a call to the Authorship Service that keeps track of authorized authors. */

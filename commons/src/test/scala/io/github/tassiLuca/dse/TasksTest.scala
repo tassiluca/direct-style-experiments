@@ -19,10 +19,10 @@ class TasksTest extends AnyFunSpec with Matchers {
       it("do not leave the Async context if millis = 0 and no suspending calls are performed") {
         var i = 0
         Async.blocking:
-          Task {
+          Task:
             i = i + 1
             if i == items then Failure(Error()) else i
-          }.schedule(TaskSchedule.RepeatUntilFailure()).run
+          .schedule(TaskSchedule.RepeatUntilFailure()).start()
           // millis = 0 is the default --------------Ʌ
         i shouldBe 5
       }
@@ -31,20 +31,20 @@ class TasksTest extends AnyFunSpec with Matchers {
         it("leaves the Async context") {
           var i = 0
           Async.blocking:
-            Task {
+            Task:
               i = i + 1
               if i == items then Failure(Error()) else i
-            }.schedule(TaskSchedule.RepeatUntilFailure(millis = 1)).run
+            .schedule(TaskSchedule.RepeatUntilFailure(millis = 1)).start()
           i should be < items
         }
 
         it("unless an await is called on the future") {
           var i = 0
           Async.blocking:
-            Task {
+            Task:
               i = i + 1
               if i == items then Failure(Error()) else i
-            }.schedule(TaskSchedule.RepeatUntilFailure(millis = 1)).run.await
+            .schedule(TaskSchedule.RepeatUntilFailure(millis = 1)).start().await
           i shouldBe 5
         }
       }
@@ -55,11 +55,10 @@ class TasksTest extends AnyFunSpec with Matchers {
           Async.blocking:
             val timer = Timer(2.seconds)
             Future(timer.run())
-            produce { _ =>
+            produce: _ =>
               timer.src.awaitResult
               consumedItems = consumedItems + 1
               if consumedItems == items then Failure(Error()) else Success(())
-            }
           consumedItems shouldBe items
         }
 
@@ -68,28 +67,27 @@ class TasksTest extends AnyFunSpec with Matchers {
           Async.blocking:
             val timer = Timer(2.seconds)
             Future(timer.run())
-            produceWithLabel { _ =>
+            produceWithLabel: _ =>
               timer.src.awaitResult
               consumedItems = consumedItems + 1
               if consumedItems == items then Failure(Error()) else Success(())
-            }
           consumedItems should be < items
         }
       }
     }
   }
 
-  def produce[T](action: SendableChannel[T] => Try[Unit])(using Async): ReadableChannel[T] =
+  def produce[T](action: SendableChannel[T] => Try[Unit])(using Async.Spawn): ReadableChannel[T] =
     val channel = UnboundedChannel[T]()
-    Task {
+    Task:
       action(channel.asSendable)
-    }.schedule(RepeatUntilFailure()).run
+    .schedule(RepeatUntilFailure()).start()
     channel.asReadable
 
-  def produceWithLabel[T](action: Async ?=> SendableChannel[T] => Try[Unit])(using Async): ReadableChannel[T] =
+  def produceWithLabel[T](action: Async ?=> SendableChannel[T] => Try[Unit])(using Async.Spawn): ReadableChannel[T] =
     val channel = UnboundedChannel[T]()
-    Task {
+    Task:
       action(channel.asSendable)
-    }.schedule(RepeatUntilFailure()).run
+    .schedule(RepeatUntilFailure()).start()
     channel.asReadable
 }

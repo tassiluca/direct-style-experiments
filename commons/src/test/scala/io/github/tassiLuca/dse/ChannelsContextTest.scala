@@ -20,12 +20,11 @@ class ChannelsContextTest extends AnyFunSpec with Matchers {
       var i = 0
       val channel = BufferedChannel[Item](items)
       Async.blocking:
-        channel.consume {
+        channel.consume:
           case Left(_) => ()
           case Right(_) => i = i + 1
-        }
       Async.blocking:
-        produceOn(channel).run.await
+        produceOn(channel).start().await
       i shouldBe 0
     }
 

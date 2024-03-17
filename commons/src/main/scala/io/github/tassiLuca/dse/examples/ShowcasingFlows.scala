@@ -22,13 +22,14 @@ object ShowcasingFlows:
     )
 
     def allWriters(using Async): Flow[Writer] = Flow:
-      users.foreach { u =>
-        sleep(2_000)
+      users.foreach: u =>
+        sleep(2_000) // something meaningful
         it.emit(u)
-      }
 
     def booksByWriter(writer: WriterId)(using Async): Flow[Book] = Flow:
-      books(writer).foreach(it.emit)
+      books(writer).foreach: w =>
+        sleep(2_000) // something meaningful
+        it.emit(w)
 
     def failingWriters(using Async): Flow[Writer] = Flow:
       throw IllegalStateException("The library is closed")

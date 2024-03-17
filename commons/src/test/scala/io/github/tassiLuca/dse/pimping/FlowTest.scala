@@ -5,7 +5,7 @@ import gears.async.{Async, AsyncOperations, Future}
 import io.github.tassiLuca.dse.pimping.Flow
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import io.github.tassiLuca.dse.pimping.FlowOps.{flatMap, map}
+import io.github.tassiLuca.dse.pimping.FlowOps.{flatMap, map, toSeq}
 
 import scala.collection
 import scala.collection.immutable
@@ -141,6 +141,21 @@ class FlowTest extends AnyFunSpec with Matchers:
         collected.size shouldBe 1
         collected.head.isFailure shouldBe true
         intercept[IllegalStateException](collected.head.get)
+      }
+    }
+
+    describe("Flows `toSeq") {
+      it("should return a Sequence wrapped inside a Success if no error occurrs") {
+        Async.blocking:
+          val result = simpleFlow.toSeq
+          result shouldBe Success(Seq.range(0, items))
+      }
+      
+      it("should return a Failure if an error occurrs") {
+        Async.blocking:
+          val result = failingFlow.toSeq
+          result.isFailure shouldBe true
+          intercept[IllegalStateException](result.get)
       }
     }
   }

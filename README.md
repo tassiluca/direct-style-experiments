@@ -1,4 +1,4 @@
-# Direct style for Functional Reactive Programming: an analysis in Scala & Kotlin
+# Analysis of direct style (for asynchronous reactive programming) in Scala
 
 ## Goals of the project
 

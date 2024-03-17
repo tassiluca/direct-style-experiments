@@ -40,14 +40,13 @@ object UseSimpleChannels:
 
   /** A generic consumer of items. */
   def consumer(c: ReadableChannel[Int]): Task[Unit] = Task:
-    while (true) {
+    while (true)
       println(s"[CONSUMER - ${Thread.currentThread()} @ ${LocalTime.now()}] Waiting for a new item...")
       val item = c.read() // blocking operation
       println(s"[CONSUMER - ${Thread.currentThread()} @ ${LocalTime.now()}] received $item")
-    }
 
   @main def useChannels(): Unit = Async.blocking:
-    for _ <- 0 until consumers do consumer(channel.asReadable).run
+    for _ <- 0 until consumers do consumer(channel.asReadable).start()
     sleep(10_000)
-    scheduledProducer(channel.asSendable).run
+    scheduledProducer(channel.asSendable).start()
     sleep(30_000)

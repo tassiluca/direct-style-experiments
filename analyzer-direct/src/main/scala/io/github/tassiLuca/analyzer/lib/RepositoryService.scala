@@ -2,7 +2,7 @@ package io.github.tassiLuca.analyzer.lib
 
 import gears.async.Async
 import io.github.tassiLuca.analyzer.commons.lib.{Contribution, Release, Repository}
-import io.github.tassiLuca.dse.pimping.TerminableChannel
+import io.github.tassiLuca.dse.pimping.{Flow, TerminableChannel}
 
 /** A service exposing functions to retrieve data from a central hosting repository service. */
 trait RepositoryService:
@@ -17,7 +17,9 @@ trait RepositoryService:
     */
   def incrementalRepositoriesOf(
       organizationName: String,
-  )(using Async): TerminableChannel[Either[String, Repository]]
+  )(using Async.Spawn): TerminableChannel[Either[String, Repository]]
+  
+  def flowingRepositoriesOf(organizationName: String)(using Async): Flow[Repository]
 
   /** @return [[Right]] with the [[Seq]]uence of [[Contribution]] for the given [[repositoryName]] owned by
     *         the given [[organizationName]] or a [[Left]] with a explanatory message in case of errors.
@@ -30,7 +32,7 @@ trait RepositoryService:
   def incrementalContributorsOf(
       organizationName: String,
       repositoryName: String,
-  )(using Async): TerminableChannel[Either[String, Contribution]]
+  )(using Async.Spawn): TerminableChannel[Either[String, Contribution]]
 
   /** @return a [[Right]] with the last [[Release]] of the given [[repositoryName]] owned by [[organizationName]]
     *         if it exists, or a [[Left]] with a explanatory message in case of errors.

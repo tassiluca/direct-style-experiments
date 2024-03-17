@@ -26,11 +26,11 @@ trait ThermostatManager
   private val samplingWindow = 10 seconds
 
   /** Runs the manager, spawning a new controller consuming the given [[source]] of events. */
-  def run(source: ReadableChannel[TemperatureEntry])(using Async, AsyncOperations): Unit =
-    thermostat.asRunnable.run
-    sensorHealthChecker.asRunnable.run
+  def run(source: ReadableChannel[TemperatureEntry])(using Async.Spawn, AsyncOperations): Unit =
+    thermostat.asRunnable.start()
+    sensorHealthChecker.asRunnable.start()
     Controller.oneToMany(
       publisherChannel = source,
       consumers = Set(thermostat, sensorHealthChecker),
-      transformation = r => r.bufferWithin(samplingWindow),
-    ).run
+      transformation = _.bufferWithin(samplingWindow),
+    ).start()

@@ -18,9 +18,7 @@ abstract class AnalyzerTest extends AnyFlatSpec with Matchers with MockFactory:
   "Analyzer" should "return the correct results if given in input an existing organization" in {
     var incrementalResults = Set[RepositoryReport]()
     Async.blocking:
-      val allResults = successfulService.analyze("dse") { report =>
-        incrementalResults += report
-      }
+      val allResults = successfulService.analyze("dse")(incrementalResults += _)
       incrementalResults shouldBe expectedResults
       allResults.isRight shouldBe true
       allResults.foreach(_ should contain theSameElementsAs expectedResults)
@@ -29,9 +27,7 @@ abstract class AnalyzerTest extends AnyFlatSpec with Matchers with MockFactory:
   "Analyzer" should "return a failure in case the given organization doesn't exists" in {
     var incrementalResults = Set[RepositoryReport]()
     Async.blocking:
-      val allResults = failingService.analyze("non-existing") { report =>
-        incrementalResults += report
-      }
+      val allResults = failingService.analyze("non-existing")(incrementalResults += _)
       incrementalResults shouldBe empty
       allResults.isLeft shouldBe true
   }
@@ -45,12 +41,13 @@ abstract class AnalyzerTest extends AnyFlatSpec with Matchers with MockFactory:
   def successfulService(using Async): Analyzer =
     val gitHubService: RepositoryService = mock[RepositoryService]
     registerSuccessfulRepositoriesResult(gitHubService)
-    dummiesData.foreach { (repo, data) =>
-      when(gitHubService.contributorsOf(_: String, _: String)(using _: Async)).expects(repo.organization, repo.name, *)
+    dummiesData.foreach: (repo, data) =>
+      when(gitHubService.contributorsOf(_: String, _: String)(using _: Async))
+        .expects(repo.organization, repo.name, *)
         .returning(Right(data._1))
-      when(gitHubService.lastReleaseOf(_: String, _: String)(using _: Async)).expects(repo.organization, repo.name, *)
+      when(gitHubService.lastReleaseOf(_: String, _: String)(using _: Async))
+        .expects(repo.organization, repo.name, *)
         .returning(data._2.toRight("404, not found"))
-    }
     analyzerProvider(gitHubService)
 
   def registerSuccessfulRepositoriesResult(service: RepositoryService)(using Async): Any
@@ -68,10 +65,14 @@ class BasicAnalyzerTest extends AnalyzerTest:
   override val analyzerProvider: RepositoryService => Analyzer = Analyzer.basic
 
   override def registerSuccessfulRepositoriesResult(service: RepositoryService)(using Async): Any =
-    when(service.repositoriesOf(_: String)(using _: Async)).expects("dse", *).returning(Right(dummiesData.keys.toSeq))
+    when(service.repositoriesOf(_: String)(using _: Async))
+      .expects("dse", *)
+      .returning(Right(dummiesData.keys.toSeq))
 
   override def registerFailureRepositoriesResult(service: RepositoryService)(using Async): Any =
-    when(service.repositoriesOf(_: String)(using _: Async)).expects("non-existing", *).returning(Left("404, not found"))
+    when(service.repositoriesOf(_: String)(using _: Async))
+      .expects("non-existing", *)
+      .returning(Left("404, not found"))
 end BasicAnalyzerTest
 
 class IncrementalAnalyzerTest extends AnalyzerTest:
@@ -82,12 +83,14 @@ class IncrementalAnalyzerTest extends AnalyzerTest:
     val repositoriesResult = TerminableChannel.ofUnbounded[Either[String, Repository]]
     dummiesData.keys.foreach(repo => repositoriesResult.send(Right(repo)))
     repositoriesResult.terminate()
-    when(service.incrementalRepositoriesOf(_: String)(using _: Async)).expects("dse", *).returning(repositoriesResult)
+    when(service.incrementalRepositoriesOf(_: String)(using _: Async.Spawn))
+      .expects("dse", *).returning(repositoriesResult)
 
   override def registerFailureRepositoriesResult(service: RepositoryService)(using Async): Any =
     val repositoriesResult = TerminableChannel.ofUnbounded[Either[String, Repository]]
     repositoriesResult.send(Left("404, not found"))
     repositoriesResult.terminate()
-    when(service.incrementalRepositoriesOf(_: String)(using _: Async)).expects("non-existing", *)
+    when(service.incrementalRepositoriesOf(_: String)(using _: Async.Spawn))
+      .expects("non-existing", *)
       .returning(repositoriesResult)
 end IncrementalAnalyzerTest

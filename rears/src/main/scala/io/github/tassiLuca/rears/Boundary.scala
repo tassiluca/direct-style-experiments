@@ -1,5 +1,6 @@
 package io.github.tassiLuca.rears
 
+import gears.async.Async.Spawn
 import gears.async.{Async, Channel, ReadableChannel, SendableChannel, Task, UnboundedChannel}
 import gears.async.TaskSchedule.RepeatUntilFailure
 
@@ -23,14 +24,14 @@ trait Consumer[E, S]:
   val listeningChannel: SendableChannel[Try[E]] = UnboundedChannel()
 
   /** @return a runnable [[Task]]. */
-  def asRunnable: Task[Unit] = Task {
+  def asRunnable(using Async.Spawn): Task[Unit] = Task:
     listeningChannel.asInstanceOf[Channel[Try[E]]].read().foreach(react)
-  }.schedule(RepeatUntilFailure())
+  .schedule(RepeatUntilFailure())
 
   /** The suspendable reaction triggered upon a new read of an item succeeds. */
-  protected def react(e: Try[E])(using Async): S
+  protected def react(e: Try[E])(using Async.Spawn): S
 
-/** A mixin to make consumer stateful. Its state is updated with the result of the [[react]]ion.
+/** A mixin to turn consumer stateful. Its state is updated with the result of the [[react]]ion.
   * Initially its state is set to [[initialValue]].
   */
 trait State[E, S](initialValue: S):
@@ -41,8 +42,8 @@ trait State[E, S](initialValue: S):
   /** @return the current state of the consumer. */
   def state: S = synchronized(_state)
 
-  override def asRunnable: Task[Unit] = Task {
-    listeningChannel.asInstanceOf[Channel[Try[E]]].read().foreach { e =>
-      synchronized { _state = react(e) }
-    }
-  }.schedule(RepeatUntilFailure())
+  override def asRunnable(using Async.Spawn): Task[Unit] = Task:
+    listeningChannel.asInstanceOf[Channel[Try[E]]].read().foreach: e =>
+      synchronized:
+        _state = react(e)
+  .schedule(RepeatUntilFailure())

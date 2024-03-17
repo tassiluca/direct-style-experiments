@@ -3,7 +3,6 @@
   <component name="AdditionalModuleElements">
     <content url="file://$MODULE_DIR$/../../../commons/src/main" dumb="true">
       <sourceFolder url="file://$MODULE_DIR$/../../../commons/src/main/kotlin" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../commons/src/main/scala" isTestSource="false" />
     </content>
   </component>
 </module>
