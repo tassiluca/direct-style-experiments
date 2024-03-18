@@ -30,7 +30,7 @@ private class BasicAnalyzer(repositoryService: RepositoryService) extends Abstra
     Async.group:
       val reposInfo = repositoryService.repositoriesOf(organizationName).?
         .map(_.performAnalysis.start())
-      val collector = Collector[RepositoryReport](reposInfo.toList*)
+      val collector = Collector(reposInfo.toList*)
       reposInfo.foreach: _ =>
         updateResults(collector.results.read().asTry.?.awaitResult.?)
       reposInfo.awaitAll

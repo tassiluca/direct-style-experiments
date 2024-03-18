@@ -145,13 +145,13 @@ class FlowTest extends AnyFunSpec with Matchers:
     }
 
     describe("Flows `toSeq") {
-      it("should return a Sequence wrapped inside a Success if no error occurrs") {
+      it("should return a Sequence wrapped inside a Success if no error occurs") {
         Async.blocking:
           val result = simpleFlow.toSeq
           result shouldBe Success(Seq.range(0, items))
       }
       
-      it("should return a Failure if an error occurrs") {
+      it("should return a Failure if an error occurs") {
         Async.blocking:
           val result = failingFlow.toSeq
           result.isFailure shouldBe true

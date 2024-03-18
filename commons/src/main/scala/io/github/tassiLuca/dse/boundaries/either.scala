@@ -3,6 +3,8 @@ package io.github.tassiLuca.dse.boundaries
 import scala.util.{Failure, Success, Try, boundary}
 import scala.util.boundary.{Label, break}
 
+type CanFail = Label[Left[String, Nothing]]
+
 /** Represents a computation that will hopefully return a [[Right]] value, but might fail with a [[Left]] one. */
 object either:
 
