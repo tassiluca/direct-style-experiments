@@ -29,11 +29,8 @@ trait TerminableChannel[T] extends Channel[Terminable[T]]:
 
 object TerminableChannel:
 
-  /** Creates a [[TerminableChannel]] backed to [[SyncChannel]]. */
-  def ofSync[T]: TerminableChannel[T] = TerminableChannelImpl(SyncChannel())
-
   /** Creates a [[TerminableChannel]] backed to [[BufferedChannel]]. */
-  def ofBuffered[T]: TerminableChannel[T] = TerminableChannelImpl(BufferedChannel())
+  def ofBuffered[T](size: Int): TerminableChannel[T] = TerminableChannelImpl(BufferedChannel(size))
 
   /** Creates a [[TerminableChannel]] backed to an [[UnboundedChannel]]. */
   def ofUnbounded[T]: TerminableChannel[T] = TerminableChannelImpl(UnboundedChannel())
