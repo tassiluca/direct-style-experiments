@@ -1,0 +1,52 @@
+% -------------------------------------------------------------------------------------------------------
+% LISTING CONFIGURATIONS
+% See https://en.wikibooks.org/wiki/LaTeX/Source_Code_Listings
+% -------------------------------------------------------------------------------------------------------
+\usepackage{listings}           	% for code listings - see the listing configs section below
+
+\lstset{
+	showstringspaces=false,
+	basicstyle=\fontsize{7}{10}\selectfont\ttfamily,
+	commentstyle={\color{olive}},
+	identifierstyle=\color{black},
+	ndkeywordstyle={\color{blue}},
+	stringstyle={\color{magenta}},
+	emphstyle={},
+	keywordstyle={\color{blue}},
+	breaklines=true,
+	numbers=left,
+	numberstyle=\tiny\color{gray},
+	numbersep=10pt,
+	tabsize=2,
+	extendedchars=true,
+	frame=trBL,
+	frameround=fttt,
+}
+
+% defining style for not yet supported languages:
+\lstdefinelanguage{Kotlin} {
+	comment=[l]{//},
+	emph={delegate, filter, first, firstOrNull, forEach, lazy, map, mapNotNull, println, return@},
+	keywords={abstract, actual, as, as?, break, by, class, companion, continue, data, do, dynamic, else, enum, expect, false, final, for, fun, get, if, import, in, interface, internal, is, null, object, override, package, private, public, return, set, super, suspend, this, throw, true, try, typealias, val, var, vararg, when, where, while},
+	morecomment=[s]{/*}{*/},
+	morestring=[b]",
+	morestring=[s]{"""*}{*"""},
+	ndkeywords={@Deprecated, @JvmField, @JvmName, @JvmOverloads, @JvmStatic, @JvmSynthetic, Array, Byte, Double, Float, Int, Integer, Iterable, Long, Runnable, Short, String, Unit, it},
+	sensitive=true
+}
+
+\lstdefinelanguage{scala}{
+  morekeywords={%
+    abstract,case,catch,class,def,do,else,extends,%
+    false,final,finally,for,forSome,if,then,implicit,using,given,import,%
+    lazy,match,new,null,object,override,package,private,protected,%
+    return,sealed,super,this,throw,trait,true,try,type,%
+    val,var,while,with,yield,erased,opaque,extension,enum,inline},
+  otherkeywords={=>,<-,<\%,<:,>:,\#,@,tailrec,main},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[n]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  morestring=[b]"""
+}[keywords,comments,strings]
