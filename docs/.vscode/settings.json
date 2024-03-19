@@ -9,5 +9,8 @@
             "language": "markdown",
             "scheme": "file"
         }
-    ]
+    ],
+    "files.watcherExclude": {
+        "**/target": true
+    }
 }

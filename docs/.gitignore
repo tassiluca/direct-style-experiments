@@ -345,3 +345,7 @@ TSWLatexianTemp*
 ### Others ###
 *.pdf
 !**/images/*.pdf
+.bsp
+.metals
+target/
+project/

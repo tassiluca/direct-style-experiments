@@ -1,31 +1,34 @@
 package io.github.tassiLuca.dse.examples.boundaries
 
+import io.github.tassiLuca.dse.boundaries.{CanFail, either}
+import io.github.tassiLuca.dse.boundaries.either.leave
+
 import scala.util.boundary
 import scala.util.boundary.{Label, break}
 
-trait EitherRawExamples:
+trait EitherExamples:
 
   type User
   type UserId
   type Address
 
-  def findUser(id: UserId): User
+  def userBy(id: UserId): User
   def verifyUser(id: User): Boolean
-  def findAddresses(user: User): Option[Address]
+  def addressOf(user: User): Option[Address]
   def verifyAddress(address: Address): Boolean
 
-  def getUser(id: UserId)(using Label[Left[String, Nothing]]): User =
-    val user = findUser(id)
-    if verifyUser(user) then user else break(Left("Incorrent user"))
+  def getUser(id: UserId)(using CanFail): User =
+    val user = userBy(id)
+    if verifyUser(user) then user else leave("Incorrent user")
 
-  def getAddress(user: User)(using Label[Left[String, Nothing]]): Address =
-    findAddresses(user) match
+  def getAddress(user: User)(using CanFail): Address =
+    addressOf(user) match
       case Some(a) if verifyAddress(a) => a
-      case Some(_) => break(Left("Incorrect address"))
-      case _ => break(Left("Missing address"))
+      case Some(_) => leave("Incorrect address")
+      case _ => leave("Missing address")
 
-  def getShippingData(id: UserId): Either[String, (User, Address)] =
-    boundary:
+  def getShippingData(id: UserId) =
+    either:
       val user = getUser(id)
       val address = getAddress(user)
-      Right((user, address))
+      (user, address)

@@ -6,7 +6,7 @@
 
 \lstset{
 	showstringspaces=false,
-	basicstyle=\fontsize{7}{10}\selectfont\ttfamily,
+	basicstyle=\fontsize{8}{10}\selectfont\ttfamily,
 	commentstyle={\color{olive}},
 	identifierstyle=\color{black},
 	ndkeywordstyle={\color{blue}},
@@ -21,6 +21,7 @@
 	extendedchars=true,
 	frame=trBL,
 	frameround=fttt,
+	escapeinside={(*@}{@*)}, % text between "~" will be rendered as normal TeX
 }
 
 % defining style for not yet supported languages:
@@ -50,3 +51,13 @@
   morestring=[b]',
   morestring=[b]"""
 }[keywords,comments,strings]
+
+%% graphics and color
+\newcommand{\HL}[1][\relax]{%
+    \ifx#1\relax
+        \def\highlightcolor{orange!30}%
+    \else
+        \def\highlightcolor{#1}%
+    \fi
+    \colorbox{\highlightcolor}%
+}

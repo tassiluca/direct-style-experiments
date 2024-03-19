@@ -1,10 +1,11 @@
 package io.github.tassiLuca.dse.effects
 
-import language.experimental.saferExceptions
 import scala.annotation.experimental
 
 @experimental
 object SaferExceptions extends App:
+
+  import language.experimental.saferExceptions
 
   class DivisionByZero extends Exception
 
@@ -14,10 +15,13 @@ object SaferExceptions extends App:
     case _ => n / m
 
   println:
-    try div(10, 0)
+    try
+      // the compiler generates an accumulated capability as follows:
+      // erased given CanThrow[DivisionByZero] = compiletime.erasedValue
+      div(10, 0)
     catch case _: DivisionByZero => "Division by zero"
 
   val values = (10, 1) :: (5, 2) :: (4, 2) :: (5, 1) :: Nil
   println:
-    try values.map(div)
+    try values.map(div) // map is the regular List.map implementation!
     catch case _: DivisionByZero => "Division by zero"
