@@ -1,5 +1,5 @@
 override def create(authorId: AuthorId, title: Title, body: Body)(using Async, CanFail): Post =
-  if repository.exists(title) then leave(s"Post entitled $title already exists")
+  if repository.exists(title) then fail(s"Post entitled $title already exists")
   val (post, author) = Async.group: // new completion group
     val content = Future(verifyContent(title, body))
     val author = Future(authorBy(authorId))
