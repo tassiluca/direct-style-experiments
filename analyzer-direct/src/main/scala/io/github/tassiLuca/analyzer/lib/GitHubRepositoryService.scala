@@ -2,7 +2,9 @@ package io.github.tassiLuca.analyzer.lib
 
 import gears.async.{Async, Future}
 import io.github.tassiLuca.analyzer.commons.lib.{Contribution, Release, Repository}
+import io.github.tassiLuca.dse.boundaries.{CanFail, either}
 import io.github.tassiLuca.dse.pimping.{Flow, TerminableChannel}
+import io.github.tassiLuca.dse.boundaries.either.{?, fail}
 
 import scala.annotation.tailrec
 
@@ -15,7 +17,7 @@ private class GitHubRepositoryService extends RepositoryService:
   private val baseUrl = "https://api.github.com"
   private val request = basicRequest.auth.bearer(System.getenv("GH_TOKEN"))
 
-  override def repositoriesOf(organizationName: String)(using Async): Either[String, Seq[Repository]] =
+  override def repositoriesOf(organizationName: String)(using Async, CanFail): Seq[Repository] =
     paginatedRequest(uri"$baseUrl/orgs/$organizationName/repos")
 
   override def incrementalRepositoriesOf(
@@ -29,7 +31,7 @@ private class GitHubRepositoryService extends RepositoryService:
   override def contributorsOf(
       organizationName: String,
       repositoryName: String,
-  )(using Async): Either[String, Seq[Contribution]] =
+  )(using Async, CanFail): Seq[Contribution] =
     paginatedRequest(uri"$baseUrl/repos/$organizationName/$repositoryName/contributors")
 
   override def incrementalContributorsOf(
@@ -38,22 +40,22 @@ private class GitHubRepositoryService extends RepositoryService:
   )(using Async.Spawn): TerminableChannel[Either[String, Contribution]] =
     incrementalPaginatedRequest(uri"$baseUrl/repos/$organizationName/$repositoryName/contributors")
 
-  override def lastReleaseOf(organizationName: String, repositoryName: String)(using Async): Either[String, Release] =
-    plainRequest[Release](uri"$baseUrl/repos/$organizationName/$repositoryName/releases/latest")
+  override def lastReleaseOf(organizationName: String, repositoryName: String)(using Async, CanFail): Release =
+    plainRequest[Release](uri"$baseUrl/repos/$organizationName/$repositoryName/releases/latest").?
 
   private def plainRequest[T](endpoint: Uri)(using Reader[T]): Either[String, T] =
     doRequest(endpoint).body.map(read[T](_))
 
-  private def paginatedRequest[T](endpoint: Uri)(using Reader[T]): Either[String, Seq[T]] =
+  private def paginatedRequest[T](endpoint: Uri)(using Reader[T], CanFail): Seq[T] =
     @tailrec
-    def withPagination(partialResponse: Either[String, Seq[T]])(next: Option[Uri]): Either[String, Seq[T]] =
-      next match
-        case None => partialResponse
-        case Some(uri) =>
-          val response = doRequest(uri)
-          val next = nextPage(response)
-          withPagination(partialResponse.flatMap(pr => response.body.map(pr ++ read[Seq[T]](_))))(next)
-    withPagination(Right(Seq[T]()))(Some(endpoint))
+    def withPagination(partialResponse: Seq[T])(next: Option[Uri]): Seq[T] = next match
+      case None => partialResponse
+      case Some(uri) =>
+        val response = doRequest(uri)
+        val body = read[Seq[T]](response.body.getOrElse(fail("Error")))
+        val next = nextPage(response)
+        withPagination(partialResponse ++ body)(next)
+    withPagination(Seq[T]())(Some(endpoint))
 
   private def incrementalPaginatedRequest[T](
       endpoint: Uri,

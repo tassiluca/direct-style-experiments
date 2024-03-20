@@ -3,6 +3,7 @@ package io.github.tassiLuca.analyzer.lib
 import gears.async.{Async, AsyncOperations}
 import io.github.tassiLuca.analyzer.commons.lib
 import io.github.tassiLuca.analyzer.commons.lib.RepositoryReport
+import io.github.tassiLuca.dse.boundaries.CanFail
 
 /** A generic analyzer of organization/group/workspace repositories. */
 trait Analyzer:
@@ -13,7 +14,7 @@ trait Analyzer:
     */
   def analyze(organizationName: String)(
       updateResults: RepositoryReport => Unit,
-  )(using Async, AsyncOperations): Either[String, Seq[RepositoryReport]]
+  )(using Async, AsyncOperations, CanFail): Seq[RepositoryReport]
 
 object Analyzer:
   /** @return the basic version of the [[Analyzer]], i.e. the one performing suspending

@@ -4,6 +4,7 @@ import gears.async.{Async, AsyncOperations, Future}
 import io.github.tassiLuca.analyzer.commons.client.{AnalyzerView, AppController, OrganizationReport}
 import io.github.tassiLuca.analyzer.commons.lib.RepositoryReport
 import io.github.tassiLuca.analyzer.lib.{Analyzer, RepositoryService}
+import io.github.tassiLuca.dse.boundaries.either
 
 object AppController:
   def direct(using Async.Spawn, AsyncOperations): AppController = DirectAppController()
@@ -18,10 +19,11 @@ object AppController:
     override def runSession(organizationName: String): Unit =
       var organizationReport: OrganizationReport = (Map(), Set())
       val f = Future:
-        analyzer.analyze(organizationName): report =>
-          organizationReport = organizationReport.mergeWith(report)
-          view.update(organizationReport)
-        match { case Left(e) => view.error(e); case _ => view.endComputation() }
+        either:
+          analyzer.analyze(organizationName): report =>
+            organizationReport = organizationReport.mergeWith(report)
+            view.update(organizationReport)
+        .fold(e => view.error(e), _ => view.endComputation())
       currentComputation = Some(f)
 
     override def stopSession(): Unit = currentComputation.foreach(_.cancel())
