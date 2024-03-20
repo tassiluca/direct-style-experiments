@@ -14,6 +14,6 @@ GH_TOKEN=....
 
 or having set an environment variable named `GH_TOKEN`.
 
-![Analyzer example](../docs/content/res/img/analyzer-e2e.png)
+![Analyzer example](../docs/site/content/res/img/analyzer-e2e.png)
 
 Have a look to [the documentation](https://tassiluca.github.io/direct-style-experiments/docs/03-channels/) for more details.

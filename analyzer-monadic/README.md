@@ -14,7 +14,7 @@ GH_TOKEN=....
 
 or having set an environment variable named `GH_TOKEN`.
 
-![Analyzer example](../docs/content/res/img/analyzer-e2e.png)
+![Analyzer example](../docs/site/content/res/img/analyzer-e2e.png)
 
 Warning: Incremental retrieval of results from the github api using pagination has not been implemented for this version (the data displayed may therefore be partial)
 
