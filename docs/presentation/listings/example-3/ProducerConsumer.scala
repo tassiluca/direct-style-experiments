@@ -10,6 +10,7 @@ trait Consumer[E, S]:
   def asRunnable(using Async.Spawn): Task[Unit] = Task:
     listeningChannel.asInstanceOf[Channel[Try[E]]].read().foreach(react)
   .schedule(RepeatUntilFailure())
+  // WARNING: Like in event-loop architectures, the reaction logic should not perform long-lasting blocking operation, otherwise, the whole system will not react to new events!
   protected def react(e: Try[E])(using Async.Spawn): S
 
 /** A mixin to turn consumer stateful. */

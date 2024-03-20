@@ -13,6 +13,7 @@ object SensorHealthChecker:
     override protected def react(e: Try[Seq[E]])(using Async.Spawn): Seq[E] = e match
       case Success(current) =>
         val noMoreActive = state.map(_.name).toSet -- current.map(_.name).toSet
-        if noMoreActive.nonEmpty then sendAlert(s"[$currentTime] ${noMoreActive.mkString(", ")} no more active!")
+        if noMoreActive.nonEmpty then 
+          sendAlert(s"[$currentTime] ${noMoreActive.mkString(", ")} no more active!")
         current
       case Failure(es) => sendAlert(es.getMessage); Seq()

@@ -5,7 +5,8 @@ object Flow:
       val channel = flow.channel
       flow.sync.release()
       given FlowCollector[T] with
-        override def emit(value: T)(using Async): Unit = channel.send(Success(value))
+        override def emit(value: T)(using Async): Unit =
+          channel.send(Success(value))
       try body catch case e: Exception => channel.send(Failure(e))
     flow
 
@@ -18,7 +19,7 @@ object Flow:
       Async.group:
         val myChannel = TerminableChannel.ofUnbounded[Try[T]]
         synchronized:
-            channel = myChannel
-            task.start().onComplete(() => myChannel.terminate())
-            sync.acquire()
+          channel = myChannel
+          task.start().onComplete(() => myChannel.terminate())
+          sync.acquire()
         myChannel.foreach(t => collector(t))

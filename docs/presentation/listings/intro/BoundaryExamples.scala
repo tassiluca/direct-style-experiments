@@ -4,6 +4,7 @@ def deprecatedFirstIndex[T](xs: List[T], elem: T): Int =
   -1
 
 def firstIndex[T](xs: List[T], elem: T): Int =
-  boundary:
-    for (x, i) <- xs.zipWithIndex do if x == elem then break(i)
+  boundary: // enrich the inner scope with a `Label[Int]`
+    for (x, i) <- xs.zipWithIndex do 
+      if x == elem then break(i) // to break we need a `Label[Int]`
     -1

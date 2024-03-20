@@ -4,7 +4,7 @@ import gears.async.AsyncOperations.sleep
 import gears.async.default.given
 import gears.async.{Async, AsyncOperations, Future}
 import io.github.tassiLuca.dse.boundaries.EitherConversions.given
-import io.github.tassiLuca.dse.boundaries.either.?
+import io.github.tassiLuca.dse.boundaries.either.{?, fail}
 import io.github.tassiLuca.dse.boundaries.{CanFail, either}
 
 import scala.util.boundary.Label
@@ -25,12 +25,24 @@ object EffectsShowcase extends App:
 
   @main def useEffectfulComputation(): Unit =
     Async.blocking:
-      print:
+      println:
         either:
           f
 
   @main def useG(): Unit =
     Async.blocking:
-      print:
+      println:
         either:
           g(f)
+
+  def failing(using CanFail): Unit =
+    fail("Error!")
+
+  @main def useFailing(): Unit =
+    Async.blocking:
+      println:
+        either:
+          Future(failing).awaitResult
+      println:
+        either:
+          Future(failing).await

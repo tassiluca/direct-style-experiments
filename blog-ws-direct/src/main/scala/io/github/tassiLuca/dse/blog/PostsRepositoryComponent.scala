@@ -2,7 +2,7 @@ package io.github.tassiLuca.dse.blog
 
 import gears.async.Async
 import io.github.tassiLuca.dse.blog.core.{PostsModel, simulates}
-import io.github.tassiLuca.dse.boundaries.either.leave
+import io.github.tassiLuca.dse.boundaries.either.fail
 import io.github.tassiLuca.dse.boundaries.{CanFail, either}
 
 /** The component exposing blog posts repositories. */
@@ -34,7 +34,7 @@ trait PostsRepositoryComponent:
       private var posts: Set[Post] = Set()
 
       override def save(post: Post)(using Async, CanFail): Post =
-        if exists(post.title) then leave("A post with same title has already been saved")
+        if exists(post.title) then fail("A post with same title has already been saved")
         "PostsRepository".simulates(s"saving post '${post.title}'")
         synchronized { posts = posts + post }
         post

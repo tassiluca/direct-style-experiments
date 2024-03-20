@@ -3,7 +3,7 @@ package io.github.tassiLuca.dse.blog
 import gears.async.{Async, Future}
 import io.github.tassiLuca.dse.blog.core.{PostsModel, simulates}
 import io.github.tassiLuca.dse.boundaries.EitherConversions.given
-import io.github.tassiLuca.dse.boundaries.either.{?, leave}
+import io.github.tassiLuca.dse.boundaries.either.{?, fail}
 import io.github.tassiLuca.dse.boundaries.CanFail
 
 import java.util.Date
@@ -39,7 +39,7 @@ trait PostsServiceComponent:
     ) extends PostsService:
 
       override def create(authorId: AuthorId, title: Title, body: Body)(using Async, CanFail): Post =
-        if context.repository.exists(title) then leave(s"A post entitled $title already exists")
+        if context.repository.exists(title) then fail(s"A post entitled $title already exists")
         val (post, author) = Async.group:
           val content = Future(verifyContent(title, body))
           val author = Future(authorBy(authorId))
