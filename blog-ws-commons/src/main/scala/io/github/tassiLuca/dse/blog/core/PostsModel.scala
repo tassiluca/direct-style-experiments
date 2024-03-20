@@ -1,6 +1,7 @@
 package io.github.tassiLuca.dse.blog.core
 
 import java.util.Date
+import scala.util.Try
 
 /** The model of a simple blog posts service. */
 trait PostsModel:
@@ -23,12 +24,12 @@ trait PostsModel:
   /** A blog post, comprising an author, title, body and the last modification. */
   case class Post(author: Author, title: Title, body: Body, lastModification: Date)
 
-  /** A function that verifies the content of the post, returning [[Right]] with the content of
-    * the post if the verification succeeds or [[Left]] with the reason why failed.
+  /** A function that verifies the content of the post, returning a [[scala.util.Success]] with
+    * the content of  the post if the verification succeeds or a [[scala.util.Failure]] otherwise.
     */
-  type ContentVerifier = (Title, Body) => Either[String, PostContent]
+  type ContentVerifier = (Title, Body) => Try[PostContent]
 
-  /** A function that verifies the author has appropriate permissions, returning [[Right]]
-    * with their information or [[Left]] with the reason why failed.
+  /** A function that verifies the author has appropriate permissions, returning a
+    * [[scala.util.Success]] with their information or a [[scala.util.Failure]] otherwise.
     */
-  type AuthorsVerifier = AuthorId => Either[String, Author]
+  type AuthorsVerifier = AuthorId => Try[Author]

@@ -47,14 +47,14 @@ trait PostsServiceComponent:
         context.repository.save(Post(author, post._1, post._2, Date()))
 
       /* Pretending to make a call to the Authorship Service that keeps track of authorized authors. */
-      private def authorBy(id: AuthorId)(using Async, CanFail): Author =
+      private def authorBy(id: AuthorId)(using Async): Author =
         "PostsService".simulates(s"getting author $id info...", maxDuration = 1_000)
-        authorsVerifier(id).?
+        authorsVerifier(id).get
 
       /* Some local computation that verifies the content of the post is appropriate. */
-      private def verifyContent(title: Title, body: Body)(using Async, CanFail): PostContent =
+      private def verifyContent(title: Title, body: Body)(using Async): PostContent =
         "PostsService".simulates(s"verifying content of post '$title'", minDuration = 1_000)
-        contentVerifier(title, body).?
+        contentVerifier(title, body).get
 
       override def get(title: Title)(using Async, CanFail): Option[Post] =
         context.repository.load(title)

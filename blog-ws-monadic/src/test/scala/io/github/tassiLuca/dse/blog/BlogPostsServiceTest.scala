@@ -7,6 +7,7 @@ import org.scalatest.matchers.should.Matchers.shouldBe
 
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.concurrent.{Await, ExecutionContext}
+import scala.util.Success
 
 class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
 
@@ -14,18 +15,6 @@ class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
   val authorId = "mrossi"
   val postTitle = "A hello world post"
   val postBody = "Hello World Scala Gears!"
-
-  def newBlogPostsAppInstance(): BlogPostsApp & CheckFlag = new BlogPostsApp with CheckFlag:
-    private var _completedChecks: Set[Check] = Set.empty
-    override def completedChecks: Set[Check] = _completedChecks
-    override val contentVerifier: ContentVerifier = (t, b) =>
-      _completedChecks += Check.ContentVerified
-      Right((t, b))
-    override val authorsVerifier: AuthorsVerifier = a =>
-      require(a == authorId, "No author with the given id matches")
-      _completedChecks += Check.AuthorVerified
-      Right(Author(a, "Mario", "Rossi"))
-    override val service: PostsService = PostsService(contentVerifier, authorsVerifier)
 
   given ExecutionContext = ExecutionContext.global
 
@@ -66,3 +55,15 @@ class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
     Thread.sleep(3_000) // waiting for the max duration of the content verification check
     app.completedChecks shouldBe Set(Check.ContentVerified)
   }
+
+  def newBlogPostsAppInstance(): BlogPostsApp & CheckFlag = new BlogPostsApp with CheckFlag:
+    private var _completedChecks: Set[Check] = Set.empty
+    override def completedChecks: Set[Check] = _completedChecks
+    override val contentVerifier: ContentVerifier = (t, b) =>
+      _completedChecks += Check.ContentVerified
+      Success((t, b))
+    override val authorsVerifier: AuthorsVerifier = a =>
+      require(a == authorId, "No author with the given id matches")
+      _completedChecks += Check.AuthorVerified
+      Success(Author(a, "Mario", "Rossi"))
+    override val service: PostsService = PostsService(contentVerifier, authorsVerifier)

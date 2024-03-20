@@ -8,6 +8,8 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
 
+import scala.util.Success
+
 class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
 
   val authorId = "mrossi"
@@ -63,9 +65,9 @@ class BlogPostsServiceTest extends AnyFlatSpec with BeforeAndAfterEach:
     override def completedChecks: Set[Check] = _completedChecks
     override val contentVerifier: ContentVerifier = (t, b) =>
       _completedChecks += Check.ContentVerified
-      Right((t, b))
+      Success((t, b))
     override val authorsVerifier: AuthorsVerifier = a =>
       require(a == authorId, "No author with the given id matches")
       _completedChecks += Check.AuthorVerified
-      Right(Author(a, "Mario", "Rossi"))
+      Success(Author(a, "Mario", "Rossi"))
     override val service: PostsService = PostsService(contentVerifier, authorsVerifier)

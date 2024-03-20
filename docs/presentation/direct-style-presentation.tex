@@ -245,6 +245,7 @@
   \small
   \lstinputlisting[language=scala]{listings/example-1/PostsServiceImpl.scala}
   \texttt{zip} operator allows combining the results of two \texttt{Future}s in a pair if both succeed, or fail with the first error encountered. Combined with \texttt{Async.group} the failure of one determines the cancellation of the other.
+  Note: the only way \texttt{authorBy} and \texttt{verifyContent} can fail, making the \texttt{zip} return immediately the failure (thus cancelling the other check) is by throwing an exception!
 \end{frame}
 %
 \begin{frame}{Sources operators}
