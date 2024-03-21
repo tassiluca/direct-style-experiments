@@ -53,12 +53,12 @@
 %----------------------------------------------------------------------------------------
 \begin{frame}{What Direct Style is?}
   \begin{block}{}
-    Direct style is a programming style where, in contrast to continuation-passing and monadic styles, the control flow of the program is explicit and the program is written as a sequence of instructions that are executed one after the other, resembling imperative code, while still being in a functional world (with all its advantages!).
+    Direct style is a programming style where, in contrast to continuation-passing and monadic styles, the control flow of the program is explicit and the program is written as a sequence of instructions that are executed one after the other, resembling imperative code, while still being in a functional framework (with all its advantages).
   \end{block}
-  Advantages:
+  Compared to monads, direct style:
   \begin{itemize}
-      \item It is the most common and natural programming style and every developer is familiar with it;
-      \item 
+    \item is more intuitive and easier to reason about
+    \item it supports composability more cleanly
   \end{itemize}
 \end{frame}
 %
@@ -79,7 +79,7 @@
   \lstinputlisting[language=scala]{listings/intro/MonadicAggregate.scala}
 
   \pause
-  Could be simplified: 
+  Could be simplified using Cats using \texttt{traverse}, yet there remains considerable complexity behind it...
   \lstinputlisting[language=scala]{listings/intro/IdiomaticMonadicAggregate.scala}
 \end{frame}
 %
@@ -316,7 +316,7 @@
 \begin{frame}  
   \begin{figure}
     \centering
-    \includegraphics[width=0.7\textwidth]{./images/channels-uml.png}
+    \includegraphics[width=0.8\textwidth]{./images/channels-uml.png}
   \end{figure}
   \begin{itemize}
       \item Synchronous Channels: links a read request to a send within a rendezvous
@@ -337,20 +337,20 @@
 %
 \begin{frame}
   \begin{columns}[c,onlytextwidth]
-      \column{.4\textwidth}
-        \begin{example}[2]
-            We want to realize a little asynchronous library allowing clients to collect the common statistics about repositories (issues, stars, last release) and contributors of a given GitHub organization.
-        \end{example}
-        \begin{itemize}
-            \item Start the computation (interaction with GitHub API is required)
-            \item Cancellation of the computation
-        \end{itemize}
-      %
-      \column{.65\textwidth}
-        \begin{figure}
-            \centering
-            \includegraphics[width=\textwidth]{./images/analyzer-e2e.png}
-        \end{figure}
+    \column{.4\textwidth}
+      \begin{example}[2]
+        We want to realize a little asynchronous library allowing clients to collect the common statistics about repositories (issues, stars, last release) and contributors of a given GitHub organization.
+      \end{example}
+      \begin{itemize}
+        \item Start the computation (interaction with GitHub API is required)
+        \item Cancellation of the computation
+      \end{itemize}
+    %
+    \column{.65\textwidth}
+      \begin{figure}
+          \centering
+          \includegraphics[width=\textwidth]{./images/analyzer-e2e.png}
+      \end{figure}
   \end{columns}
   \vspace*{0.5cm}
   \footnotesize
@@ -367,11 +367,12 @@
   \lstinputlisting[language=scala]{listings/example-2/BasicAnalyzer.scala}
   \footnotesize
   \begin{enumerate}
-      \item[4)] we get all the repositories of the requested organization
-      \item[5)] for each of them, the contributors and the last release are retrieved concurrently, starting a \texttt{Future}
-      \item[6)] \texttt{Future} results are gathered within a \texttt{Collector}, which allows a list of \texttt{Future}s to be collected in a channel, arriving as they finish.
-      \item[8)] results are read from the channel as they come, calling the \texttt{updateResult} reaction function.
-      \item[9)] overall results are returned to the client.
+    \item[1)] \texttt{Tasks} represent delayed \texttt{Futures} (to make them \textit{referential transparent}), essentially wrapping a \texttt{() => Future[T]}
+    \item[4)] we get all the repositories of the requested organization
+    \item[5)] for each of them, the contributors and the last release are retrieved concurrently, starting a \texttt{Future}
+    \item[6)] \texttt{Future} results are gathered within a \texttt{Collector}, which allows a list of \texttt{Future}s to be collected in a channel, arriving as they finish.
+    \item[8)] results are read from the channel as they come, calling the \texttt{updateResult} reaction function.
+    \item[9)] overall results are returned to the client.
   \end{enumerate}
 \end{frame}
 %

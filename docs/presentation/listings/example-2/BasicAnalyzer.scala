@@ -1,3 +1,5 @@
+def performAnalysis(using Async): Task[RepositoryReport] = ...
+
 override def analyze(organizationName: String)(
     updateResults: RepositoryReport => Unit,
 )(using Async, AsyncOperations, CanFail): Seq[RepositoryReport] = Async.group:
