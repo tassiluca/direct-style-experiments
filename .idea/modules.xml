@@ -4,11 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/popping-bubbles-swing/PPS-22-direct-style-experiments.popping-bubbles-swing.main.iml" filepath="$PROJECT_DIR$/.idea/modules/popping-bubbles-swing/PPS-22-direct-style-experiments.popping-bubbles-swing.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/popping-bubbles-swing/PPS-22-direct-style-experiments.popping-bubbles-swing.test.iml" filepath="$PROJECT_DIR$/.idea/modules/popping-bubbles-swing/PPS-22-direct-style-experiments.popping-bubbles-swing.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/analyzer-commons/direct-style-experiments.analyzer-commons.main.iml" filepath="$PROJECT_DIR$/.idea/modules/analyzer-commons/direct-style-experiments.analyzer-commons.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/blog-ws-direct/direct-style-experiments.blog-ws-direct.main.iml" filepath="$PROJECT_DIR$/.idea/modules/blog-ws-direct/direct-style-experiments.blog-ws-direct.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/blog-ws-direct/direct-style-experiments.blog-ws-direct.test.iml" filepath="$PROJECT_DIR$/.idea/modules/blog-ws-direct/direct-style-experiments.blog-ws-direct.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/commons/direct-style-experiments.commons.main.iml" filepath="$PROJECT_DIR$/.idea/modules/commons/direct-style-experiments.commons.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/direct-style-experiments.main.iml" filepath="$PROJECT_DIR$/.idea/modules/direct-style-experiments.main.iml" />
     </modules>
   </component>
 </project>

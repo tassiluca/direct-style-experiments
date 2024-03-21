@@ -27,4 +27,5 @@ object Analyzer:
     */
   def incremental(service: RepositoryService): Analyzer = IncrementalAnalyzer(service)
 
+  /** @return a version of the [[Analyzer]] internally using the new Flow abstraction. */
   def flowing(service: RepositoryService): Analyzer = FlowingAnalyzer(service)

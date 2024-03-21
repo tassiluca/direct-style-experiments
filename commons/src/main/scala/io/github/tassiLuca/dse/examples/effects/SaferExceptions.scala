@@ -1,4 +1,4 @@
-package io.github.tassiLuca.dse.effects
+package io.github.tassiLuca.dse.examples.effects
 
 import scala.annotation.experimental
 

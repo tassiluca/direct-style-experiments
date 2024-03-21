@@ -1,4 +1,4 @@
-package io.github.tassiLuca.dse.examples
+package io.github.tassiLuca.dse.examples.gears
 
 import gears.async.*
 import gears.async.TaskSchedule.Every

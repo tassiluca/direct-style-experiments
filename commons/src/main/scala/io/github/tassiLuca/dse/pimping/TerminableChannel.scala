@@ -1,7 +1,7 @@
 package io.github.tassiLuca.dse.pimping
 
 import gears.async.Channel.Closed
-import gears.async.{Async, BufferedChannel, Channel, SyncChannel, UnboundedChannel}
+import gears.async.{Async, BufferedChannel, Channel, UnboundedChannel}
 
 import scala.annotation.tailrec
 import scala.language.postfixOps
@@ -22,7 +22,7 @@ class ChannelTerminatedException extends Exception
   * still allowing to consumer to read pending values.
   * Trying to `send` values after its termination arise a [[ChannelTerminatedException]].
   * When one consumer reads the [[Terminated]] token, the channel is closed. Any subsequent
-  * read will return `Left(Channel.Closed`.
+  * read will return `Left(Channel.Closed)`.
   */
 trait TerminableChannel[T] extends Channel[Terminable[T]]:
   def terminate()(using Async): Unit

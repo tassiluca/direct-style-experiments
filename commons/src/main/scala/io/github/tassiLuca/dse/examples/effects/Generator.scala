@@ -1,7 +1,7 @@
-package io.github.tassiLuca.dse.effects
+package io.github.tassiLuca.dse.examples.effects
 
 import gears.async.VThreadSupport.{boundary, suspend}
-import io.github.tassiLuca.dse.effects.Tree.{Inner, Leaf}
+import Tree.{Inner, Leaf}
 
 enum Tree[T]:
   case Leaf(x: T)

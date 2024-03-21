@@ -9,27 +9,21 @@ import javax.swing.SwingUtilities
 trait SwingDashboardService(view: DashboardUI) extends DashboardServiceComponent:
   override val dashboard: DashboardService = new DashboardService:
 
-    override def temperatureUpdated(temperature: Temperature): Unit = SwingUtilities.invokeLater { () =>
+    override def temperatureUpdated(temperature: Temperature): Unit = SwingUtilities.invokeLater: () =>
       view.temperatureLabel.setText(s"$temperature °C")
-    }
 
-    override def offHeaterNotified(): Unit = SwingUtilities.invokeLater { () =>
+    override def offHeaterNotified(): Unit = SwingUtilities.invokeLater: () =>
       view.heaterLabel.setText("Off")
-    }
 
-    override def onHeaterNotified(): Unit = SwingUtilities.invokeLater { () =>
+    override def onHeaterNotified(): Unit = SwingUtilities.invokeLater: () =>
       view.heaterLabel.setText("On")
-    }
 
-    override def alertNotified(message: String): Unit = SwingUtilities.invokeLater { () =>
+    override def alertNotified(message: String): Unit = SwingUtilities.invokeLater: () =>
       view.alertsModel.insertRow(0, Array[AnyRef](message))
-    }
 
-    override def luminosityUpdate(luminosity: Luminosity): Unit = SwingUtilities.invokeLater { () =>
+    override def luminosityUpdate(luminosity: Luminosity): Unit = SwingUtilities.invokeLater: () =>
       view.luminosityLabel.setText(s"$luminosity lux")
-    }
 
-    override def updateSchedule(schedule: Map[(String, String), String]): Unit = SwingUtilities.invokeLater { () =>
+    override def updateSchedule(schedule: Map[(String, String), String]): Unit = SwingUtilities.invokeLater: () =>
       view.scheduleModel.setRowCount(0)
       schedule.foreach((d, t) => view.scheduleModel.addRow(Array[AnyRef](d._1, d._2, t)))
-    }
