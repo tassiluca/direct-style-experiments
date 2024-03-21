@@ -1,14 +1,19 @@
 # Analysis of direct style (for asynchronous reactive programming) in Scala
 
-## Goals of the project
+## Context
 
-In the realm of asynchronous programming, the Scala ecosystem offers a set of solid monads constructs and libraries to tackle complex task functionally with elegance and efficiency, like [Monix Tasks](https://monix.io/docs/current/eval/task.html) and [Cats Effect](https://typelevel.org/cats-effect/).
+In the realm of asynchronous programming, the Scala ecosystem offers a set of solid and widely adopted monadic constructs and libraries to tackle complex tasks functionally with elegance and efficiency, like [Monix Tasks](https://monix.io/docs/current/eval/task.html) and [Cats Effecs](https://typelevel.org/cats-effect/), enabling a wide range of interesting and useful features, like composable error handling, cancellation mechanisms and structured concurrency that the standard library lacks.
+However, they also come with a cost: the pervasiveness of the `flatMap` operator to compose values makes the code harder to reason about and difficult and awkward to integrate with regular control structures.
 
-However, we are assisting to the increase in adoption of continuation and coroutines in modern runtimes, either exploiting some kind of fibers support, like the project Loom with Virtual Threads, or via code generation, like Kotlin Coroutines.
+In the last years, we have been assisting the increase in adoption of continuations and coroutines in modern runtimes, either exploiting some kind of fiber support, like the project Loom with Virtual Threads, or via code generation, like [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html).
+Even Scala is not immune to this trend and a new strawman library, [Gears](https://github.com/lampepfl/gears), is currently being developed, aiming to bring direct style support for asynchronous programming.
+Despite the interest and the potential this new library could bring, it is just a speck that fits into a bigger picture, which is the management of effects: the ongoing research activity led by M. Odersky has indeed the goal to, instead of pushing effect management into external libraries, upgrade the type system to handle effects natively using capabilities, as research-oriented programming languages do with Algebraic Effects (like Koka).
 
-The goal of this project is to delve into this field through the lens of direct style, developing few examples (not too complex) leveraging the new *strawman* library [Scala Gears](https://github.com/lampepfl/gears), comparing it with Kotlin's Coroutines and the current implementation of monadic Futures, seeking to analyze aspects such as:
+## Goals
 
-- ergonomics of the two styles (which one results more thoughtful and/or verbose);
+The goal of this project is to explore, ***mainly focusing on Scala***, the direct style, developing a few examples (not too complex) leveraging the new strawman library Gears for asynchronous programming, comparing it with Kotlin Coroutines and the current implementation of monadic Futures, seeking to analyze aspects such as:
+
+- ergonomics of the two styles;
 - which of the two approaches has a real advantage in adoption;
 - pros and cons of the two styles;
 - any limitations and difficulties encountered in using them.
@@ -36,7 +41,7 @@ direct-style-experiments
 │   │  └─ main/
 │   │     └─ scala/
 │   │        ├─ boundaries   # `boundary` and `break` implementations
-│   │        ├─ examples     # some common examples
+│   │        ├─ examples     # some examples
 │   │        └─ pimping      # proposed extensions to the Scala Gears library
 │   └─ test                  # general tests (cancellation, structured concurrency, ...)
 ├── rears                    # extensions to the Scala Gears library for Rx
@@ -44,7 +49,7 @@ direct-style-experiments
 └── smart-hub-direct-kt      # smart hub example using Kotlin Coroutines
 ```
 
-**IMPORTANT NOTE: Examples works with a version of the JDK > 21** (Virtual Threads are needed!).
+**:warning: Examples works with a version of the JDK > 21** (Virtual Threads are needed!).
 
 To build and run all the tests:
 
