@@ -2,11 +2,16 @@
 %	PACKAGES AND THEMES
 %----------------------------------------------------------------------------------------
 % handout option removes the pauses
-\documentclass[aspectratio=1610,xcolor=dvipsnames,handout]{beamer}
+\documentclass[aspectratio=1610,xcolor=dvipsnames]{beamer}
 \usetheme{SimplePlus}
 
 \usepackage{tabularx}
 \usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=magenta,
+  urlcolor=magenta
+}
 \usepackage{graphicx} % Allows including images
 \usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
 \usepackage{listing}  % see style.sty file
@@ -48,38 +53,42 @@
 %----------------------------------------------------------------------------------------
 \begin{frame}{What Direct Style is?}
   \begin{block}{}
-      Direct style is a programming style where, in contrast to continuation-passing and monadic styles, the control flow of the program is explicit and the program is written as a sequence of instructions that are executed one after the other, \emph{imperatively}.
+    Direct style is a programming style where, in contrast to continuation-passing and monadic styles, the control flow of the program is explicit and the program is written as a sequence of instructions that are executed one after the other, resembling imperative code, while still being in a functional world (with all its advantages!).
   \end{block}
   Advantages:
   \begin{itemize}
-      \item It is the most common and natural programming style;
-      \item Every developer is familiar with it.
+      \item It is the most common and natural programming style and every developer is familiar with it;
+      \item 
   \end{itemize}
 \end{frame}
 %
 \begin{frame}{Boundary \& Break \cite{scalar-gears}}
-  Boundary \& break is a mechanism providing a cleaner alternative to non-local returns:
-  \texttt{boundary} enrich the scope with a \texttt{Label[T]} allowing to \texttt{break} the computation and return a value of type \texttt{T}.
+  Boundary \& break is a mechanism allowing to prematurely break the computation returning a value to the client: \texttt{boundary} enrich the scope with a \texttt{Label[T]} allowing to \texttt{break} the computation and return a value of type \texttt{T}.
   \lstinputlisting[language=scala]{listings/intro/BoundaryExamples.scala}
   By leveraging boundary \& break it is possible to implement data types to handle errors "directly" with a short exit path. 
 \end{frame}
 %
 \begin{frame}
-  \small
-  \begin{columns}
-    \column{0.8\textwidth}
-      \lstinputlisting[language=scala]{listings/intro/ShowcasingEither.scala}
-    \column{0.2\textwidth}
-      \texttt{aggregate} returns the list of HTTP body responses or the first encountered error.
-  \end{columns}
+  \footnotesize
+  \texttt{aggregate} returns either the list of HTTP response bodies or the first encountered error.
+
+  \lstinputlisting[language=scala]{listings/intro/DirectAggregate.scala}
+
   \pause
-  \begin{columns}
-    \column{0.8\textwidth}
-      \lstinputlisting[language=scala]{listings/intro/ShowcasingCanFail.scala}
-    \column{0.2\textwidth}
-      Functions requiring the \texttt{CanFail} type can promptly break the computation upon encountering an error.
-      Calling side the label is defined using the \texttt{either} boundary.
-  \end{columns}
+  Using monadic style:
+  \lstinputlisting[language=scala]{listings/intro/MonadicAggregate.scala}
+
+  \pause
+  Could be simplified: 
+  \lstinputlisting[language=scala]{listings/intro/IdiomaticMonadicAggregate.scala}
+\end{frame}
+%
+\begin{frame}
+  \small
+  Functions requiring the \texttt{CanFail} type can promptly break the computation upon encountering an error.
+  On the calling side, the label is defined using the \texttt{either} boundary.
+  
+  \lstinputlisting[language=scala]{listings/intro/ShowcasingCanFail.scala}
 \end{frame}
 %
 \begin{frame}[fragile]{Capabilities for modeling effects}
@@ -105,7 +114,7 @@
   }:
   \begin{columns}
     \column{0.76\textwidth}
-      \lstinputlisting[language=scala]{listings/CanThrow.scala}
+      \lstinputlisting[language=scala]{listings/intro/CanThrow.scala}
     \column{0.2\textwidth}
       \settowidth{\leftmargini}{\usebeamertemplate{itemize item}}
       \addtolength{\leftmargini}{\labelsep}
@@ -126,16 +135,16 @@
     Algebraic Effects $\equiv$ exceptions + \texttt{resume} operation \cite{can-throw}
   \end{block}
   The \texttt{resume} operation allows to resume the computation from the point where the effect was raised, after having \textbf{handled} it
-  \lstinputlisting[language=scala]{listings/AsyncSupport.scala}
+  \lstinputlisting[language=scala]{listings/intro/AsyncSupport.scala}
 \end{frame}
 %
 \begin{frame}<presentation:0>[noframenumbering]{Generator effect \cite{scalar-gears}}
   Python-like generator to get all the leafs of a tree:
-  \lstinputlisting[language=scala]{listings/TreeGenerator.scala}
+  \lstinputlisting[language=scala]{listings/intro/TreeGenerator.scala}
 \end{frame}
 %
 \begin{frame}<presentation:0>[noframenumbering]
-  \lstinputlisting[language=scala]{listings/Generator.scala}   
+  \lstinputlisting[language=scala]{listings/intro/Generator.scala}   
 \end{frame}
 %
 \begin{frame}<presentation:0>[noframenumbering]
@@ -156,7 +165,7 @@
   \begin{block}{}
     Scala \texttt{gears} is a new \textit{experimental} library for asynchronous programming leveraging capabilities to model, with direct style, one of the most important effects: \textbf{\textit{suspension}}.
   \end{block}
-  It is designed to be \emph{cross platform}. Currently, it provides suspension support leveraging:
+  It is designed to be \emph{cross platform}. Currently, it provides suspension support (i.e. the ability to suspend the computation and resume it later) leveraging:
   \begin{itemize}
     \item Virtual Threads on the JVM (requires JRE 21 or later, or JRE 19 with experimental virtual threads enabled);
     \item Delimited continuations on Scala Native.
@@ -206,19 +215,28 @@
       \item \texttt{Async.Source} model an asynchronous source of data that can be \textbf{polled} or \textbf{awaited} by suspending the computation, as well as composed using combinator functions.
       \item \texttt{Futures} are the primary (in fact, the only) active elements \textbf{encapsulating a control flow} that, eventually, will deliver a result (either a computed or a failure value that contains an exception)
       \begin{itemize}
-        \item To spawn \texttt{Future}s, the \HL{\texttt{Spawn}} capability is needed. It is usually provided by the \HL{\texttt{Async.group}} function.
-        \begin{lstlisting}[language=scala,gobble=10]
-          def suspendingFunction(using Async): Int =
-            Async.group: // needs the Async capability!
-              // here the Async.Spawn capability is available
-              Future:
-                // ...
-        \end{lstlisting}
+        \item To spawn \texttt{Future}s, the \HL{\texttt{Spawn}} capability is needed. It is provided by the \HL{\texttt{Async.group}} function.
+        % \begin{lstlisting}[language=scala,gobble=10]
+        %   def suspendingFunction(using Async): Int =
+        %     Async.group: // needs the Async capability!
+        %       // here the Async.Spawn capability is available
+        %       Future:
+        %         // ...
+        % \end{lstlisting}
         %
-        \item \texttt{Tasks} represent delayed \texttt{Futures} (to make them \textit{referential transparent}), essentially wrapping a \texttt{() => Future[T]}.
+        % \item \texttt{Tasks} represent delayed \texttt{Futures} (to make them \textit{referential transparent}), essentially wrapping a \texttt{() => Future[T]}.
       \end{itemize}
     \end{enumerate}
   \end{block}
+  \pause
+  \begin{lstlisting}[language=scala,gobble=4]
+    override def create(authorId: AuthorId, title: Title, body: Body)(using Async, CanFail): Post =
+      val (post, author) = Async.group: // needs the Async capability!
+        // here the Async.Spawn capability is available; hence, we can spawn Futures
+        val content = Future(verifyContent(title, body))
+        val author = Future(authorBy(authorId))
+        ...
+  \end{lstlisting}
 \end{frame}
 %
 \begin{frame}
@@ -243,6 +261,7 @@
 %
 \begin{frame}
   \small
+  The complete implementation:
   \lstinputlisting[language=scala]{listings/example-1/PostsServiceImpl.scala}
   \texttt{zip} operator allows combining the results of two \texttt{Future}s in a pair if both succeed, or fail with the first error encountered. Combined with \texttt{Async.group} the failure of one determines the cancellation of the other.
   Note: the only way \texttt{authorBy} and \texttt{verifyContent} can fail, making the \texttt{zip} return immediately the failure (thus cancelling the other check) is by throwing an exception!
@@ -433,9 +452,9 @@
 \begin{frame}
   \begin{columns}
     \column{.45\textwidth}
-      \lstinputlisting[language=scala]{listings/ShowcasingFlows2.scala}
+      \lstinputlisting[language=scala]{listings/example-2/ShowcasingFlows2.scala}
 
-      \lstinputlisting[language=scala]{listings/ShowcasingFlows3.scala}
+      \lstinputlisting[language=scala]{listings/example-2/ShowcasingFlows3.scala}
 
     \column{.55\textwidth}
       \footnotesize
@@ -564,8 +583,8 @@
 %
 \begin{frame}
   \small
-  Putting all together:
-  \lstinputlisting[language=scala]{listings/HubManager.scala}
+  Putting it all together:
+  \lstinputlisting[language=scala]{listings/example-3/HubManager.scala}
 \end{frame}
 %
 \begin{frame}
