@@ -8,6 +8,11 @@
         {
             "language": "markdown",
             "scheme": "file"
+        },
+        {
+            "language": "latex",
+            "scheme": "file",
+            "pattern": "presentation/direct-style-presentation.tex"
         }
     ],
     "files.watcherExclude": {

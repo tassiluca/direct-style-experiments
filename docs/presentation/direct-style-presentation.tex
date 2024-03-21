@@ -61,7 +61,7 @@
   Boundary \& break is a mechanism providing a cleaner alternative to non-local returns:
   \texttt{boundary} enrich the scope with a \texttt{Label[T]} allowing to \texttt{break} the computation and return a value of type \texttt{T}.
   \lstinputlisting[language=scala]{listings/intro/BoundaryExamples.scala}
-  Leveraging boundary \& break it's possible to implement data types to handle errors "directly" with a short exit path. 
+  By leveraging boundary \& break it is possible to implement data types to handle errors "directly" with a short exit path. 
 \end{frame}
 %
 \begin{frame}
@@ -70,7 +70,7 @@
     \column{0.8\textwidth}
       \lstinputlisting[language=scala]{listings/intro/ShowcasingEither.scala}
     \column{0.2\textwidth}
-      \texttt{aggregate} returns the list of HTTP body responses, or the first encountered error.
+      \texttt{aggregate} returns the list of HTTP body responses or the first encountered error.
   \end{columns}
   \pause
   \begin{columns}
@@ -111,7 +111,7 @@
       \addtolength{\leftmargini}{\labelsep}
       \begin{itemize}
         \item This mechanism works only for \textit{checked} exceptions and needs to be enabled with the \texttt{saferExceptions} import.
-        \item Unchecked exceptions can still be throw without the capability.
+        \item Unchecked exceptions can still be thrown without the capability.
         \item If the capability is not provided: compilation error!
       \end{itemize}
     \begin{quote}
@@ -230,8 +230,8 @@
         Structured concurrency guarantees that \textbf{when a group terminates all its dangling children are canceled}.
       \end{block}
       \begin{itemize}
-        \item \texttt{Async.blocking}, \texttt{Async.group} and \texttt{Future} creates a new completion group;
-        \item to make sure children computations are not canceled we need to \texttt{await} them.
+        \item \texttt{Async.blocking}, \texttt{Async.group} and \texttt{Future} create a new completion group;
+        \item to make sure children's computations are not canceled we need to \texttt{await} them.
       \end{itemize}
     \column{0.45\textwidth}
       \begin{figure}
@@ -410,7 +410,7 @@
       \item[5)] iterate over all the repositories sent over the channel as soon as they are retrieved by the service;
       \item[6)] we start the analysis in a separate \texttt{Future}: the analysis is spawned as soon as a repository is fetched by the channel, preventing starting the analysis of the next repository only when the previous one is finished;
       \item[9)] since the analysis are started concurrently the \texttt{updateResult} must be called safely;
-      \item[11)] we wait for the completion of all the started Futures.
+      \item[11)] wait for the completion of all the started Futures.
   \end{enumerate}
 \end{frame}
 %

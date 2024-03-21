@@ -5,11 +5,13 @@
 In the realm of asynchronous programming, the Scala ecosystem offers a set of solid and widely adopted monadic constructs and libraries to tackle complex tasks functionally with elegance and efficiency, like [Monix Tasks](https://monix.io/docs/current/eval/task.html) and [Cats Effecs](https://typelevel.org/cats-effect/), enabling a wide range of interesting and useful features, like composable error handling, cancellation mechanisms and structured concurrency that the standard library lacks.
 However, they also come with a cost: the pervasiveness of the `flatMap` operator to compose values makes the code harder to reason about and difficult and awkward to integrate with regular control structures.
 
-In the last years, we have been assisting the increase in adoption of continuation and coroutines in modern runtimes, either exploiting some kind of fibers support, like the project Loom with Virtual Threads, or via code generation, like Kotlin Coroutines, aiming to capture the essence of effects more cleanly compared to monads.
+In the last years, we have been assisting the increase in adoption of continuations and coroutines in modern runtimes, either exploiting some kind of fiber support, like the project Loom with Virtual Threads, or via code generation, like [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html).
+Even Scala is not immune to this trend and a new strawman library, [Gears](https://github.com/lampepfl/gears), is currently being developed, aiming to bring direct style support for asynchronous programming.
+Despite the interest and the potential this new library could bring, it is just a speck that fits into a bigger picture, which is the management of effects: the ongoing research activity led by M. Odersky has indeed the goal to, instead of pushing effect management into external libraries, upgrade the type system to handle effects natively using capabilities, as research-oriented programming languages do with Algebraic Effects (like Koka).
 
 ## Goals
 
-The goal of this project is to explore, mainly focusing on Scala, the direct style, developing a few examples (not too complex) leveraging the new strawman library [Gears](https://github.com/lampepfl/gears), comparing it with [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) and the current implementation of monadic Futures, seeking to analyze aspects such as:
+The goal of this project is to explore, mainly focusing on Scala, the direct style, developing a few examples (not too complex) leveraging the new strawman library Gears for asynchronous programming, comparing it with Kotlin Coroutines and the current implementation of monadic Futures, seeking to analyze aspects such as:
 
 - ergonomics of the two styles;
 - which of the two approaches has a real advantage in adoption;
@@ -66,6 +68,7 @@ In conclusion, Scala Gears is a promising project that could bring direct-style 
 - [Scala 3: What Is "Direct Style" by D. Wampler](https://medium.com/scala-3/scala-3-what-is-direct-style-d9c1bcb1f810#:~:text=Dean%20Wampler-,Scala%203,without%20the%20boilerplate%20of%20monads.)
 - [Kotlin Coroutines documentation](https://kotlinlang.org/docs/coroutines-overview.html)
 - [Pre-SIP: Suspended functions and continuations in Scala 3](https://contributors.scala-lang.org/t/pre-sip-suspended-functions-and-continuations/5801/20?u=adamw)
+- [Martin Odersky - Simply Scala](https://www.youtube.com/watch?v=-qf8yteuxPs)
 - [The Great Concurrency Smackdown: ZIO versus JDK by John A. De Goes](https://www.youtube.com/watch?v=9I2xoQVzrhs)
 - [Continuaton, coroutine, and generator by A. Ber](https://medium.com/geekculture/continuation-coroutine-continuation-generator-9a1af03a3bed)
 - [KotlinConf 2017 - Introduction to Coroutines by Roman Elizarov](https://www.youtube.com/watch?v=_hfBv0a09Jc)

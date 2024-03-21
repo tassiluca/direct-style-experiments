@@ -3,6 +3,7 @@ package io.github.tassiLuca.dse.boundaries
 import scala.util.{Failure, Success, Try, boundary}
 import scala.util.boundary.{Label, break}
 
+/** A capability enabling to break the computation returning a [[Left]] with an useful string-encoded message. */
 type CanFail = Label[Left[String, Nothing]]
 
 /** Represents a computation that will hopefully return a [[Right]] value, but might fail with a [[Left]] one. */

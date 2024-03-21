@@ -77,15 +77,15 @@ trait PostsModel:
   /** A blog post, comprising an author, title, body and the last modification. */
   case class Post(author: Author, title: Title, body: Body, lastModification: Date)
 
-  /** A function that verifies the content of the post, returning [[Right]] with the content of
-    * the post if the verification succeeds or [[Left]] with the reason why failed.
+  /** A function that verifies the content of the post, returning a [[scala.util.Success]] with
+    * the content of  the post if the verification succeeds or a [[scala.util.Failure]] otherwise.
     */
-  type ContentVerifier = (Title, Body) => Either[String, PostContent]
+  type ContentVerifier = (Title, Body) => Try[PostContent]
 
-  /** A function that verifies the author has appropriate permissions, returning [[Right]]
-    * with their information or [[Left]] with the reason why failed.
+  /** A function that verifies the author has appropriate permissions, returning a
+    * [[scala.util.Success]] with their information or a [[scala.util.Failure]] otherwise.
     */
-  type AuthorsVerifier = AuthorId => Either[String, Author]
+  type AuthorsVerifier = AuthorId => Try[Author]
 ```
 
 To implement the service two components have been conceived, following the Cake Pattern:
@@ -206,10 +206,27 @@ Unfortunately, currently, Scala Futures are not cancellable and provide no _stru
 
 The API of the gears library is presented hereafter and is built on top of four main abstractions, three of which are here presented (the fourth in the next example):
 
-1. **`Async`** context is **"a capability that allows a computation to suspend while waiting for the result of an async source"**. Code that has access to an instance of the `Async` trait is said to be in an async context and can suspend its execution. Usually, it is provided via `given` instances.
-   - A common way to obtain an `Async` instance is to use an `Async.blocking`.
+1. **`Async`** context is **"a capability that allows a computation to suspend while waiting for the result of an async source"**. Code that has access to an instance of the `Async` trait is said to be in an async context and can suspend its execution. Usually, it is provided via `given` instance:
+   ```scala
+    def suspendingFunction(using Async): Int 
+   ```
+   - `Async.blocking` creates an Async context *blocking the current thread for suspension* and it is good practice to use it only in the main function of an application (or in test suites).
+      ```scala
+      @main def launcher(): Unit = 
+        Async.blocking:
+          // inside this scope the `Async` capability is provided
+          // (hence we can suspend and call suspendable functions!)
+      ```
 2. **`Async.Source`** model an asynchronous source of data that can be polled or awaited by suspending the computation, as well as composed using combinator functions.
-3. **`Future`s** are the primary (in fact, the only) active elements that encapsulate a control flow that, eventually, will deliver a result (either a computed or a failure value that contains an exception). Since `Future`s are `Async.Source`s can be awaited and combined with other `Future`s, suspending their execution.
+3. **`Future`s** are the primary (in fact, the only) active elements that encapsulate a control flow that, eventually, will deliver a result (either a computed or a failure value that contains an exception). To **be spawned** an **`Async.Spawn` capability** is required, which is provided by the `Async.group` method.
+    ```scala
+    def suspendingFunction(using Async): Int = 
+      Async.group: // needs the `Async` capability!
+        // here the `Async.Spawn` capability is available, hence we can spawn Futures...
+        Future:
+          // ...
+    ```
+   - Since `Future`s are `Async.Source`s can be awaited and combined with other `Future`s, suspending their execution.
    - **`Task`s** are the abstraction created to create delayed `Future`s, responding to the lack of referential transparency problem. They take the body of a `Future` as an argument; its `run` method converts that body to a `Future`, starting its execution.
    - **`Promise`s** allow us to define `Future`'s result value externally, instead of executing a specific body of code.
 
@@ -224,6 +241,11 @@ classDiagram
     +blocking[T](body: Async ?=> T) T$
     +group[T](body: Async ?=> T) T$
   }
+
+  class `Async.Spawn` {
+    << type >>
+  }
+  Async <|-- `Async.Spawn`
 
   class `Async.Source[+T]` {
     << trait >>
@@ -256,8 +278,8 @@ classDiagram
     +apply[T](body: Async ?=> T) Future[T]$
     +now[T](result: Try[T]) Future[T]
     +zip[U](f2: Future[U]) Future[T, U]
-    +alt(f2: Future[T]) Future[T]
-    +altWithCancel(f2: Future[T]) Future[T]
+    +or(f2: Future[T]) Future[T]
+    +orWithCancel(f2: Future[T]) Future[T]
   }
   class `Promise[+T]` {
     << trait >>
@@ -313,16 +335,16 @@ trait PostsRepositoryComponent:
   /** The repository in charge of storing and retrieving blog posts. */
   trait PostsRepository:
     /** Save the given [[post]]. */
-    def save(post: Post)(using Async): Either[String, Post]
+    def save(post: Post)(using Async, CanFail): Post
 
     /** Return true if a post exists with the given title, false otherwise. */
-    def exists(postTitle: Title)(using Async): Either[String, Boolean]
+    def exists(postTitle: Title)(using Async, CanFail): Boolean
 
     /** Load the post with the given [[postTitle]]. */
-    def load(postTitle: Title)(using Async): Either[String, Option[Post]]
+    def load(postTitle: Title)(using Async, CanFail): Option[Post]
 
     /** Load all the saved post. */
-    def loadAll()(using Async): Either[String, LazyList[Post]]
+    def loadAll()(using Async, CanFail): LazyList[Post]
 ```
 
 ```scala
@@ -338,22 +360,24 @@ trait PostsServiceComponent:
     /** Creates a new blog post with the given [[title]] and [[body]], authored by [[authorId]],
       * or a string explaining the reason of the failure.
       */
-    def create(authorId: AuthorId, title: Title, body: Body)(using Async): Either[String, Post]
+    def create(authorId: AuthorId, title: Title, body: Body)(using Async, CanFail): Post
 
     /** Get a post from its [[title]] or a string explaining the reason of the failure. */
-    def get(title: Title)(using Async): Either[String, Option[Post]]
+    def get(title: Title)(using Async, CanFail): Option[Post]
 
     /** Gets all the stored blog posts in a lazy manner or a string explaining the reason of the failure. */
-    def all()(using Async): Either[String, LazyList[Post]]
+    def all()(using Async, CanFail): LazyList[Post]
 ```
 
-As you can see, `Future`s are gone and the return type it's just the result of their intent (expressed with `Either` to return a meaningful message in case of failure). The fact they are _suspendable_ is expressed using the `Async` context, which is required to invoke those functions.
+As you can see, **`Future`s are gone** and the return type it's just the result of their intent. 
+The fact they are _suspendable_ is expressed using the `Async` context, which is required to invoke those functions. 
+Since all these functions could fail (for example, because of a problem with the DB connection), the `CanFail` capability is used to model the effect of failure (as described in previous chapter).
 
 > Key inspiring principle (actually, taken by Kotlin)
 >
 > ***&#10077;Concurrency is hard! Concurrency has to be explicit!&#10078;***
 
-By default the code is serial. If you want to opt-in concurrency you have to explicitly use a `Future` or `Task` spawning a new control flow that executes asynchronously, allowing the caller to continue its execution.
+**By default the code is serial. If you want to opt-in concurrency you have to explicitly use a `Future` or `Task` spawning a new control flow that executes asynchronously, allowing the caller to continue its execution.**
 
 The other important key feature of the library is the support for **structured concurrency and cancellation mechanisms**:
 
@@ -369,38 +393,43 @@ The other important key feature of the library is the support for **structured c
       // this can be interrupted
     ```
 
-- `Future`s are nestable; **the lifetime of nested computations is contained within the lifetime of enclosing ones**. This is achieved using **`CompletionGroup`s**, which are cancellable objects themselves and serve as **containers for other cancellable objects**; **once they are canceled, all of their members are canceled as well**.
+- `Future`s are nestable; **the lifetime of nested computations is contained within the lifetime of enclosing ones**. This is achieved using **`CompletionGroup`s**, which are cancellable objects themselves and serve as **containers for other cancellable objects**; **once they are canceled, all of their members are canceled as well**. Every `Async` context has a completion group tracking all computations in a tree structure, like the following:
+  
+  {{< figure src="../../res/img/completion-groups.svg" width="35%" alt="completion groups hierarchy" class="center" >}}
+
+  **When a group terminates all its dangling children are canceled!**
   - The group is accessible through `Async.current.group`;
-  - A cancellable object can be included inside the cancellation group of the async context using the `link` method; this is what the [implementation of the `Future` does, under the hood](https://github.com/lampepfl/gears/blob/07989ffdae153b2fe11ac1ece53ce9dd1dbd18ef/shared/src/main/scala/async/futures.scala#L140).
+  - `Async.blocking`, `Async.group` and `Future` create a new completion group;
+  - A cancellable object can be included inside the cancellation group of the async context using the `link` method; this is what the [implementation of the `Future` does, under the hood](https://github.com/lampepfl/gears/blob/07989ffdae153b2fe11ac1ece53ce9dd1dbd18ef/shared/src/main/scala/async/futures.scala#L140);
+  - **to make sure children's computations are not canceled we need to await them.**
 
 The implementation of the `create` function with direct style in Gears looks like this:
 
 ```scala
-override def create(authorId: AuthorId, title: Title, body: Body)(using Async): Either[String, Post] = 
-  either:
-    if context.repository.exists(title).? then left(s"A post entitled $title already exists")
-    val f = Future:
-      val content = verifyContent(title, body).run
-      val author = authorBy(authorId).run
-      content.zip(author).await
-    val (post, author) = f.awaitResult.?
-    context.repository.save(Post(author.?, post.?._1, post.?._2, Date())).?
+override def create(authorId: AuthorId, title: Title, body: Body)(using Async, CanFail): Post =
+  if context.repository.exists(title) then fail(s"A post entitled $title already exists")
+  val (post, author) = Async.group:
+    val content = Future(verifyContent(title, body))
+    val author = Future(authorBy(authorId))
+    content.zip(author).awaitResult.?
+  context.repository.save(Post(author, post._1, post._2, Date()))
 
 /* Pretending to make a call to the Authorship Service that keeps track of authorized authors. */
-private def authorBy(id: AuthorId): Task[Either[String, Author]] = ???
+private def authorBy(id: AuthorId)(using Async): Author = ...
 
 /* Some local computation that verifies the content of the post is appropriate. */
-private def verifyContent(title: Title, body: Body): Task[Either[String, PostContent]] = ???
+private def verifyContent(title: Title, body: Body)(using Async): PostContent = ...
 ```
 
 Some remarks:
 
-- the `either` boundary have been used to quickly return a `Right[String, Post]` object in case something goes wrong;
-- `authorBy` and `verifyContent` returns referential transparent `Task` instances. Running them spawns a new `Future` instance;
-- Thanks to structured concurrency and `zip` combinator we can obtain that if one of the nested two futures fails the enclosing future is cancelled, cancelling also all its unterminated children
-  - `zip`: combinator function returning a pair with the results if both `Future`s succeed, otherwise fail with the failure that was returned first.
+- the `CanFail` capability is used to quickly break the computation with a meaningful message in case of failures;
+- `authorBy` and `verifyContent` are suspendible functions, encapsulating the logic of the two checks;
+- Thanks to structured concurrency and `zip` combinator we can achieve that if one of the nested two futures fails the other check is cancelled:
+  - `zip`: combinator function returning a pair with the results if both `Future`s succeed, otherwise fail with the failure that was returned first;
+  - in case of failure of one of the two futures, the `zip` returns immediately the control: `awaitResult` would return a `Failure(...)` and with `.?` we break prematurely the computation, leaving the `Async.group`, thus canceling all dangling `Future`!
+    - `authorBy` and `verifyContent` needs to be programmed to throw an exception in case of failure. This is needed to make `Future` fail: without fail with an exception, the `zip` operator is not able to return immediately the control and the other future is not canceled!
   - Be aware of the fact to achieve cancellation is necessary to enclose both the content verification and authorization task inside an enclosing `Future`, since the `zip` doesn't provide a cancellation mechanism per se. The following code wouldn't work as expected!
-
     ```scala
     // WRONG: doesn't provide cancellation!
     val contentVerifier = verifyContent(title, body).run
@@ -418,8 +447,8 @@ Other combinator methods, available on `Future`s instance:
 | **Combinator**                       | **Goal**                                      |
 |--------------------------------------|---------------------------------------------- |
 | `Future[T].zip(Future[U])`           | Parallel composition of two futures. If both futures succeed, succeed with their values in a pair. Otherwise, fail with the failure that was returned first |
-| `Future[T].alt(Future[T])` / `Seq[Future[T]].altAll` | Alternative parallel composition. If either task succeeds, succeed with the success that was returned first. Otherwise, fail with the failure that was returned last (race all futures). |
-| `Future[T].altWithCancel(Future[T])` / `Seq[Future[T]].altAllWithCancel` | Like `alt` but the slower future is cancelled. |
+| `Future[T].or(Future[T])` / `Seq[Future[T]].awaitFirst` | Alternative parallel composition. If either task succeeds, succeed with the success that was returned first. Otherwise, fail with the failure that was returned last (race all futures). |
+| `Future[T].orWithCancel(Future[T])` / `Seq[Future[T]].awaitFirstWithCancel` | Like `or`/`awaitFirst` but the slower futures are cancelled. |
 | `Seq[Future[T]].awaitAll`            | `.await` for all futures in the sequence, returns the results in a sequence, or throws if any futures fail. |
 | `Seq[Future[T]].awaitAllOrCancel`    | Like `awaitAll`, but cancels all futures as soon as one of them fails. |
 
