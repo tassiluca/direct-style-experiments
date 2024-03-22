@@ -288,6 +288,25 @@
 \end{frame}
 %
 \begin{frame}
+  \small
+  \begin{columns}
+    \column{0.6\textwidth}
+      \lstinputlisting[language=scala]{listings/intro/DirectComposability.scala}
+    \column{0.2\textwidth}
+      Direct style cleanly supports composability.
+  \end{columns}
+  
+  \pause
+  \begin{columns}
+    \column{0.91\textwidth}
+      \lstinputlisting[language=scala]{listings/intro/MonadicComposability.scala}
+      \lstinputlisting[language=scala]{listings/intro/IdiomaticMonadicComposability.scala}
+    \column{0.1\textwidth}
+      Using monads is more complex to achieve the same goal.
+  \end{columns}
+\end{frame}
+%
+\begin{frame}
   \begin{columns}[c,onlytextwidth] % The "t" option specifies top vertical alignment
     \column{.35\textwidth}
       \begin{block}{Producer-Consumer pattern}
