@@ -1,7 +1,5 @@
 package io.github.tassiLuca.dse.examples.gears
 
-import scala.reflect.ClassTag
-
 object ShowcasingDirectStyle:
 
   object Monadic:
