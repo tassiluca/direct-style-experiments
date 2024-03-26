@@ -9,8 +9,8 @@ import io.github.tassiLuca.dse.boundaries.CanFail
 trait Analyzer:
 
   /** Performs a **suspending** analysis of the [[organizationName]]'s repositories, providing the results
-    * incrementally to the [[updateResults]] function.
-    * @return [[Right]] with the overall results of the analysis or [[Left]] with an error message in case of failure.
+    * incrementally to the [[updateResults]] function. It may fail along the way!
+    * @return the overall results of the analysis.
     */
   def analyze(organizationName: String)(
       updateResults: RepositoryReport => Unit,

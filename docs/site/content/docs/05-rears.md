@@ -24,7 +24,7 @@ Before delving into the example, two abstractions of Gears, yet not covered, are
 classDiagram
   class `Task[+T]` {
     +apply(body: (Async, AsyncOperations) ?=> T) Task[T]$
-    +run(using Async, AsyncOperations) Future[+T]
+    +start(using Async, Async.Spawn, AsyncOperations) Future[+T]
     +schedule(s: TaskSchedule) Task[T]
   }
 
@@ -48,6 +48,8 @@ classDiagram
   - If we want to wait for the task completion, it's the client's responsibility to explicitly `Async.await` (or `awaitResult`)
   - **Cons**: depending on the content of the block, the behavior is different! This is _error-prone_!
 {{< /hint >}}
+
+Follows some considerations (to be tested with the new version 0.2.0 and the introduction of `Async.Spawn` capability):
 
 {{< hint warning >}}
 
@@ -161,15 +163,15 @@ trait Consumer[E, S]:
   val listeningChannel: SendableChannel[Try[E]] = UnboundedChannel()
 
   /** @return a runnable [[Task]]. */
-  def asRunnable: Task[Unit] = Task {
+  def asRunnable(using Async.Spawn): Task[Unit] = Task:
     listeningChannel.asInstanceOf[Channel[Try[E]]].read().foreach(react)
-  }.schedule(RepeatUntilFailure())
+  .schedule(RepeatUntilFailure())
 
   /** The suspendable reaction triggered upon a new read of an item succeeds. */
-  protected def react(e: Try[E])(using Async): S
+  protected def react(e: Try[E])(using Async.Spawn): S
 
-/** A mixin to make consumer stateful. Its state is updated with the result
-  * of the [[react]]ion. Initially its state is set to [[initialValue]].
+/** A mixin to turn consumer stateful. Its state is updated with the result of the [[react]]ion.
+  * Initially its state is set to [[initialValue]].
   */
 trait State[E, S](initialValue: S):
   consumer: Consumer[E, S] =>
@@ -179,11 +181,11 @@ trait State[E, S](initialValue: S):
   /** @return the current state of the consumer. */
   def state: S = synchronized(_state)
 
-  override def asRunnable: Task[Unit] = Task {
-    listeningChannel.asInstanceOf[Channel[Try[E]]].read().foreach { e =>
-      synchronized { _state = react(e) }
-    }
-  }.schedule(RepeatUntilFailure())
+  override def asRunnable(using Async.Spawn): Task[Unit] = Task:
+    listeningChannel.asInstanceOf[Channel[Try[E]]].read().foreach: e =>
+      synchronized:
+        _state = react(e)
+  .schedule(RepeatUntilFailure())
 ```
 
 - The `Controller` object exposes methods wiring `Producer` and `Consumer`s altogether, possibly performing some kind of transformation on the `publisherChannel`.
@@ -192,12 +194,9 @@ trait State[E, S](initialValue: S):
     - to accomplish this, a `ChannelMultiplexer` is used, which is in charge of forwarding the items read from the transformed `publisherChannel` to all consumers' channels.
 
 ```scala
-/** Simply, a function that, given in input a [[ReadableChannel]], performs some 
-  * kind of transformation, returning, as a result, another [[ReadableChannel]]. */
-type PipelineTransformation[T, R] = ReadableChannel[T] => ReadableChannel[R]
-
 object Controller:
-  /** Creates a runnable [[Task]] forwarding the items read from the [[publisherChannel]] 
+
+  /** Creates a runnable [[Task]] forwarding the items read from the [[publisherChannel]]
     * to the given [[consumer]], after having it transformed with the given [[transformation]].
     */
   def oneToOne[T, R](
@@ -206,11 +205,11 @@ object Controller:
       transformation: PipelineTransformation[T, R] = identity,
   ): Task[Unit] =
     val transformedChannel = transformation(publisherChannel)
-    Task {
-      consumer.listeningChannel.send(transformedChannel.read().tryable)
-    }.schedule(RepeatUntilFailure())
+    Task:
+      consumer.listeningChannel.send(transformedChannel.read())
+    .schedule(RepeatUntilFailure())
 
-  /** Creates a runnable [[Task]] forwarding the items read from the [[publisherChannel]] to 
+  /** Creates a runnable [[Task]] forwarding the items read from the [[publisherChannel]] to
     * all consumers' channels, after having it transformed with the given [[transformation]].
     */
   def oneToMany[T, R](
@@ -221,9 +220,8 @@ object Controller:
     val multiplexer = ChannelMultiplexer[R]()
     consumers.foreach(c => multiplexer.addSubscriber(c.listeningChannel))
     multiplexer.addPublisher(transformation(publisherChannel))
-    // blocking call: the virtual thread on top of which this task is 
-    // executed needs to block to continue publishing publisher's events 
-    // towards the consumer by means of the multiplexer.
+    // blocking call: the virtual thread on top of which this task is executed needs to block
+    // to continue publishing publisher's events towards the consumer by means of the multiplexer.
     multiplexer.run()
 ```
 
@@ -420,11 +418,11 @@ Going back to the example here is presented a schema summarizing the flows of da
     - the sensor checker sends alerts whether, compared with the previous detection, it did not receive data from some sensors:
 
       ```scala
-      override protected def react(e: Try[Seq[E]])(using Async): Seq[E] = e match
+      override protected def react(e: Try[Seq[E]])(using Async.Spawn): Seq[E] = e match
         case Success(current) =>
           val noMoreActive = state.map(_.name).toSet -- current.map(_.name).toSet
-          if noMoreActive.nonEmpty then
-            sendAlert(s"[${currentTime}] Detected ${noMoreActive.mkString(", ")} no more active!")
+          if noMoreActive.nonEmpty then 
+            sendAlert(s"[$currentTime] ${noMoreActive.mkString(", ")} no more active!")
           current
         case Failure(es) => sendAlert(es.getMessage); Seq()
       ```
@@ -432,10 +430,10 @@ Going back to the example here is presented a schema summarizing the flows of da
     - the thermostat computes the average temperature and, based on a scheduler, decides whether to turn on or off the heating system:
 
       ```scala
-      override protected def react(e: Try[Seq[TemperatureEntry]])(using Async): Option[Temperature] =
+      override protected def react(e: Try[Seq[TemperatureEntry]])(using Async.Spawn): Option[Temperature] =
         for
           averageTemperature <- e.map { entries => entries.map(_.temperature).sum / entries.size }.toOption
-          _ = averageTemperature.evaluate() // here logic to decide whether turn on or off heating system
+          _ = averageTemperature.evaluate()
         yield averageTemperature
       ```
 
@@ -443,29 +441,29 @@ Going back to the example here is presented a schema summarizing the flows of da
 
   ```scala
   val channelBySensor = sensorsSource.publishingChannel.groupBy(_.getClass)
-  Task {
+  Task:
     channelBySensor.read() match
       case Right((clazz, c)) if clazz == classOf[TemperatureEntry] =>
         thermostatManager.run(c.asInstanceOf[ReadableChannel[TemperatureEntry]])
       case Right((clazz, c)) if clazz == classOf[LuminosityEntry] =>
         lightingManager.run(c.asInstanceOf[ReadableChannel[LuminosityEntry]])
       case _ => ()
-  }.schedule(RepeatUntilFailure()).run
-  sensorsSource.asRunnable.run.await
+  .schedule(RepeatUntilFailure()).start()
+  sensorsSource.asRunnable.start().await
   ```
 
 - Both `ThermostatManager` and `LightingManager` are in charge of creating the appropriate `Controller` instance, based on the number of `Consumer`s and pipeline transformation we need to implement:
 
   ```scala
   // ThermostatManager
-  def run(source: ReadableChannel[TemperatureEntry])(using Async, AsyncOperations): Unit =
-    thermostat.asRunnable.run
-    sensorHealthChecker.asRunnable.run
+  def run(source: ReadableChannel[TemperatureEntry])(using Async.Spawn, AsyncOperations): Unit =
+    thermostat.asRunnable.start()
+    sensorHealthChecker.asRunnable.start()
     Controller.oneToMany(
       publisherChannel = source,
       consumers = Set(thermostat, sensorHealthChecker),
-      transformation = r => r.bufferWithin(samplingWindow),
-    ).run
+      transformation = _.bufferWithin(samplingWindow),
+    ).start()
   ```
 
 ---

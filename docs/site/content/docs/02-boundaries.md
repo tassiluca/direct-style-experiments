@@ -116,7 +116,30 @@ def doRequest(endpoint: Uri): Either[String, String] =
   HttpClientSyncBackend().send(basicRequest.get(endpoint)).body
 ```
 
-Functions requiring the label capability can promptly break the computation upon encountering an error. 
+The monadic counterpart is much more complex:
+
+```scala
+def monadicAggregate(xs: List[Uri]): Either[String, List[String]] =
+  xs.foldLeft[Either[String, List[String]]](Right(List.empty)): (acc, uri) =>
+    for
+      results <- acc
+      response <- doRequest(uri)
+    yield results :+ response
+```
+
+Could be simplified using Cats `traverse`, yet there remains considerable complexity behind it...
+
+```scala
+def idiomaticMonadicAggregate(xs: List[Uri]): Either[String, List[String]] =
+  import cats.implicits.toTraverseOps
+  // "Given a function which returns a G effect, thread this effect through the running of
+  // this function on all the values in F, returning an F[B] in a G context."
+  //
+  //    def traverse[G[_]: Applicative, A, B](fa: F[A])(f: A => G[B]): G[F[B]]
+  xs.traverse(doRequest)
+```
+
+Functions requiring the label capability can promptly break the computation upon encountering an error.
 Calling side the label is defined using `either` boundary.
 
 ```scala
@@ -136,7 +159,6 @@ def paymentData(id: UserId) = either:
   val address = getPayment(user)
   (user, address)
 ```
-
 
 {{< button relref="/01-overview" >}} **Overview** {{< /button >}}
 

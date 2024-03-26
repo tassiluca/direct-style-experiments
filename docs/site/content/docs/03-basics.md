@@ -10,6 +10,7 @@ bookToc: false
     - [Structure](#structure)
     - [Current monadic `Future`](#current-monadic-future)
     - [Direct style: Scala version with `gears`](#direct-style-scala-version-with-gears)
+      - [Direct style vs. monadic style comparison w.r.t. composition](#direct-style-vs-monadic-style-comparison-wrt-composition)
     - [Kotlin Coroutines](#kotlin-coroutines)
   - [Takeaways](#takeaways)
 
@@ -275,7 +276,7 @@ classDiagram
 
   class `Future[+T]` {
     << trait >>
-    +apply[T](body: Async ?=> T) Future[T]$
+    +apply[T](body: Async.Spawn ?=> T)(using Async, Async.Spawn) Future[T]$
     +now[T](result: Try[T]) Future[T]
     +zip[U](f2: Future[U]) Future[T, U]
     +or(f2: Future[T]) Future[T]
@@ -292,7 +293,7 @@ classDiagram
 
   class `Task[+T]` {
     +apply(body: (Async, AsyncOperations) ?=> T) Task[T]$
-    +run(using Async, AsyncOperations) Future[+T]
+    +start(using Async, Async.Spawn, AsyncOperations) Future[+T]
   }
   `Future[+T]` <--* `Task[+T]`
 
@@ -429,7 +430,7 @@ Some remarks:
   - `zip`: combinator function returning a pair with the results if both `Future`s succeed, otherwise fail with the failure that was returned first;
   - in case of failure of one of the two futures, the `zip` returns immediately the control: `awaitResult` would return a `Failure(...)` and with `.?` we break prematurely the computation, leaving the `Async.group`, thus canceling all dangling `Future`!
     - `authorBy` and `verifyContent` needs to be programmed to throw an exception in case of failure. This is needed to make `Future` fail: without fail with an exception, the `zip` operator is not able to return immediately the control and the other future is not canceled!
-  - Be aware of the fact to achieve cancellation is necessary to enclose both the content verification and authorization task inside an enclosing `Future`, since the `zip` doesn't provide a cancellation mechanism per se. The following code wouldn't work as expected!
+  - Be aware of the fact to achieve cancellation is necessary to enclose both the content verification and authorization task inside a completion group (either using `Async.group` or `Future`), since the `zip` doesn't provide a cancellation mechanism per se. The following code wouldn't work as expected!
     ```scala
     // WRONG: doesn't provide cancellation!
     val contentVerifier = verifyContent(title, body).run
@@ -451,6 +452,44 @@ Other combinator methods, available on `Future`s instance:
 | `Future[T].orWithCancel(Future[T])` / `Seq[Future[T]].awaitFirstWithCancel` | Like `or`/`awaitFirst` but the slower futures are cancelled. |
 | `Seq[Future[T]].awaitAll`            | `.await` for all futures in the sequence, returns the results in a sequence, or throws if any futures fail. |
 | `Seq[Future[T]].awaitAllOrCancel`    | Like `awaitAll`, but cancels all futures as soon as one of them fails. |
+
+#### Direct style vs. monadic style comparison w.r.t. composition
+
+Direct style cleanly supports composability:
+
+```scala
+def transform[E, T](xs: Seq[Future[Either[E, T]]])(using Async.Spawn): Future[Either[E, Seq[T]]] =
+  Future:
+    either:
+      xs.map(_.await.?)
+```
+
+Using monads is more complex to achieve the same goal:
+
+```scala
+def transform[E, T](
+    xs: Seq[Future[Either[E, T]]],
+)(using ExecutionContext): Future[Either[E, Seq[T]]] =
+  val initial: Future[Either[E, List[T]]] = Future.successful(Right(List.empty[T]))
+  xs.foldRight(initial): (future, acc) =>
+    for
+      f <- future
+      a <- acc
+    yield a.flatMap(lst => f.map(_ :: lst))
+```
+
+Again, using Cats simplifies the code, still, it's more complex than the direct style:
+
+```scala
+def transform[E, T](
+    xs: Seq[Future[Either[E, T]]],
+)(using ExecutionContext): Future[Either[E, Seq[T]]] =
+  import cats.implicits._
+  Future.sequence(xs) // Future[Seq[Either[E, T]]
+    .map(_.sequence) // equivalent to: _.traverse(identity)
+```
+
+[[Ref]](https://github.com/tassiLuca/direct-style-experiments/blob/master/commons/src/main/scala/io/github/tassiLuca/dse/examples/gears/ShowcasingDirectStyle.scala)
 
 ### Kotlin Coroutines
 

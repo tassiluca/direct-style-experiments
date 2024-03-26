@@ -8,22 +8,25 @@ import io.github.tassiLuca.dse.pimping.{Flow, TerminableChannel}
 /** A service exposing functions to retrieve data from a central hosting repository service. */
 trait RepositoryService:
 
-  /** @return [[Right]] with the [[Seq]]uence of [[Repository]] owned by the given
-    *         [[organizationName]] or a [[Left]] with a explanatory message in case of errors.
+  /** Suspend the execution to get all the [[Repository]] owned by the given [[organizationName]].
+    * It may fail along the way!
+    * @return the [[Seq]]uence of [[Repository]].
     */
   def repositoriesOf(organizationName: String)(using Async, CanFail): Seq[Repository]
 
-  /** @return a [[Terminable]] [[ReadableChannel]] with the [[Repository]] owned by the given
+  /** @return a [[TerminableChannel]] with the [[Repository]] owned by the given
     *         [[organizationName]], wrapped inside a [[Either]] for errors management.
     */
   def incrementalRepositoriesOf(
       organizationName: String,
   )(using Async.Spawn): TerminableChannel[Either[String, Repository]]
 
+  /** @return a cold [[Flow]] with the [[Repository]] owned by the given [[organizationName]]. */
   def flowingRepositoriesOf(organizationName: String)(using Async): Flow[Repository]
 
-  /** @return [[Right]] with the [[Seq]]uence of [[Contribution]] for the given [[repositoryName]] owned by
-    *         the given [[organizationName]] or a [[Left]] with a explanatory message in case of errors.
+  /** Suspend the execution to get all the [[Contribution]] made by users to the given
+    * [[repositoryName]] owned by [[organizationName]]. It may fail along the way!
+    * @return the [[Seq]]uence of [[Contribution]].
     */
   def contributorsOf(organizationName: String, repositoryName: String)(using Async, CanFail): Seq[Contribution]
 
@@ -35,8 +38,9 @@ trait RepositoryService:
       repositoryName: String,
   )(using Async.Spawn): TerminableChannel[Either[String, Contribution]]
 
-  /** @return a [[Right]] with the last [[Release]] of the given [[repositoryName]] owned by [[organizationName]]
-    *         if it exists, or a [[Left]] with a explanatory message in case of errors.
+  /** Suspend the execution to get the last [[Release]] of the given [[repositoryName]]
+    * owned by [[organizationName]]. It may fail along the way!
+    * @return the last [[Release]] if it exists.
     */
   def lastReleaseOf(organizationName: String, repositoryName: String)(using Async, CanFail): Release
 

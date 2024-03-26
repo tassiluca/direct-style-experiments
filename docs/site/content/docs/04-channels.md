@@ -97,18 +97,15 @@ class ChannelTerminatedException extends Exception
   * still allowing to consumer to read pending values.
   * Trying to `send` values after its termination arise a [[ChannelTerminatedException]].
   * When one consumer reads the [[Terminated]] token, the channel is closed. Any subsequent
-  * read will return `Left(Channel.Closed`.
+  * read will return `Left(Channel.Closed)`.
   */
 trait TerminableChannel[T] extends Channel[Terminable[T]]:
   def terminate()(using Async): Unit
 
 object TerminableChannel:
 
-  /** Creates a [[TerminableChannel]] backed to [[SyncChannel]]. */
-  def ofSync[T]: TerminableChannel[T] = TerminableChannelImpl(SyncChannel())
-
   /** Creates a [[TerminableChannel]] backed to [[BufferedChannel]]. */
-  def ofBuffered[T]: TerminableChannel[T] = TerminableChannelImpl(BufferedChannel())
+  def ofBuffered[T](size: Int): TerminableChannel[T] = TerminableChannelImpl(BufferedChannel(size))
 
   /** Creates a [[TerminableChannel]] backed to an [[UnboundedChannel]]. */
   def ofUnbounded[T]: TerminableChannel[T] = TerminableChannelImpl(UnboundedChannel())
@@ -119,10 +116,9 @@ object TerminableChannel:
     private var _terminated: Boolean = false
 
     override val readSource: Async.Source[Res[Terminable[T]]] =
-      c.readSource.transformValuesWith {
+      c.readSource.transformValuesWith:
         case Right(Terminated) => c.close(); Left(Channel.Closed)
         case v @ _ => v
-      }
 
     override def sendSource(x: Terminable[T]): Async.Source[Res[Unit]] =
       synchronized:
@@ -158,7 +154,9 @@ On top of this new abstraction is possible to implement, for example, the `forea
 object TerminableChannelOps:
 
   extension [T: ClassTag](c: TerminableChannel[T])
-    /** Blocking consume channel items, executing the given function [[f]] for each element. */
+
+    /** Consume channel items, executing the given function [[f]] for each element. 
+      * This is a blocking operation. */
     @tailrec
     def foreach[U](f: T => U)(using Async): Unit = c.read() match
       case Left(Channel.Closed) => ()
@@ -167,8 +165,8 @@ object TerminableChannelOps:
           case Terminated => ()
           case v: T => f(v); foreach(f)
 
-    /** @return a [[Seq]] containing channel items, after having them read.
-      * This is a blocking operation! */
+    /** @return a [[Seq]] containing channel items, after having them read. 
+      * This is a blocking operation. */
     def toSeq(using Async): Seq[T] =
       var results = Seq[T]()
       c.foreach(t => results = results :+ t)
@@ -346,41 +344,36 @@ This obeys the principle of **explicit asynchrony**: if the client wants to perf
 trait Analyzer:
 
   /** Performs a **suspending** analysis of the [[organizationName]]'s repositories,
-    * providing the results incrementally to the [[updateResults]] function.
-    * @return [[Right]] with the overall results of the analysis or [[Left]] with 
-    *         an error message in case of failure.
+    * providing the results incrementally to the [[updateResults]] function. 
+    * It may fail along the way!
+    * @return the overall results of the analysis.
     */
   def analyze(organizationName: String)(
       updateResults: RepositoryReport => Unit,
-  )(using Async, AsyncOperations): Either[String, Seq[RepositoryReport]]
+  )(using Async, AsyncOperations, CanFail): Seq[RepositoryReport]
 ```
 
 ```scala
 /** A service exposing functions to retrieve data from a central hosting repository service. */
 trait RepositoryService:
 
-  /** @return [[Right]] with the [[Seq]]uence of [[Repository]] owned by the given
-    *         [[organizationName]] or a [[Left]] with a explanatory message in case of errors.
+  /** Suspend the execution to get all the [[Repository]] owned by the given [[organizationName]].
+    * It may fail along the way!
+    * @return the [[Seq]]uence of [[Repository]].
     */
-  def repositoriesOf(organizationName: String)(using Async): Either[String, Seq[Repository]]
+  def repositoriesOf(organizationName: String)(using Async, CanFail): Seq[Repository]
 
-  /** @return [[Right]] with the [[Seq]]uence of [[Contribution]] for the given 
-    *       [[repositoryName]] owned by the given [[organizationName]] or a [[Left]] with an 
-    *       explanatory message in case of errors.
+  /** Suspend the execution to get all the [[Contribution]] made by users to the given
+    * [[repositoryName]] owned by [[organizationName]]. It may fail along the way!
+    * @return the [[Seq]]uence of [[Contribution]].
     */
-  def contributorsOf(
-    organizationName: String, 
-    repositoryName: String
-  )(using Async): Either[String, Seq[Contribution]]
+  def contributorsOf(organizationName: String, repositoryName: String)(using Async, CanFail): Seq[Contribution]
 
-  /** @return a [[Right]] with the last [[Release]] of the given [[repositoryName]] owned 
-    *         by [[organizationName]] if it exists, or a [[Left]] with a explanatory message
-    *         in case of errors.
+  /** Suspend the execution to get the last [[Release]] of the given [[repositoryName]]
+    * owned by [[organizationName]]. It may fail along the way!
+    * @return the last [[Release]] if it exists.
     */
-  def lastReleaseOf(
-    organizationName: String, 
-    repositoryName: String
-  )(using Async): Either[String, Release]
+  def lastReleaseOf(organizationName: String, repositoryName: String)(using Async, CanFail): Release
 ```
 
 The implementation of the `Analyzer` leverages Channels to perform the concurrent analysis of the repositories:
@@ -388,21 +381,22 @@ The implementation of the `Analyzer` leverages Channels to perform the concurren
 ```scala
 override def analyze(organizationName: String)(
     updateResults: RepositoryReport => Unit,
-)(using Async, AsyncOperations): Either[String, Seq[RepositoryReport]] = either:
-  val reposInfo = repositoryService.repositoriesOf(organizationName).? // 1
-    .map(_.performAnalysis.run) // 2
-  val collector = Collector[RepositoryReport](reposInfo.toList*) // 3
-  reposInfo.foreach(_ => 
+)(using Async, AsyncOperations, CanFail): Seq[RepositoryReport] = Async.group:
+  val reposInfo = repositoryService.repositoriesOf(organizationName) // 1
+    .map(_.performAnalysis.start()) // 2
+  val collector = Collector(reposInfo.toList*) // 3
+  reposInfo.foreach: _ =>
     updateResults(collector.results.read().asTry.?.awaitResult.?) // 4
-  )
   reposInfo.awaitAll // 5
 
 extension (r: Repository)
   protected def performAnalysis(using Async): Task[RepositoryReport] = Task:
-    val contributions = Future: // concurrent!
-      repositoryService.contributorsOf(r.organization, r.name)
-    val release = repositoryService.lastReleaseOf(r.organization, r.name)
-    RepositoryReport(r.name, r.issues, r.stars, contributions.await.getOrElse(Seq()), release.toOption)
+    Async.group:
+      val contributions = Future: // concurrent
+        either(repositoryService.contributorsOf(r.organization, r.name))
+      val release = Future: // concurrent (not strictly necessary, just to reveal the intent)
+        either(repositoryService.lastReleaseOf(r.organization, r.name))
+      RepositoryReport(r.name, r.issues, r.stars, contributions.await.getOrElse(Seq.empty), release.await.toOption)
 ```
 
 1. first, we get all the repositories of the requested organization
@@ -445,21 +439,21 @@ Then, the implementation of the `analyze` method becomes:
 ```scala
 override def analyze(organizationName: String)(
     updateResults: RepositoryReport => Unit,
-)(using Async, AsyncOperations): Either[String, Seq[RepositoryReport]] = either:
+)(using Async, AsyncOperations, CanFail): Seq[RepositoryReport] = Async.group:
   val reposInfo = repositoryService.incrementalRepositoriesOf(organizationName) // 1
-  var futures = Seq[Future[RepositoryReport]]()
-  reposInfo.foreach { repository => // 2
-    futures = futures :+ Future: // 3
-      val report = repository.?.performAnalysis.run.awaitResult.?
-      updateResults(report)
+  var futureResults = Seq[Future[RepositoryReport]]()
+  reposInfo.foreach: repository => // 2
+    futureResults = futureResults :+ Future: // 3
+      val report = repository.?.performAnalysis.start().awaitResult.?
+      synchronized(updateResults(report))
       report
-  }
-  futures.awaitAllOrCancel
+  futureResults.awaitAllOrCancel // 4
 ```
 
 1. we get the channel of repositories from the repository service;
 2. the `foreach` method of `TerminableChannel` is used to iterate over all the repositories sent over the channel as soon as they are retrieved by the service. This is a blocking operation, i.e. it suspends until all the repositories are retrieved;
 3. we start the analysis in a separate `Future` (i.e. thread): this allows you to start the analysis as soon as a repository is fetched by the channel, preventing starting the analysis of the next repository only when the previous one is finished;
+     - since the analysis is started in a separate thread, we need to prevent the `updateResults` function from being called concurrently using a `synchronized` block;
 4. once all the repositories are retrieved, i.e. the `foreach` terminates, we wait for the completion of all the started `Future`s. Indeed, when the `foreach` terminates, we have the guarantee that all started futures have been started, but not yet completed!
 
 ### Kotlin Coroutines version
