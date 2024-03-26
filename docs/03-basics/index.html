@@ -3,24 +3,24 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Basic asynchronous constructs # Basic asynchronous constructs The need for a new Future construct Example: a blog posts service Structure Current monadic Future Direct style: Scala version with gears Kotlin Coroutines Takeaways The need for a new Future construct # The current implementation of the Future monadic construct suffers the following main cons:
-Lack of referential transparency; Lack of cancellation mechanisms and structured concurrency; Accidental Sequentiality. To show these weaknesses in practice, a simple example of the core of a web service implementation is presented.">
+<meta name="description" content="Basic asynchronous constructs # Basic asynchronous constructs The need for a new Future construct Example: a blog posts service Structure Current monadic Future Direct style: Scala version with gears Direct style vs. monadic style comparison w.r.t. composition Kotlin Coroutines Takeaways The need for a new Future construct # The current implementation of the Future monadic construct suffers the following main cons:
+Lack of referential transparency; Lack of cancellation mechanisms and structured concurrency; Accidental Sequentiality.">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:title" content="" />
-<meta property="og:description" content="Basic asynchronous constructs # Basic asynchronous constructs The need for a new Future construct Example: a blog posts service Structure Current monadic Future Direct style: Scala version with gears Kotlin Coroutines Takeaways The need for a new Future construct # The current implementation of the Future monadic construct suffers the following main cons:
-Lack of referential transparency; Lack of cancellation mechanisms and structured concurrency; Accidental Sequentiality. To show these weaknesses in practice, a simple example of the core of a web service implementation is presented." />
+<meta property="og:description" content="Basic asynchronous constructs # Basic asynchronous constructs The need for a new Future construct Example: a blog posts service Structure Current monadic Future Direct style: Scala version with gears Direct style vs. monadic style comparison w.r.t. composition Kotlin Coroutines Takeaways The need for a new Future construct # The current implementation of the Future monadic construct suffers the following main cons:
+Lack of referential transparency; Lack of cancellation mechanisms and structured concurrency; Accidental Sequentiality." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://tassiluca.github.io/direct-style-experiments/docs/03-basics/" /><meta property="article:section" content="docs" />
 
-<meta property="article:modified_time" content="2024-03-21T01:32:29+01:00" />
+<meta property="article:modified_time" content="2024-03-26T21:52:23+01:00" />
 <title>03 Basics | direct-style-experiments</title>
 <link rel="manifest" href="/direct-style-experiments/manifest.json">
 <link rel="icon" href="/direct-style-experiments/favicon.png" >
 <link rel="canonical" href="https://tassiluca.github.io/direct-style-experiments/docs/03-basics/">
 <link rel="stylesheet" href="/direct-style-experiments/book.min.42504dd4648e8da78376617fd32b73c3ae6afbe9f805c36868bc831b07002332.css" integrity="sha256-QlBN1GSOjaeDdmF/0ytzw65q&#43;&#43;n4BcNoaLyDGwcAIzI=" crossorigin="anonymous">
   <script defer src="/direct-style-experiments/flexsearch.min.js"></script>
-  <script defer src="/direct-style-experiments/en.search.min.0a53d30665124409e5805f451a4cb784495cc6887fc81a30b7e8f9f397def877.js" integrity="sha256-ClPTBmUSRAnlgF9FGky3hElcxoh/yBowt&#43;j585fe&#43;Hc=" crossorigin="anonymous"></script>
+  <script defer src="/direct-style-experiments/en.search.min.a5926707c6b614d599ec0e1f356627df2631a6a23b35837640b2ef021cc0b381.js" integrity="sha256-pZJnB8a2FNWZ7A4fNWYn3yYxpqI7NYN2QLLvAhzAs4E=" crossorigin="anonymous"></script>
 <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -192,7 +192,11 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li><a href="#structure">Structure</a></li>
 <li><a href="#current-monadic-future">Current monadic <code>Future</code></a></li>
-<li><a href="#direct-style-scala-version-with-gears">Direct style: Scala version with <code>gears</code></a></li>
+<li><a href="#direct-style-scala-version-with-gears">Direct style: Scala version with <code>gears</code></a>
+<ul>
+<li><a href="#direct-style-vs-monadic-style-comparison-wrt-composition">Direct style vs. monadic style comparison w.r.t. composition</a></li>
+</ul>
+</li>
 <li><a href="#kotlin-coroutines">Kotlin Coroutines</a></li>
 </ul>
 </li>
@@ -477,7 +481,7 @@ classDiagram
 
   class `Future[+T]` {
     << trait >>
-    +apply[T](body: Async ?=> T) Future[T]$
+    +apply[T](body: Async.Spawn ?=> T)(using Async, Async.Spawn) Future[T]$
     +now[T](result: Try[T]) Future[T]
     +zip[U](f2: Future[U]) Future[T, U]
     +or(f2: Future[T]) Future[T]
@@ -494,7 +498,7 @@ classDiagram
 
   class `Task[+T]` {
     +apply(body: (Async, AsyncOperations) ?=> T) Task[T]$
-    +run(using Async, AsyncOperations) Future[+T]
+    +start(using Async, Async.Spawn, AsyncOperations) Future[+T]
   }
   `Future[+T]` <--* `Task[+T]`
 
@@ -631,7 +635,7 @@ Since all these functions could fail (for example, because of a problem with the
 <li><code>authorBy</code> and <code>verifyContent</code> needs to be programmed to throw an exception in case of failure. This is needed to make <code>Future</code> fail: without fail with an exception, the <code>zip</code> operator is not able to return immediately the control and the other future is not canceled!</li>
 </ul>
 </li>
-<li>Be aware of the fact to achieve cancellation is necessary to enclose both the content verification and authorization task inside an enclosing <code>Future</code>, since the <code>zip</code> doesn&rsquo;t provide a cancellation mechanism per se. The following code wouldn&rsquo;t work as expected!
+<li>Be aware of the fact to achieve cancellation is necessary to enclose both the content verification and authorization task inside a completion group (either using <code>Async.group</code> or <code>Future</code>), since the <code>zip</code> doesn&rsquo;t provide a cancellation mechanism per se. The following code wouldn&rsquo;t work as expected!
 <div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic">// WRONG: doesn&#39;t provide cancellation!
 </span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span><span style="color:#8839ef">val</span> contentVerifier <span style="color:#8839ef">=</span> verifyContent<span style="color:#04a5e5;font-weight:bold">(</span>title<span style="color:#04a5e5;font-weight:bold">,</span> body<span style="color:#04a5e5;font-weight:bold">).</span>run
 </span></span><span style="display:flex;"><span><span style="color:#8839ef">val</span> authorizer <span style="color:#8839ef">=</span> authorBy<span style="color:#04a5e5;font-weight:bold">(</span>authorId<span style="color:#04a5e5;font-weight:bold">).</span>run
@@ -676,6 +680,33 @@ Since all these functions could fail (for example, because of a problem with the
 </tr>
 </tbody>
 </table>
+<h4 id="direct-style-vs-monadic-style-comparison-wrt-composition">
+  Direct style vs. monadic style comparison w.r.t. composition
+  <a class="anchor" href="#direct-style-vs-monadic-style-comparison-wrt-composition">#</a>
+</h4>
+<p>Direct style cleanly supports composability:</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">def</span> transform<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span>, <span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>xs<span style="color:#8839ef">:</span> <span style="color:#d20f39">Seq</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span>, <span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]]])(</span>using <span style="color:#df8e1d">Async</span><span style="color:#04a5e5;font-weight:bold">.</span><span style="color:#df8e1d">Spawn</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span>, <span style="color:#d20f39">Seq</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]]]</span> <span style="color:#8839ef">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#df8e1d">Future</span><span style="color:#8839ef">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#d20f39">either:</span>
+</span></span><span style="display:flex;"><span>      xs<span style="color:#04a5e5;font-weight:bold">.</span>map<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#8839ef">_</span><span style="color:#04a5e5;font-weight:bold">.</span>await<span style="color:#04a5e5;font-weight:bold">.?)</span>
+</span></span></code></pre></div><p>Using monads is more complex to achieve the same goal:</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">def</span> transform<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span>, <span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>
+</span></span><span style="display:flex;"><span>    xs<span style="color:#8839ef">:</span> <span style="color:#d20f39">Seq</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span>, <span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]]],</span>
+</span></span><span style="display:flex;"><span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">ExecutionContext</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span>, <span style="color:#d20f39">Seq</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]]]</span> <span style="color:#8839ef">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">val</span> initial<span style="color:#8839ef">:</span> <span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span>, <span style="color:#d20f39">List</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]]]</span> <span style="color:#8839ef">=</span> <span style="color:#df8e1d">Future</span><span style="color:#04a5e5;font-weight:bold">.</span>successful<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">Right</span><span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#df8e1d">List</span><span style="color:#04a5e5;font-weight:bold">.</span>empty<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]))</span>
+</span></span><span style="display:flex;"><span>  xs<span style="color:#04a5e5;font-weight:bold">.</span>foldRight<span style="color:#04a5e5;font-weight:bold">(</span>initial<span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#d20f39">future</span><span style="color:#04a5e5;font-weight:bold">,</span> <span style="color:#d20f39">acc</span><span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#8839ef">=&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">for</span>
+</span></span><span style="display:flex;"><span>      f <span style="color:#8839ef">&lt;-</span> future
+</span></span><span style="display:flex;"><span>      a <span style="color:#8839ef">&lt;-</span> acc
+</span></span><span style="display:flex;"><span>    <span style="color:#8839ef">yield</span> a<span style="color:#04a5e5;font-weight:bold">.</span>flatMap<span style="color:#04a5e5;font-weight:bold">(</span>lst <span style="color:#8839ef">=&gt;</span> f<span style="color:#04a5e5;font-weight:bold">.</span>map<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#8839ef">_</span> <span style="color:#8839ef">:</span><span style="color:#d20f39">:</span> <span style="color:#d20f39">lst</span><span style="color:#04a5e5;font-weight:bold">))</span>
+</span></span></code></pre></div><p>Again, using Cats simplifies the code, still, it&rsquo;s more complex than the direct style:</p>
+<div class="highlight"><pre tabindex="0" style="color:#4c4f69;background-color:#eff1f5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#8839ef">def</span> transform<span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span>, <span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">](</span>
+</span></span><span style="display:flex;"><span>    xs<span style="color:#8839ef">:</span> <span style="color:#d20f39">Seq</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span>, <span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]]],</span>
+</span></span><span style="display:flex;"><span><span style="color:#04a5e5;font-weight:bold">)(</span>using <span style="color:#df8e1d">ExecutionContext</span><span style="color:#04a5e5;font-weight:bold">)</span><span style="color:#8839ef">:</span> <span style="color:#d20f39">Future</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">Either</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">E</span>, <span style="color:#d20f39">Seq</span><span style="color:#04a5e5;font-weight:bold">[</span><span style="color:#d20f39">T</span><span style="color:#04a5e5;font-weight:bold">]]]</span> <span style="color:#8839ef">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8839ef">import</span> <span style="color:#fe640b">cats.implicits._</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#df8e1d">Future</span><span style="color:#04a5e5;font-weight:bold">.</span>sequence<span style="color:#04a5e5;font-weight:bold">(</span>xs<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#9ca0b0;font-style:italic">// Future[Seq[Either[E, T]]
+</span></span></span><span style="display:flex;"><span><span style="color:#9ca0b0;font-style:italic"></span>    <span style="color:#04a5e5;font-weight:bold">.</span>map<span style="color:#04a5e5;font-weight:bold">(</span><span style="color:#8839ef">_</span><span style="color:#04a5e5;font-weight:bold">.</span>sequence<span style="color:#04a5e5;font-weight:bold">)</span> <span style="color:#9ca0b0;font-style:italic">// equivalent to: _.traverse(identity)
+</span></span></span></code></pre></div><p><a href="https://github.com/tassiLuca/direct-style-experiments/blob/master/commons/src/main/scala/io/github/tassiLuca/dse/examples/gears/ShowcasingDirectStyle.scala">[Ref]</a></p>
 <h3 id="kotlin-coroutines">
   Kotlin Coroutines
   <a class="anchor" href="#kotlin-coroutines">#</a>
@@ -847,9 +878,9 @@ Since all these functions could fail (for example, because of a problem with the
   <div class="flex flex-wrap justify-between">
 
 
-  <div><a class="flex align-center" href="https://github.com/tassiLuca/direct-style-experiments/commit/adf1a76b71b0ced6d64c1f4e8301d8278e2b6f4f" title='Last modified by Luca Tassinari | March 21, 2024' target="_blank" rel="noopener">
+  <div><a class="flex align-center" href="https://github.com/tassiLuca/direct-style-experiments/commit/bdc584aaf44cf1d8df3a7900bdcfd7a3874f8644" title='Last modified by Luca Tassinari | March 26, 2024' target="_blank" rel="noopener">
       <img src="/direct-style-experiments/svg/calendar.svg" class="book-icon" alt="Calendar" />
-      <span>March 21, 2024</span>
+      <span>March 26, 2024</span>
     </a>
   </div>
 
