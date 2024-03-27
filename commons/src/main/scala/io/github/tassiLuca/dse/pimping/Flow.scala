@@ -10,23 +10,23 @@ import scala.reflect.ClassTag
 import scala.util.boundary.break
 import scala.util.{Failure, Success, Try, boundary}
 
-/** An asynchronous cold data stream that emits values, inspired to Kotlin Flows. */
+/** A cold stream of asynchronously computed values, inspired to Kotlin Flows. */
 trait Flow[+T]:
 
-  /** Start the flowing of data which can be collected reacting through the given [[collector]] function. */
+  /** Start the flowing of data that can be collected reacting through the given [[collector]] function. */
   def collect(collector: Try[T] => Unit)(using Async, AsyncOperations): Unit
 
 /** An interface modeling an entity capable of [[emit]]ting [[Flow]]able values. */
 trait FlowCollector[-T]:
 
-  /** Emits a value to the flow. */
+  /** Emit a value to the flow. */
   def emit(value: T)(using Async): Unit
 
 object Flow:
 
-  /** Creates a new asynchronous cold [[Flow]] from the given [[body]].
+  /** Create a new asynchronous cold [[Flow]] from the given [[body]].
     * Since it is cold, it starts emitting values only when the [[Flow.collect]] method is called.
-    * To emit a value use the [[FlowCollector]] given instance.
+    * To emit a value use the [[FlowCollector]] given instance with `it.emit(value)`.
     */
   def apply[T](body: (it: FlowCollector[T]) ?=> Unit): Flow[T] =
     val flow = FlowImpl[T]()
@@ -52,7 +52,7 @@ object Flow:
         // Ensure to leave the synchronized block after the task has been initialized
         // with the correct channel instance.
         sync.acquire()
-      myChannel.foreach(t => collector(t))
+      myChannel.foreach(collector)
 
 object FlowOps:
 
@@ -64,14 +64,14 @@ object FlowOps:
         catchFailure(collector):
           flow.collect(item => collector(Success(f(item.get))))
 
-    /** @return a new [[Flow]] whose values are created by flattening the flows generated
+    /** @return a new [[Flow]] whose values are emitted by flattening the flows generated
       *         by the given function [[f]] applied to each emitted value of this.
       */
     def flatMap[R](f: T => Flow[R]): Flow[R] = new Flow[R]:
       override def collect(collector: Try[R] => Unit)(using Async, AsyncOperations): Unit =
         catchFailure(collector):
           flow.collect(item => f(item.get).collect(x => collector(Success(x.get))))
-          
+
     def toSeq(using Async, AsyncOperations): Try[Seq[T]] = boundary:
       var result = Seq.empty[T]
       flow.collect:
