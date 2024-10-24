@@ -35,7 +35,7 @@ jobs:
         shell: bash
         run: |
           USES=$(cat <<TRICK_RENOVATE
-          - uses: gohugoio/hugo@v0.124.1
+          - uses: gohugoio/hugo@v0.136.5
           TRICK_RENOVATE
           )
           echo "Scripts update line: \"$USES\""
