@@ -15,7 +15,7 @@ sttp = { module = "com.softwaremill.sttp.client3:core_3", version.ref = "sttp" }
 sttp-upickle = { module = "com.softwaremill.sttp.client3:upickle_3", version.ref = "sttp" }
 sttp-backend-monix = { module = "com.softwaremill.sttp.client3:async-http-client-backend-monix_3", version.ref = "sttp" }
 cats-core = "org.typelevel:cats-core_3:2.10.0"
-scalatest = "org.scalatest:scalatest_3:3.2.17"
+scalatest = "org.scalatest:scalatest_3:3.3.0-SNAP4"
 flexmark = "com.vladsch.flexmark:flexmark-all:0.64.8"
 scalamock = { module = "eu.monniot:scala3mock_3", version.ref = "scalamock" }
 scalamock-test = { module = "eu.monniot:scala3mock-scalatest_3", version.ref = "scalamock" }
